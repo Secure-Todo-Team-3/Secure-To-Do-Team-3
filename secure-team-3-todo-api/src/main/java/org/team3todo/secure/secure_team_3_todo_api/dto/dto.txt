@@ -1,0 +1,2 @@
+Ideal place to put data validation stuff if we need it.
+We choose exactly what we send in a response rather than just sending entire objects using these dtos.

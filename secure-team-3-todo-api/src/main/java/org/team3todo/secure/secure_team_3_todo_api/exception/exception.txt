@@ -1,0 +1,2 @@
+This folder would contain user defined exceptions for specific error handling.
+It would also contain the @ControllerAdvice classes for error handling.
