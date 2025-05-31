@@ -5,6 +5,7 @@ app/dist
 app/tmp
 app/out-tsc
 app/bazel-out
+app/.angular
 
 # Node
 app/node_modules
@@ -42,7 +43,7 @@ testem.log
 Thumbs.db
 
 # Spring Boot
-api/target/
-api/.classpath
-api/.project
-api/.settings/
+secure-team-3-todo-api/target/
+secure-team-3-todo-api/.classpath
+secure-team-3-todo-api/.project
+secure-team-3-todo-api/.settings/
