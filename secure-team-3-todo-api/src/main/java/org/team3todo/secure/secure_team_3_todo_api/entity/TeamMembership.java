@@ -10,7 +10,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.OffsetDateTime;
-import java.util.Date;
 
 @Entity
 @Data
@@ -47,7 +46,5 @@ public class TeamMembership {
     @Column(name = "assigned_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP")
     private OffsetDateTime assignedAt;
 
-
-    //TODO: The constraints and dependencies between the fields still to be done.
 }
 

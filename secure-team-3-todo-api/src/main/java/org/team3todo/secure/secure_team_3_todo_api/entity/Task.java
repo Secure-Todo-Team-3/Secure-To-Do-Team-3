@@ -48,7 +48,6 @@ public class Task {
     private String name;
 
     @Column(columnDefinition = "uuid", name = "task_guid", unique = true, nullable = false, updatable = false)
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID taskGuid;
 
     @Column(columnDefinition = "TEXT", nullable = false)

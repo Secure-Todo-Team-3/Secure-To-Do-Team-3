@@ -1,5 +1,6 @@
 package org.team3todo.secure.secure_team_3_todo_api.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,10 +9,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 //import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,7 +43,6 @@ public class User {
     private String passwordSalt;
 
     @Column(unique = true, name = "user_guid", columnDefinition = "uuid")
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userGuid;
 
     @Column(name = "login_attempts",columnDefinition = "INTEGER DEFAULT 0")
@@ -61,25 +59,29 @@ public class User {
     private OffsetDateTime createdAt;
 
     // vvvvv RELATIONSHIPS vvvvv
-    @OneToMany(mappedBy = "createdByUser")
+    @OneToMany(mappedBy = "createdByUserId")
     private List<Team> createdTeams = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE) // Assuming ON DELETE CASCADE from team_memberships
+    @JsonManagedReference
     private List<TeamMembership> teamMemberships = new ArrayList<>();
 
     @OneToMany(mappedBy = "userCreator")
+    @JsonManagedReference
     private List<Task> createdTasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "assignedToUser")
+    @JsonManagedReference
     private List<Task> assignedTasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "changedByUser")
+    @JsonManagedReference
     private List<TaskStatusHistory> taskStatusHistories = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
-        if (userGuid == null) {
-            userGuid = UUID.randomUUID();
+        if (this.userGuid == null) {
+            this.userGuid = UUID.randomUUID();
         }
     }
 
