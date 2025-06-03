@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthHeaderComponent } from "../../shared/components/auth-header/auth-header.component";
+import { environment } from 'src/app/shared/environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -46,10 +47,9 @@ export class LoginComponent {
   onSubmit(): void {
     if (this.loginForm.valid) {
       const { email, password } = this.loginForm.value;
-      console.log('Login attempt:', { email, password });
       
       this.snackBar.open('Login successful!', 'Close', {
-        duration: 3000,
+        duration: environment.snackbarDuration,
         panelClass: ['success-snackbar']
       });
 
