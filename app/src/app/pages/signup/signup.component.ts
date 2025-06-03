@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthHeaderComponent } from "../../shared/components/auth-header/auth-header.component";
+import { environment } from 'src/app/shared/environments/environment';
 
 @Component({
   selector: 'app-signup',
@@ -46,7 +47,6 @@ export class SignupComponent {
     }, { validators: this.passwordMatchValidator });
   }
 
-  // Custom validator for password confirmation
   private passwordMatchValidator(control: AbstractControl): { [key: string]: boolean } | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
@@ -73,15 +73,12 @@ export class SignupComponent {
   onSubmit(): void {
     if (this.signupForm.valid) {
       const { username, email, password } = this.signupForm.value;
-      console.log('Signup attempt:', { username, email, password });
       
-      // Simulate API call
       this.snackBar.open('Account created successfully!', 'Close', {
-        duration: 3000,
+        duration: environment.snackbarDuration,
         panelClass: ['success-snackbar']
       });
 
-      // Navigate to login page after successful signup
       setTimeout(() => {
         this.router.navigate(['/login']);
       }, 2000);
