@@ -2,13 +2,18 @@ package org.team3todo.secure.secure_team_3_todo_api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TeamDto;
+import org.team3todo.secure.secure_team_3_todo_api.dto.TeamMembershipDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.UserDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
+import org.team3todo.secure.secure_team_3_todo_api.entity.TeamMembership;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 import org.team3todo.secure.secure_team_3_todo_api.mapper.TeamMapper;
+import org.team3todo.secure.secure_team_3_todo_api.mapper.TeamMembershipMapper;
 import org.team3todo.secure.secure_team_3_todo_api.mapper.UserMapper;
+import org.team3todo.secure.secure_team_3_todo_api.service.TeamMembershipService;
 import org.team3todo.secure.secure_team_3_todo_api.service.TeamService;
 import org.team3todo.secure.secure_team_3_todo_api.service.UserService;
 
@@ -23,10 +28,11 @@ public class TeamController {
     private final TeamService teamService;
     private final TeamMapper teamMapper;
     private final UserMapper userMapper;
+    private final TeamMembershipMapper teamMembershipMapper;
 
     @Autowired
-    public TeamController(TeamService teamService, TeamMapper teamMapper, UserMapper userMapper) {
-        this.teamService = teamService; this.teamMapper = teamMapper; this.userMapper = userMapper;
+    public TeamController(TeamService teamService, TeamMapper teamMapper, UserMapper userMapper, TeamMembershipMapper teamMembershipMapper) {
+        this.teamService = teamService; this.teamMapper = teamMapper; this.userMapper = userMapper; this.teamMembershipMapper = teamMembershipMapper;
     }
     //Get the team by its ID
     @GetMapping("/{teamId}")
@@ -61,6 +67,18 @@ public class TeamController {
         List<User> foundUsers = teamService.getUsersInATeam(teamId);
         List<UserDto> dtoFoundUsers = userMapper.convertToDtoList(foundUsers);
         return ResponseEntity.ok(dtoFoundUsers);
+    }
+
+    @PostMapping("/{teamId}/add-user")
+    public ResponseEntity<TeamMembershipDto> addUserToteam(@RequestBody String userEmail, @PathVariable Long teamId){
+        TeamMembership returnedTeamMembership = teamService.addUserToTeam(userEmail, teamId);
+        if(returnedTeamMembership != null){
+            TeamMembershipDto dtoReturnedTeam = teamMembershipMapper.convertToDto(returnedTeamMembership);
+            return ResponseEntity.ok(dtoReturnedTeam);
+        }
+        else{
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 

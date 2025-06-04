@@ -27,7 +27,7 @@ import java.util.Date;
 public class TaskStatusHistory {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

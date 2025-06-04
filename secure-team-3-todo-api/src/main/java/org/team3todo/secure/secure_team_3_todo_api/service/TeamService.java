@@ -20,13 +20,15 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final UserService userService;
     private final TeamMembershipRepository teamMembershipRepository;
+    private final TeamMembershipService teamMembershipService;
 
 
     @Autowired
-    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository) {
+    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService) {
         this.teamRepository = teamRepository;
         this.userService = userService;
         this.teamMembershipRepository = teamMembershipRepository;
+        this.teamMembershipService = teamMembershipService;
     }
 
     public Team findById(Long id) {
@@ -48,7 +50,7 @@ public class TeamService {
     public List<User> getUsersInATeam(Long teamId){
         Team foundTeam = findById(teamId);
         if( foundTeam != null ){
-            List<TeamMembership> memberships = teamMembershipRepository.findByTeamId(teamId);
+            List<TeamMembership> memberships = teamMembershipRepository.findByTeamId(foundTeam);
             List<User> users = memberships.stream().map(TeamMembership::getUser).toList();
             return users;
         }
@@ -71,5 +73,16 @@ public class TeamService {
         if (user == null) return Collections.emptyList();
         return teamRepository.findByCreatedByUserId(user); // Assuming this method exists in TeamRepository
         // and Team.createdByUserId is of type User
+    }
+
+    public TeamMembership addUserToTeam(String userEmail, Long teamId){
+        User user = userService.findByUserEmail(userEmail);
+        if (user != null){
+            TeamMembership membership = teamMembershipService.addUserToTeam(user.getId(), teamId, 3L);
+            return membership;
+        }
+        else{
+            return null;
+        }
     }
 }
