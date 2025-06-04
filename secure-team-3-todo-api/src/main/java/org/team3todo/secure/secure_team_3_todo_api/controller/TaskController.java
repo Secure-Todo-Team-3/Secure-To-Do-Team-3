@@ -3,11 +3,9 @@ package org.team3todo.secure.secure_team_3_todo_api.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
-import org.team3todo.secure.secure_team_3_todo_api.dto.TeamDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Task;
 import org.team3todo.secure.secure_team_3_todo_api.mapper.TaskMapper;
 import org.team3todo.secure.secure_team_3_todo_api.service.TaskService;
-import org.team3todo.secure.secure_team_3_todo_api.service.TeamService;
 
 import java.util.List;
 import java.util.UUID;
