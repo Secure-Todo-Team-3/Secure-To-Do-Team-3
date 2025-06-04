@@ -19,25 +19,14 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public UserDto findByUserGuid(UUID guid) {
+    public User findByUserGuid(UUID guid) {
         Optional<User> user = userRepository.findByUserGuid(guid);
-        return user.map(this::convertToDto).orElse(null);
+        return user.orElse(null);
     }
 
-    // In a service or mapper class
-    public UserDto convertToDto(User user) {
-        if (user == null) {
-            return null;
-        }
-        return UserDto.builder()
-                .userGuid(user.getUserGuid())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .isActive(user.getIsActive())
-                .isLocked(user.getIsLocked())
-                .createdAt(user.getCreatedAt())
-                // If you decide to include createdTeamIds:
-                // .createdTeamIds(user.getCreatedTeams().stream().map(Team::getId).collect(Collectors.toList()))
-                .build();
+    public User findByUserId(Long id){
+        Optional<User> user = userRepository.findById(id);
+        return user.orElse(null);
     }
+
 }

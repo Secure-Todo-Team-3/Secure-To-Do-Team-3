@@ -15,7 +15,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class TaskDto {
 
-    private Long id; // The task's own primary key
     private UUID taskGuid; // The task's public unique identifier
 
     private String name;
