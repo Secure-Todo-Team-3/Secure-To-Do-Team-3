@@ -1,0 +1,24 @@
+<mat-card class="team-card">
+  <button
+    *ngIf="team.isOwner"
+    mat-icon-button
+    color="primary"
+    aria-label="Edit Team"
+    class="edit-btn"
+  >
+    <mat-icon>edit</mat-icon>
+  </button>
+
+  <mat-card-title>{{ team.name }}</mat-card-title>
+
+  <mat-card-content>
+    <p>{{ team.description }}</p>
+    <p class="team-meta">
+      <mat-icon inline>group</mat-icon> {{ team.members }} members
+      <mat-icon inline class="icon-space">task</mat-icon> {{ team.tasks }} open tasks
+    </p>
+    <span class="status-chip" [ngClass]="{ 'in-progress': team.role === 'Admin' }">
+      {{ team.role }}
+    </span>
+  </mat-card-content>
+</mat-card>

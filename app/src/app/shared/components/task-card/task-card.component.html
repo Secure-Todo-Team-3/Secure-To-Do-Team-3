@@ -1,0 +1,23 @@
+<mat-card class="task-card">
+  <button mat-icon-button color="primary" mat-icon-button
+    color="primary"
+    aria-label="Edit Task"
+    class="edit-btn">
+    <mat-icon>edit</mat-icon>
+  </button>
+
+  <mat-card-title>{{ task.title }}</mat-card-title>
+
+  <mat-card-content>
+    <p>{{ task.description }}</p>
+
+    <section class="task-info">
+      <small>
+        <mat-icon inline>event</mat-icon> Due: {{ task.dueDate }}
+      </small>
+      <mat-chip [color]="task.chipColor" selected>{{ task.status }}</mat-chip>
+    </section>
+
+    <footer class="task-footer">👥 {{ task.team }}</footer>
+  </mat-card-content>
+</mat-card>
