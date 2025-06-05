@@ -1,0 +1,34 @@
+.task-card {
+  position: relative;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.1);
+  width: 25rem;
+}
+
+mat-card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.task-info {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1em;
+}
+
+.task-footer {
+  margin-top: 1em;
+  font-size: 0.9em;
+}
+
+.edit-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}

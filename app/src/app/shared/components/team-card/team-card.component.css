@@ -1,0 +1,44 @@
+.team-card {
+  padding: 1.2rem;
+  border-radius: 1rem;
+  background-color: #fff;
+  box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.1);
+  width: 25rem;
+}
+
+.team-meta {
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  margin-top: 0.5rem;
+  color: #666;
+}
+
+.icon-space {
+  margin-left: 1em;
+}
+
+.status-chip {
+  display: inline-block;
+  margin-top: 1rem;
+  background-color: #d3d3d3;
+  padding: 0.4em 1em;
+  border-radius: 1em;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.status-chip.in-progress {
+  background-color: #c5c5c5;
+}
+
+.edit-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 10;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
