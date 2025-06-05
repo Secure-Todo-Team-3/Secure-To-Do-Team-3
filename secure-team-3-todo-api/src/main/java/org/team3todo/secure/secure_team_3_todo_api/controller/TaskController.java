@@ -10,7 +10,7 @@ import org.team3todo.secure.secure_team_3_todo_api.service.TeamService;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/task")
+@RequestMapping("/api/task")
 public class TaskController {
 
     private final TaskService taskService;

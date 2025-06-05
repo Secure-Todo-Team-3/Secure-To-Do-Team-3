@@ -1,9 +1,11 @@
 package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.team3todo.secure.secure_team_3_todo_api.dto.UserDto;
-import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 import org.team3todo.secure.secure_team_3_todo_api.repository.UserRepository;
 
@@ -11,7 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService{
     private final UserRepository userRepository;
 
     @Autowired
@@ -19,12 +21,11 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public UserDto findByUserGuid(UUID guid) {
+    public User findByUserGuid(UUID guid) {
         Optional<User> user = userRepository.findByUserGuid(guid);
-        return user.map(this::convertToDto).orElse(null);
+        return user.get();
     }
 
-    // In a service or mapper class
     public UserDto convertToDto(User user) {
         if (user == null) {
             return null;
@@ -39,5 +40,10 @@ public class UserService {
                 // If you decide to include createdTeamIds:
                 // .createdTeamIds(user.getCreatedTeams().stream().map(Team::getId).collect(Collectors.toList()))
                 .build();
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }
