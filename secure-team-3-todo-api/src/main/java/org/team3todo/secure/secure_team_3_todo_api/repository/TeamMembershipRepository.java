@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TeamMembershipRepository extends JpaRepository<TeamMembership, Long> {
-    List<TeamMembership> findByTeamId(Team team);
+    List<TeamMembership> findByTeam(Team team);
     List<TeamMembership> findByUser(User user);
     Optional<TeamMembership> findByUserAndTeam(User user, Team team);
     Optional<TeamMembership> findByUserAndTeamAndTeamRole(User user, Team team, TeamRole teamRole);

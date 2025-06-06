@@ -6,6 +6,7 @@ import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Task;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
+import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TaskRepository;
 
 import java.util.List;
@@ -25,19 +26,23 @@ public class TaskService {
         this.teamService = teamService;
     }
 
-    public List<Task> findByTeamId(Long id) {
-        Team foundTeam = teamService.findById(id);
-        return taskRepository.findByTeamId(id);
-
+    public List<Task> findByTeamId(Long teamId) {
+        Team foundTeam = teamService.findById(teamId);
+        if (foundTeam != null){
+            return taskRepository.findByTeam(foundTeam);
+        }
+        else{
+            throw new ResourceNotFoundException("Cannot find tasks for a non-existent team with ID: " + teamId);
+        }
     }
 
-    public List<Task> findByUserGuid(UUID guid){
+    public List<Task> findByAssignedUserGuid(UUID guid){
         User foundUser = userService.findByUserGuid(guid);
         if (foundUser != null){
             return taskRepository.findByAssignedToUser(foundUser);
         }
         else{
-            return null;
+            throw new ResourceNotFoundException("User not found with GUID: "+ guid);
         }
     }
 }
