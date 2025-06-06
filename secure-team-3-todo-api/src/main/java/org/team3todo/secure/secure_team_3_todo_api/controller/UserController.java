@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TeamDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.UserDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
+import org.team3todo.secure.secure_team_3_todo_api.mapper.UserMapper;
 import org.team3todo.secure.secure_team_3_todo_api.service.UserService;
 
 import java.util.List;
@@ -17,9 +18,11 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     @GetMapping("/{userGuid}")

@@ -1,0 +1,58 @@
+<section class="toolbar">
+  <form class="filter-form" role="search">
+    <mat-form-field class="search-field" appearance="outline">
+      <input matInput placeholder="Search teams..." />
+      <button mat-icon-button matSuffix>
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <mat-form-field class="filter-field" appearance="outline">
+      <mat-select placeholder="Status">
+        <mat-option value="">All</mat-option>
+        <mat-option value="admin">Admin</mat-option>
+        <mat-option value="member">Member</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field class="filter-field" appearance="outline">
+      <mat-select placeholder="Teams">
+        <mat-option value="">All Teams</mat-option>
+        <mat-option value="marketing">Marketing</mat-option>
+        <mat-option value="finance">Finance</mat-option>
+        <mat-option value="it">IT</mat-option>
+        <mat-option value="product">Product Development</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" type="button">
+      <mat-icon>add</mat-icon>
+      Add Team
+    </button>
+  </form>
+</section>
+<main class="teams-page">
+  <section class="team-section">
+    <h2 class="section-title">
+      <mat-icon color="warn">workspace_premium</mat-icon>
+      My Teams ({{ myTeams.length }})
+    </h2>
+    <ul class="team-list">
+      <li *ngFor="let team of myTeams">
+        <app-team-card [team]="team"></app-team-card>
+      </li>
+    </ul>
+  </section>
+
+  <section class="team-section">
+    <h2 class="section-title">
+      <mat-icon color="primary">group</mat-icon>
+      Joined Teams ({{ joinedTeams.length }})
+    </h2>
+    <ul class="team-list">
+      <li *ngFor="let team of joinedTeams">
+        <app-team-card [team]="team"></app-team-card>
+      </li>
+    </ul>
+  </section>
+</main>
