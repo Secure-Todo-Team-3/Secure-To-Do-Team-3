@@ -134,27 +134,5 @@ public class CustomPasswordEncoder implements PasswordEncoder {
         return false;
     }
 
-    // Example: You might have a main method for testing (remove in production bean)
-    /*
-    public static void main(String[] args) {
-        // IMPORTANT: The pepper must be a securely managed secret!
-        String mySecurePepper = "MyApplicationSecretPepperValue!@#$"; // Example pepper
-        CustomPasswordEncoder encoder = new CustomPasswordEncoder(mySecurePepper);
-
-        String rawPass = "password123";
-
-        String encoded = encoder.encode(rawPass);
-        System.out.println("Encoded with pepper: " + encoded);
-
-        System.out.println("Match with correct password: " + encoder.matches(rawPass, encoded));
-        System.out.println("Match with incorrect password: " + encoder.matches("wrongpassword", encoded));
-
-        // Test with a different pepper during matching (should fail)
-        CustomPasswordEncoder encoderWrongPepper = new CustomPasswordEncoder("DifferentPepper");
-        System.out.println("Match with different pepper (should be false): " + encoderWrongPepper.matches(rawPass, encoded));
-
-        // Test invalid format
-        System.out.println("Match with invalid format (should be false): " + encoder.matches(rawPass, "invalidformat"));
-    }
-    */
+   
 }
