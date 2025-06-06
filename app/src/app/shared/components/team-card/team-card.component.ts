@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { DetailsDialogComponent } from '../details-dialog/details-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-team-card',
@@ -15,7 +16,7 @@ import { MatDialog } from '@angular/material/dialog';
 })
 export class TeamCardComponent {
   @Input() team: any;
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog, private router: Router) {}
 
   openDetails() {
     this.dialog.open(DetailsDialogComponent, {
@@ -28,15 +29,16 @@ export class TeamCardComponent {
   }
 
   editTeam() {
-    window.location.href = `/edit-team/${this.team.id}`;
+    console.log('Edit team clicked', this.team);
+    this.router.navigate(['/edit-team', this.team.id]);
   }
 
   openMembers() {
-    window.location.href = `/team-members/${this.team.id}`;
+    this.router.navigate(['/team-members', this.team.id]);
   }
 
   openTasks() {
-    window.location.href = `/team-tasks/${this.team.id}`;
+    this.router.navigate(['/team-tasks', this.team.id]);
   }
-  
+
 }

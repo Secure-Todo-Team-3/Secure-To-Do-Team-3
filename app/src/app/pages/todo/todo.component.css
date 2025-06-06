@@ -29,10 +29,6 @@
   min-width: 10rem;
 }
 
-.add-task-btn {
-  height: 3em;
-}
-
 .section-heading {
   display: flex;
   align-items: center;
@@ -42,13 +38,6 @@
 
 .heading-icon {
   margin-right: 0.5rem;
-}
-
-.task-list {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-  margin-bottom: 2rem;
 }
 
 .task-card {
@@ -115,7 +104,7 @@
 
 .task-list {
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
   flex-wrap: wrap;
   margin-bottom: 2rem;
 }

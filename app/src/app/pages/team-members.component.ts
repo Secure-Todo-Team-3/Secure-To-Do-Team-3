@@ -16,6 +16,7 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { getInitials } from '../shared/utils/get-initials';
 import { ConfirmDialogComponent } from '../shared/components/confirm-dialog/confirm-dialog.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-team-members',
@@ -77,7 +78,7 @@ export class TeamMembersComponent {
   editingMember: any = null;
   originalRole: string = '';
 
-  constructor(private dialog: MatDialog, private snackBar: MatSnackBar) {}
+  constructor(private dialog: MatDialog, private snackBar: MatSnackBar, private router: Router) {}
 
   private _filterUsers(value: string): any[] {
     const filterValue = value.toLowerCase();
@@ -86,6 +87,10 @@ export class TeamMembersComponent {
         user.name.toLowerCase().includes(filterValue) &&
         !this.teamMembers.some((member) => member.id === user.id)
     );
+  }
+
+  goBack() {
+    this.router.navigate(['/teams']);
   }
 
   addMember() {

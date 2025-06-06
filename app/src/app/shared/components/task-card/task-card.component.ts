@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CommonModule, NgIf } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { DetailsDialogComponent } from '../details-dialog/details-dialog.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-task-card',
@@ -25,7 +26,7 @@ export class TaskCardComponent {
   @Input() task: any;
   @Output() unassigned = new EventEmitter<any>();
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog, private router: Router) {}
 
   openDetails() {
     this.dialog.open(DetailsDialogComponent, {
@@ -42,7 +43,7 @@ export class TaskCardComponent {
   }
 
   editTask() {
-    window.location.href = `/edit-task/${this.task.id}`;
+    this.router.navigate(['/edit-task', this.task.id]);
   }
 
   get statusColor(): string {

@@ -7,25 +7,7 @@
       </button>
     </mat-form-field>
 
-    <mat-form-field class="filter-field" appearance="outline">
-      <mat-select placeholder="Status">
-        <mat-option value="">All</mat-option>
-        <mat-option value="admin">Admin</mat-option>
-        <mat-option value="member">Member</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field class="filter-field" appearance="outline">
-      <mat-select placeholder="Teams">
-        <mat-option value="">All Teams</mat-option>
-        <mat-option value="marketing">Marketing</mat-option>
-        <mat-option value="finance">Finance</mat-option>
-        <mat-option value="it">IT</mat-option>
-        <mat-option value="product">Product Development</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <button mat-flat-button color="primary" type="button">
+    <button mat-flat-button color="primary" type="button" (click)="addTeam()">
       <mat-icon>add</mat-icon>
       Add Team
     </button>

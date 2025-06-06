@@ -80,11 +80,11 @@ export class TeamTasksComponent {
   }
 
   addTask(): void {
-    window.location.href = '/add-task';
+    this.router.navigate(['/create-task']);
   }
 
   goBack(): void {
-    this.router.navigate(['/']);
+    this.router.navigate(['/teams']);
   }
 
   toggleAssignment(task: Task): void {

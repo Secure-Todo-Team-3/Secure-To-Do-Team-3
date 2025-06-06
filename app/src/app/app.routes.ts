@@ -16,10 +16,10 @@ export const routes: Routes = [
   {path: 'tasks', component: TodoPageComponent},
   {path: 'teams', component: TeamsPageComponent},
   {path: 'edit-task/:id', component: TaskEditPageComponent},
-  {path: 'add-task/:id', component: TaskEditPageComponent},
+  {path: 'create-task', component: TaskEditPageComponent},
   {path: 'team-members/:id', component: TeamMembersComponent},
   {path: 'edit-team/:id', component: TeamEditComponent},
-  {path: 'add-team', component: TeamEditComponent},
+  {path: 'create-team', component: TeamEditComponent},
   {path: 'team-tasks/:id', component: TeamTasksComponent},
   // { path: '**', redirectTo: '/login' }
 ];
