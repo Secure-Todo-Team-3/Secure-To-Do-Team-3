@@ -1,8 +1,12 @@
+INSERT INTO system_roles (name) VALUES
+    ('SYSTEM_ADMIN'),
+    ('REGULAR_USER')
+ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO roles (name, description) VALUES
-    ('Admin', 'System administrator with full control.'),
+INSERT INTO team_roles (name, description) VALUES
+    ('Admin', 'Team administrator with full control over the team, its members, and tasks.'),
     ('Team Lead', 'Manages a specific team and its members/tasks.'),
-    ('Member', 'Regular user, can manage their tasks and team tasks based on permissions.')
+    ('Member', 'Regular team member, can manage their tasks and team tasks based on permissions.')
 ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO task_statuses (name, description) VALUES
