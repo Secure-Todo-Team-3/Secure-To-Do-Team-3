@@ -40,7 +40,7 @@ public class TeamMembershipService {
         TeamRole teamRole = roleRepository.findById(roleId)
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
 
-        if (teamMembershipRepository.existsByUserAndTeamAndRole(user, team, teamRole)) {
+        if (teamMembershipRepository.existsByUserAndTeamAndTeamRole(user, team, teamRole)) {
             throw new RuntimeException("User " + user.getUsername() +
                     " is already a member of team " + team.getName() +
                     " with role " + teamRole.getName());

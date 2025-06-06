@@ -13,6 +13,6 @@ public interface TeamMembershipRepository extends JpaRepository<TeamMembership, 
     List<TeamMembership> findByTeamId(Team team);
     List<TeamMembership> findByUser(User user);
     Optional<TeamMembership> findByUserAndTeam(User user, Team team);
-    Optional<TeamMembership> findByUserAndTeamAndRole(User user, Team team, TeamRole teamRole);
-    boolean existsByUserAndTeamAndRole(User user, Team team, TeamRole teamRole);
+    Optional<TeamMembership> findByUserAndTeamAndTeamRole(User user, Team team, TeamRole teamRole);
+    boolean existsByUserAndTeamAndTeamRole(User user, Team team, TeamRole teamRole);
 }

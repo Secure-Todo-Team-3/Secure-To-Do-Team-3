@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticatedResponse;
 import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticationRequest;
 import org.team3todo.secure.secure_team_3_todo_api.dto.RegisterRequest;
+import org.team3todo.secure.secure_team_3_todo_api.entity.SystemRole;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
+import org.team3todo.secure.secure_team_3_todo_api.repository.SystemRoleRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.UserRepository;
 import org.team3todo.secure.secure_team_3_todo_api.util.CustomPasswordEncoder;
 
@@ -25,14 +27,19 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final SystemRoleRepository systemRoleRepository;
 
     @Transactional
     public AuthenticatedResponse register(RegisterRequest registerRequest) throws InvalidKeyException, IOException {
+
+        SystemRole defaultRole = systemRoleRepository.findByName("REGULAR_USER").orElseThrow(() -> new RuntimeException("Error: Default role REGULAR_USER not found in database."));
+
         var user = User.builder()
                 .username(registerRequest.getUsername())
                 .email(registerRequest.getEmail())
                 .passwordHash(passwordEncoder.encode(registerRequest.getPassword()))
-                .totpEnabled(false)
+                .systemRole(defaultRole)
+                .isTotpEnabled(false)
                 .build();
         var userCreated = userRepository.save(user);
         var token = jwtService.generateToken(Map.of("userGuid",userCreated.getUserGuid()), user);

@@ -65,7 +65,7 @@ public class TeamService {
         ArrayList<Long> roleIdsToExclude = new ArrayList<Long>();
         roleIdsToExclude.add(1L);
         roleIdsToExclude.add(2L);
-        return teamRepository.findByTeamMemberships_UserAndTeamMemberships_Role_IdNotIn(user, roleIdsToExclude); // Assuming this method exists in TeamRepository
+        return teamRepository.findByTeamMemberships_UserAndTeamMemberships_TeamRole_IdNotIn(user, roleIdsToExclude); // Assuming this method exists in TeamRepository
     }
 
     public List<Team> findTeamsCreatedByUserGuid(UUID userGuid) {

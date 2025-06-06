@@ -2,7 +2,9 @@ package org.team3todo.secure.secure_team_3_todo_api.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -11,6 +13,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 /// A custom PasswordEncoder implementation, we should be using BCryptPasswordEncoder impl, but this allows for pepper
+@Component
 public class CustomPasswordEncoder implements PasswordEncoder {
     private static final String HASH_ALGORITHM = "SHA-256"; 
     private static final int SALT_LENGTH_BYTES = 16;
@@ -24,7 +27,7 @@ public class CustomPasswordEncoder implements PasswordEncoder {
      * This should be configured securely and not stored with user data.
      * @throws IllegalArgumentException if the pepper is null or empty.
      */
-    public CustomPasswordEncoder(String pepper) {
+    public CustomPasswordEncoder(@Value("${team3todo.security.password-pepper}") String pepper) {
         if (pepper == null || pepper.isEmpty()) {
             throw new IllegalArgumentException("Pepper cannot be null or empty. Please provide a secure pepper.");
         }

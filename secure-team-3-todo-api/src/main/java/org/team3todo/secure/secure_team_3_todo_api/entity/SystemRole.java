@@ -20,7 +20,4 @@ public class SystemRole {
 
     @Column(length = 100, unique = true, nullable = false)
     private String name;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
 }

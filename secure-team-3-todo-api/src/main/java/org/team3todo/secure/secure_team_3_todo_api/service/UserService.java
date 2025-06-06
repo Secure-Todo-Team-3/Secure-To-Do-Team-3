@@ -26,22 +26,6 @@ public class UserService implements UserDetailsService{
         return user.get();
     }
 
-    public UserDto convertToDto(User user) {
-        if (user == null) {
-            return null;
-        }
-        return UserDto.builder()
-                .userGuid(user.getUserGuid())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .isActive(user.getIsActive())
-                .isLocked(user.getIsLocked())
-                .createdAt(user.getCreatedAt())
-                // If you decide to include createdTeamIds:
-                // .createdTeamIds(user.getCreatedTeams().stream().map(Team::getId).collect(Collectors.toList()))
-                .build();
-    }
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
