@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(255) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    password_salt TEXT NOT NULL,
     user_guid UUID UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
     login_attempts INTEGER DEFAULT 0,
     is_locked BOOLEAN DEFAULT FALSE,
