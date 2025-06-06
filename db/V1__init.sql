@@ -1,8 +1,10 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Modified System Roles Table to include description
 CREATE TABLE IF NOT EXISTS system_roles (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) UNIQUE NOT NULL
+    name VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT -- Added description column
 );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -17,11 +19,11 @@ CREATE TABLE IF NOT EXISTS users (
     system_role_id INTEGER NOT NULL,
     is_totp_enabled BOOLEAN DEFAULT FALSE,
     totp_secret TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_users_system_role_id
         FOREIGN KEY(system_role_id)
         REFERENCES system_roles(id)
-        ON DELETE CASCADE 
+        ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_username ON users (username);

@@ -1,6 +1,6 @@
-INSERT INTO system_roles (name) VALUES
-    ('SYSTEM_ADMIN'),
-    ('REGULAR_USER')
+INSERT INTO system_roles (name, description) VALUES
+    ('SYSTEM_ADMIN', 'System administrator with full control over all data.'),
+    ('REGULAR_USER', 'A standard user with abilities to join teams and manage tasks.')
 ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO team_roles (name, description) VALUES
