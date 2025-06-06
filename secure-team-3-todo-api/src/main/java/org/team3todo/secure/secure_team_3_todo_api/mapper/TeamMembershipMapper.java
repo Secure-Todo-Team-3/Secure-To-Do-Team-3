@@ -5,7 +5,7 @@ import org.team3todo.secure.secure_team_3_todo_api.dto.TeamMembershipDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.TeamMembership;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
-import org.team3todo.secure.secure_team_3_todo_api.entity.Role;
+import org.team3todo.secure.secure_team_3_todo_api.entity.TeamRole;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +21,7 @@ public class TeamMembershipMapper {
 
         User user = teamMembership.getUser();
         Team team = teamMembership.getTeam();
-        Role role = teamMembership.getRole();
+        TeamRole teamRole = teamMembership.getTeamRole();
 
         TeamMembershipDto.TeamMembershipDtoBuilder builder = TeamMembershipDto.builder()
                 .id(teamMembership.getId())
@@ -37,9 +37,9 @@ public class TeamMembershipMapper {
             builder.teamName(team.getName());     // Assuming Team entity has getName()
         }
 
-        if (role != null) {
-            builder.roleId(role.getId());         // Assuming Role entity has getId() (and it's Integer)
-            builder.roleName(role.getName());     // Assuming Role entity has getName()
+        if (teamRole != null) {
+            builder.roleId(teamRole.getId());         // Assuming Role entity has getId() (and it's Integer)
+            builder.roleName(teamRole.getName());     // Assuming Role entity has getName()
         }
 
         return builder.build();

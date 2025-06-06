@@ -45,6 +45,11 @@ public class User implements UserDetails{
     @Column(unique = true, name = "user_guid", columnDefinition = "uuid")
     private UUID userGuid;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "system_role_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_users_system_role_id"))
+    private SystemRole systemRole;
+
     @Column(name = "login_attempts",columnDefinition = "INTEGER DEFAULT 0")
     @Builder.Default
     private Integer loginAttempts = 0;
@@ -66,27 +71,23 @@ public class User implements UserDetails{
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
+    // vvvvv RELATIONSHIPS vvvvv
     @OneToMany(mappedBy = "createdByUserId")
-    @Builder.Default
     private List<Team> createdTeams = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    @JsonManagedReference 
     @Builder.Default
     private List<TeamMembership> teamMemberships = new ArrayList<>();
 
     @OneToMany(mappedBy = "userCreator")
-    @JsonManagedReference
     @Builder.Default
     private List<Task> createdTasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "assignedToUser")
-    @JsonManagedReference
     @Builder.Default
     private List<Task> assignedTasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "changedByUser")
-    @JsonManagedReference
     @Builder.Default
     private List<TaskStatusHistory> taskStatusHistories = new ArrayList<>();
 
@@ -100,10 +101,10 @@ public class User implements UserDetails{
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (teamMemberships == null || teamMemberships.isEmpty()) {
-            return List.of(); 
+            return List.of();
         }
         return teamMemberships.stream()
-                .filter(tm -> tm.getRole() != null) 
+                .filter(tm -> tm.getRole() != null)
                 .map(TeamMembership::getRole)
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
@@ -121,18 +122,18 @@ public class User implements UserDetails{
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; 
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-      
+
         return !Boolean.TRUE.equals(this.isLocked);
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; 
+        return true;
     }
 
     @Override

@@ -17,7 +17,7 @@ import java.util.List;
 @Table(name = "roles", indexes = {
     @Index(name = "idx_roles_name", columnList = "name")
 })
-public class Role {
+public class TeamRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

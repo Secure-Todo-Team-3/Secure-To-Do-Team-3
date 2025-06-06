@@ -3,7 +3,7 @@ package org.team3todo.secure.secure_team_3_todo_api.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Important for write operations
-import org.team3todo.secure.secure_team_3_todo_api.entity.Role;
+import org.team3todo.secure.secure_team_3_todo_api.entity.TeamRole;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
 import org.team3todo.secure.secure_team_3_todo_api.entity.TeamMembership;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
@@ -11,8 +11,6 @@ import org.team3todo.secure.secure_team_3_todo_api.repository.RoleRepository; //
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamMembershipRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.UserRepository;
-
-import java.util.Optional; // For fetching entities
 
 @Service
 public class TeamMembershipService {
@@ -39,18 +37,18 @@ public class TeamMembershipService {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new RuntimeException("Team not found with id: " + teamId));
-        Role role = roleRepository.findById(roleId)
+        TeamRole teamRole = roleRepository.findById(roleId)
                 .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
 
-        if (teamMembershipRepository.existsByUserAndTeamAndRole(user, team, role)) {
+        if (teamMembershipRepository.existsByUserAndTeamAndRole(user, team, teamRole)) {
             throw new RuntimeException("User " + user.getUsername() +
                     " is already a member of team " + team.getName() +
-                    " with role " + role.getName());
+                    " with role " + teamRole.getName());
         }
         TeamMembership newMembership = TeamMembership.builder()
                 .user(user)
                 .team(team)
-                .role(role)
+                .teamRole(teamRole)
                 .build();
 
         return teamMembershipRepository.save(newMembership);
