@@ -25,7 +25,7 @@ public class UserController {
         this.userMapper = userMapper;
     }
 
-    @GetMapping("/{userGuid}")
+     @GetMapping("/{userGuid}")
     public ResponseEntity<UserDto> getUserByGUID(@PathVariable UUID userGuid){
         User foundUser = userService.findByUserGuid(userGuid);
         UserDto userDto = userService.convertToDto(foundUser);
