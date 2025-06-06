@@ -40,7 +40,7 @@ public class TeamMembership {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_tm_role_id"))
-    private Role role;
+    private TeamRole teamRole;
 
     @CreationTimestamp
     @Column(name = "assigned_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP")

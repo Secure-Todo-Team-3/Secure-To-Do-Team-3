@@ -14,10 +14,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "roles", indexes = {
+@Table(name = "team_roles", indexes = {
     @Index(name = "idx_roles_name", columnList = "name")
 })
-public class Role {
+public class TeamRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +30,6 @@ public class Role {
     private String description;
 
     // vvvvv RELATIONSHIPS vvvvv
-    @OneToMany(mappedBy = "role")
+    @OneToMany(mappedBy = "teamRole")
     private List<TeamMembership> teamMemberships = new ArrayList<>();
 }

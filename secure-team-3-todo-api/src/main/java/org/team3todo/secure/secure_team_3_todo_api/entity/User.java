@@ -1,6 +1,5 @@
 package org.team3todo.secure.secure_team_3_todo_api.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,11 +11,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity
 @Data
@@ -26,9 +23,10 @@ import java.util.stream.Collectors;
 @Table(name="users", indexes = {
         @Index(name = "idx_users_username", columnList = "username"),
         @Index(name = "idx_users_email", columnList = "email"),
-        @Index(name = "idx_users_user_guid", columnList = "user_guid")
+        @Index(name = "idx_users_user_guid", columnList = "user_guid"),
+        @Index(name = "idx_users_system_role_id", columnList = "system_role_id") // Added index
 })
-public class User implements UserDetails{
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,10 +40,17 @@ public class User implements UserDetails{
     @Column(nullable = false, name = "password_hash", columnDefinition = "TEXT")
     private String passwordHash;
 
+    // REMOVED password_salt field to match the latest DDL
+
     @Column(unique = true, name = "user_guid", columnDefinition = "uuid")
     private UUID userGuid;
 
-    @Column(name = "login_attempts",columnDefinition = "INTEGER DEFAULT 0")
+    @ManyToOne(fetch = FetchType.EAGER) // Eager fetch for system role as it's fundamental for security
+    @JoinColumn(name = "system_role_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_users_system_role_id"))
+    private SystemRole systemRole;
+
+    @Column(name = "login_attempts", columnDefinition = "INTEGER DEFAULT 0")
     @Builder.Default
     private Integer loginAttempts = 0;
 
@@ -53,40 +58,39 @@ public class User implements UserDetails{
     @Builder.Default
     private Boolean isLocked = false;
 
-
-    @Column(name = "totp_enabled", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Column(name = "is_totp_enabled", columnDefinition = "BOOLEAN DEFAULT FALSE")
     @Builder.Default
-    private boolean totpEnabled = false;
+    private boolean isTotpEnabled = false; // Renamed to match DDL column name
+
+    @Column(name = "totp_secret", columnDefinition = "TEXT")
+    private String totpSecret; // Added totp_secret field
 
     @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
     private Boolean isActive = true;
 
     @CreationTimestamp
-    @Column(name = "created_at")
+    @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;
 
+    // vvvvv RELATIONSHIPS vvvvv
     @OneToMany(mappedBy = "createdByUserId")
     @Builder.Default
     private List<Team> createdTeams = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-    @JsonManagedReference 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY) // Changed back to LAZY
     @Builder.Default
     private List<TeamMembership> teamMemberships = new ArrayList<>();
 
     @OneToMany(mappedBy = "userCreator")
-    @JsonManagedReference
     @Builder.Default
     private List<Task> createdTasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "assignedToUser")
-    @JsonManagedReference
     @Builder.Default
     private List<Task> assignedTasks = new ArrayList<>();
 
     @OneToMany(mappedBy = "changedByUser")
-    @JsonManagedReference
     @Builder.Default
     private List<TaskStatusHistory> taskStatusHistories = new ArrayList<>();
 
@@ -99,40 +103,34 @@ public class User implements UserDetails{
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (teamMemberships == null || teamMemberships.isEmpty()) {
-            return List.of(); 
+        // Authority based on the main System Role (e.g., "SYSTEM_ADMIN", "REGULAR_USER")
+        if (this.systemRole != null && this.systemRole.getName() != null){
+            return List.of(new SimpleGrantedAuthority("ROLE_"+ this.systemRole.getName()));
         }
-        return teamMemberships.stream()
-                .filter(tm -> tm.getRole() != null) 
-                .map(TeamMembership::getRole)
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .collect(Collectors.toList());
+        return Collections.emptyList();
     }
+
 
     @Override
     public String getPassword() {
         return passwordHash;
     }
 
-    @Override
-    public String getUsername() {
-        return username;
-    }
+    // getUsername() is already provided by Lombok's @Data
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; 
+        return true; // Or add logic for this
     }
 
     @Override
     public boolean isAccountNonLocked() {
-      
         return !Boolean.TRUE.equals(this.isLocked);
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; 
+        return true; // Or add logic for this
     }
 
     @Override

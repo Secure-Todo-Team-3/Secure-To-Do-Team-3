@@ -41,8 +41,8 @@ public class applicationConfig {
         return config.getAuthenticationManager();
     }
 
-     @Bean
-    public PasswordEncoder passwordEncoder() {
+    @Bean
+    public CustomPasswordEncoder passwordEncoder() {
         return new CustomPasswordEncoder(systemPepper);
     }
 }
