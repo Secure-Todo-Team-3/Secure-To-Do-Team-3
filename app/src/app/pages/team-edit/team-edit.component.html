@@ -1,0 +1,53 @@
+<mat-card class="edit-card">
+  <mat-card-header>
+    <button mat-icon-button class="back-button" (click)="goBack()" aria-label="Back">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <div class="header-text">
+      <mat-card-title>{{ isEditMode ? 'Edit Team' : 'Add Team' }}</mat-card-title>
+      <mat-card-subtitle>
+        {{ isEditMode ? 'Update your team details' : 'Create a new team' }}
+      </mat-card-subtitle>
+    </div>
+  </mat-card-header>
+
+  <mat-divider class="header-divider"></mat-divider>
+
+  <mat-card-content>
+    @if (isLoading) {
+      <div class="loading-overlay">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+    } @else {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Team Name</mat-label>
+        <input matInput [(ngModel)]="team.name" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput [(ngModel)]="team.description" rows="4" required></textarea>
+      </mat-form-field>
+    }
+  </mat-card-content>
+
+  <mat-divider class="footer-divider"></mat-divider>
+
+  <mat-card-actions align="end">
+    <button mat-stroked-button 
+            (click)="cancelChanges()" 
+            [disabled]="isLoading"
+            class="cancel-button">
+      Cancel
+    </button>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="saveChanges()"
+            [disabled]="isLoading || !team.name || !team.description">
+      {{ isEditMode ? 'Save' : 'Create' }}
+      @if (isLoading) {
+        <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
+      }
+    </button>
+  </mat-card-actions>
+</mat-card>

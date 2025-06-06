@@ -10,6 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TaskCardComponent } from 'src/app/shared/components/task-card/task-card.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-task-dashboard',
@@ -32,9 +33,11 @@ import { TaskCardComponent } from 'src/app/shared/components/task-card/task-card
   styleUrls: ['./todo.component.css'],
 })
 export class TodoPageComponent {
+  constructor(private router: Router) {}
+
   pendingTasks: any[] = [
     {
-      title: 'Q1 Marketing Campaign',
+      title: 'Q1 Marketing Campaign. Q1 Marketing Campaign. Q1 Marketing Campaign',
       description: 'Complete project proposal for Q1 marketing campaign',
       dueDate: '2024-01-11',
       status: 'In Progress',
@@ -42,6 +45,7 @@ export class TodoPageComponent {
       chipColor: 'primary',
       icon: 'schedule',
       chipSelected: true,
+      id: 'task-456',
     },
     {
       title: 'Q2 Marketing Campaign',
@@ -52,6 +56,18 @@ export class TodoPageComponent {
       chipColor: 'primary',
       icon: 'schedule',
       chipSelected: true,
+      id: 'task-123',
+    },
+    {
+      title: 'Q2 Marketing Campaign',
+      description: 'Complete project proposal for Q2 marketing campaign',
+      dueDate: '2024-01-12',
+      status: 'In Progress',
+      team: 'Marketing Team',
+      chipColor: 'primary',
+      icon: 'schedule',
+      chipSelected: true,
+      id: 'task-123',
     },
   ];
 
@@ -65,6 +81,7 @@ export class TodoPageComponent {
       chipColor: 'accent',
       icon: 'check_circle',
       chipSelected: true,
+      id: 'task-789',
     },
     {
       title: 'Annual Report',
@@ -75,6 +92,7 @@ export class TodoPageComponent {
       chipColor: 'accent',
       icon: 'check_circle',
       chipSelected: true,
+      id: 'task-456',
     },
     {
       title: 'Team Training',
@@ -85,6 +103,11 @@ export class TodoPageComponent {
       chipColor: 'accent',
       icon: 'check_circle',
       chipSelected: true,
+      id: 'task-123',
     },
   ];
+
+  addTask() {
+    this.router.navigate(['/create-task']);
+  }
 }

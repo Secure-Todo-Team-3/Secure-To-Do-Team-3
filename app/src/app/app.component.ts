@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { NgIf } from '@angular/common';
+import { getInitials } from './shared/utils/get-initials';
 
 @Component({
   selector: 'app-root',
@@ -29,6 +30,7 @@ export class AppComponent {
   appTitle = 'Task Manager Pro';
   userName = 'Alex Johnson';
   userEmail = 'alex.johnson@example.com';
+  getInitials = getInitials;
 
   constructor(private router: Router) {
     this.router.events

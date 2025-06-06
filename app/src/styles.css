@@ -3,9 +3,9 @@
 :root {
   --primary-color: #3f51b5;
   --accent-color: #ff4081;
-  --background-color: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  --background-color: #e6edf7;
   --text-color: #212121;
-  --nav-background: #ffffff;
+  --nav-background:#e6edf7;
 }
 
 html, body {

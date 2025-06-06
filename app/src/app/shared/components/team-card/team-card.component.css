@@ -3,42 +3,85 @@
   border-radius: 1rem;
   background-color: #fff;
   box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.1);
+  max-width: 90vw;
   width: 25rem;
+  overflow: hidden;
 }
 
-.team-meta {
-  font-size: 0.95rem;
+.team-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 1em;
-  margin-top: 0.5rem;
-  color: #666;
 }
 
-.icon-space {
-  margin-left: 1em;
-}
-
-.status-chip {
-  display: inline-block;
-  margin-top: 1rem;
-  background-color: #d3d3d3;
-  padding: 0.4em 1em;
-  border-radius: 1em;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.status-chip.in-progress {
-  background-color: #c5c5c5;
+.team-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .edit-btn {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  z-index: 10;
-  border: none;
-  background: transparent;
+  color: var(--primary-color);
+}
+
+.team-description {
+  margin-top: 0.5rem;
+  color: #444;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-meta {
+  margin-top: 1rem;
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+  color: #666;
   cursor: pointer;
+}
+
+.meta-icon {
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+.status-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.status-chip {
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.3rem 1rem;
+  border-radius: 1rem;
+}
+
+.status-chip.admin {
+  background-color: rgb(252, 227, 181);
+  color: #311900;
+}
+
+.status-chip.member {
+  background-color: rgb(198, 211, 249);
+  color: #001a34;
+}
+
+.more-info-btn {
+  color: var(--primary-color);
 }

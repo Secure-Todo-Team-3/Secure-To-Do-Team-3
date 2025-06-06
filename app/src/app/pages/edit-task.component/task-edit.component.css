@@ -1,0 +1,96 @@
+.page-container {
+  max-width: 50rem;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  position: relative;
+  border: 0.0625rem solid rgba(0, 0, 0, 0.12);
+  border-radius: 0.5rem;
+  background-color: #fff;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+}
+
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.back-button {
+  margin-right: 1rem;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.subtitle {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-field {
+  width: 100%;
+}
+
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.checkbox-section {
+  margin: 1rem 0;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+@media (max-width: 37.5rem) {
+  .page-container {
+    padding: 1rem;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}
+
+::ng-deep .mat-mdc-form-field-outline {
+  border-radius: 0.25rem !important;
+}
+
+::ng-deep .mat-mdc-text-field-wrapper {
+  border-radius: 0.25rem !important;
+}

@@ -1,12 +1,12 @@
 .teams-page {
   padding: 2rem;
-  background-color: #e6edf7;
+  background-color: var(--background-color);
   display: grid;
   gap: 3rem;
 }
 
 .toolbar {
-  background-color: #e6edf7;
+  background-color: var(--nav-background);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -20,25 +20,17 @@
 
 .filter-form {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.2rem;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
 }
 
-.search-field,
-.filter-field {
-  border-radius: 0.4rem;
-}
-
 .search-field {
   flex-grow: 1;
-  min-width: 12rem;
+  max-width: 75%;
 }
 
-.filter-field {
-  min-width: 10rem;
-}
+
 
 .section-title {
   display: flex;

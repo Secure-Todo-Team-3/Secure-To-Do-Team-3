@@ -1,10 +1,12 @@
-@if (showSidenav()) {
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #drawer class="sidenav" mode="side" [opened]="showSidenav()">
     <mat-toolbar class="user-profile">
-      <mat-icon class="avatar">account_circle</mat-icon>
+      <div class="avatar">
+        {{ getInitials(userName) }}
+      </div>
       <span class="username">{{ userName }}</span>
     </mat-toolbar>
+
     <mat-nav-list class="nav-list">
       <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
         <mat-icon>dashboard</mat-icon>
@@ -21,13 +23,13 @@
     </mat-nav-list>
 
     <footer class="sidenav-footer">
-      <mat-divider></mat-divider>
       <button mat-raised-button color="primary" (click)="logout()">
         <mat-icon class="logout-icon">exit_to_app</mat-icon>
         Logout
       </button>
     </footer>
   </mat-sidenav>
+
   <mat-sidenav-content>
     <mat-toolbar color="primary" class="app-toolbar">
       <button
@@ -43,6 +45,3 @@
     <router-outlet></router-outlet>
   </mat-sidenav-content>
 </mat-sidenav-container>
-} @else {
-<router-outlet></router-outlet>
-}

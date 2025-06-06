@@ -1,0 +1,72 @@
+.edit-card {
+  max-width: 600px;
+  margin: 1rem auto 2rem;
+  padding: 1.5rem;
+  position: relative;
+}
+
+mat-card-header {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.header-text {
+  flex: 1;
+  margin-left: 1rem;
+}
+
+.back-button {
+  color: rgba(0, 0, 0, 0.87);
+  margin-right: 8px;
+}
+
+.header-divider {
+  margin-bottom: 1.5rem;
+}
+
+.footer-divider {
+  margin: 1.5rem 0;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+mat-card-actions {
+  padding: 0.5rem 0;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 100;
+}
+
+.button-spinner {
+  margin-left: 8px;
+}
+
+@media (max-width: 600px) {
+  .edit-card {
+    margin: 0.5rem auto 1rem;
+    padding: 1rem;
+  }
+}
+
+.cancel-button {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.87);
+}
