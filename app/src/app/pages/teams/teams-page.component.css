@@ -1,12 +1,12 @@
 .teams-page {
   padding: 2rem;
-  background-color: #e6edf7;
+  background-color: var(--background-color);
   display: grid;
   gap: 3rem;
 }
 
 .toolbar {
-  background-color: #e6edf7;
+  background-color: var(--nav-background);
   display: flex;
   justify-content: space-between;
   align-items: center;

@@ -80,7 +80,7 @@ export class TeamTasksComponent {
   }
 
   addTask(): void {
-    console.log('Add task clicked');
+    window.location.href = '/add-task';
   }
 
   goBack(): void {

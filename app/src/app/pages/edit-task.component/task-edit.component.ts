@@ -86,10 +86,7 @@ export class TaskEditPageComponent implements OnInit {
   async loadTaskData(): Promise<void> {
     this.isLoading.set(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Mock data for editing
       this.taskForm.patchValue({
         title: 'Existing Task',
         description: 'This is an existing task description',

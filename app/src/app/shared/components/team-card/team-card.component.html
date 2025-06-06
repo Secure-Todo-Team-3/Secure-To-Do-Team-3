@@ -7,6 +7,8 @@
       color="primary"
       aria-label="Edit Team"
       class="edit-btn"
+      (click)="editTeam()"
+      matTooltip="Edit Team"
     >
       <mat-icon>edit</mat-icon>
     </button>
@@ -18,14 +20,14 @@
     </p>
 
     <section class="team-meta">
-      <div class="meta-item">
+      <section class="meta-item" (click)="openMembers()">
         <mat-icon class="meta-icon">group</mat-icon>
         <u>{{ team.members }} members</u>
-      </div>
-      <div class="meta-item">
+      </section>
+      <section class="meta-item" (click)="openTasks()">
         <mat-icon class="meta-icon">task</mat-icon>
         <u>{{ team.tasks }} open tasks</u>
-      </div>
+      </section>
     </section>
 
     <section class="status-container">

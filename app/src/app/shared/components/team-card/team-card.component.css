@@ -50,6 +50,7 @@
   gap: 0.4rem;
   font-size: 0.95rem;
   color: #666;
+  cursor: pointer;
 }
 
 .meta-icon {

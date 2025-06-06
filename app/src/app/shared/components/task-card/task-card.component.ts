@@ -42,7 +42,7 @@ export class TaskCardComponent {
   }
 
   editTask() {
-    console.log('Edit task', this.task);
+    window.location.href = `/edit-task/${this.task.id}`;
   }
 
   get statusColor(): string {

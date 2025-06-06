@@ -26,4 +26,17 @@ export class TeamCardComponent {
       width: '400px',
     });
   }
+
+  editTeam() {
+    window.location.href = `/edit-team/${this.team.id}`;
+  }
+
+  openMembers() {
+    window.location.href = `/team-members/${this.team.id}`;
+  }
+
+  openTasks() {
+    window.location.href = `/team-tasks/${this.team.id}`;
+  }
+  
 }
