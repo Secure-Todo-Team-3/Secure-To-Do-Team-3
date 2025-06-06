@@ -1,23 +1,53 @@
 <mat-card class="task-card">
-  <button mat-icon-button color="primary" mat-icon-button
+  <!-- Top Icons: Edit and Unassign -->
+  <mat-icon
+    class="edit-icon"
     color="primary"
     aria-label="Edit Task"
-    class="edit-btn">
-    <mat-icon>edit</mat-icon>
-  </button>
+    (click)="editTask()"
+    matTooltip="Edit Task"
+    >edit</mat-icon
+  >
 
-  <mat-card-title>{{ task.title }}</mat-card-title>
+  <mat-icon
+    class="unassign-icon"
+    color="warn"
+    aria-label="Unassign Task"
+    (click)="unassign()"
+    matTooltip="Unassign Yourself"
+    >person_remove</mat-icon
+  >
+
+  <mat-card-title [title]="task.title">{{ task.title }}</mat-card-title>
 
   <mat-card-content>
-    <p>{{ task.description }}</p>
+    <p [title]="task.description">{{ task.description }}</p>
 
     <section class="task-info">
       <small>
-        <mat-icon inline>event</mat-icon> Due: {{ task.dueDate }}
+        <mat-icon inline>event</mat-icon> Due:
+        {{ task.dueDate | date : "mediumDate" }}
       </small>
-      <mat-chip [color]="task.chipColor" selected>{{ task.status }}</mat-chip>
+      <mat-chip
+        class="status-chip"
+        [ngClass]="task.status.replace(' ', '-').toLowerCase()"
+      >
+        {{ task.status }}
+      </mat-chip>
     </section>
 
-    <footer class="task-footer">👥 {{ task.team }}</footer>
+    <footer class="task-footer">
+      <mat-icon inline>group</mat-icon> {{ task.team }}
+    </footer>
   </mat-card-content>
+
+  <!-- Bottom More Info Icon -->
+  <mat-icon
+    class="more-info-icon"
+    color="primary"
+    aria-label="More Info"
+    (click)="openDetails()"
+    matTooltip="More Info"
+    >info</mat-icon
+  >
 </mat-card>

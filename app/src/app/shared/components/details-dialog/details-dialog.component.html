@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>
+  {{ data.type === 'task' ? 'Task Details' : 'Team Details' }}
+  <button mat-icon-button aria-label="Close dialog" class="close-btn" (click)="close()">
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
+
+<mat-dialog-content>
+  <div *ngIf="data.type === 'task'" class="details-container">
+    <dl>
+      <dt>Title:</dt>
+      <dd>{{ data.title }}</dd>
+
+      <dt>Description:</dt>
+      <dd>{{ data.description }}</dd>
+
+      <dt>Due Date:</dt>
+      <dd>{{ data.dueDate | date:'mediumDate' }}</dd>
+
+      <dt>Status:</dt>
+      <dd>{{ data.status }}</dd>
+
+      <dt>Team:</dt>
+      <dd>{{ data.team }}</dd>
+    </dl>
+  </div>
+
+  <div *ngIf="data.type === 'team'" class="details-container">
+    <dl>
+      <dt>Name:</dt>
+      <dd>{{ data.name }}</dd>
+
+      <dt>Description:</dt>
+      <dd>{{ data.description }}</dd>
+
+      <dt>Members:</dt>
+      <dd>{{ data.members }}</dd>
+
+      <dt>Open Tasks:</dt>
+      <dd>{{ data.tasks }}</dd>
+
+      <dt>Role:</dt>
+      <dd>{{ data.role }}</dd>
+    </dl>
+  </div>
+</mat-dialog-content>

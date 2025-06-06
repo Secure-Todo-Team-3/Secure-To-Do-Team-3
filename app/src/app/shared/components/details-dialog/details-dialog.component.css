@@ -1,0 +1,54 @@
+mat-dialog-content {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.5;
+}
+
+.details-container dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.4rem 1rem;
+  margin: 0;
+}
+
+.details-container dt {
+  font-weight: 600;
+  color: #555;
+  user-select: none;
+}
+
+.details-container dd {
+  margin: 0;
+  word-wrap: break-word;
+  color: #222;
+}
+
+.close-btn {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  color: rgba(0, 0, 0, 0.54);
+  background: transparent;
+  box-shadow: none;
+  transition: color 0.3s;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.close-btn:hover {
+  color: rgba(0, 0, 0, 0.87);
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+h2[mat-dialog-title] {
+  position: relative;
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin-bottom: 0.8rem;
+  padding-right: 2.5rem;
+  color: #222;
+  user-select: none;
+}

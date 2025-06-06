@@ -27,8 +27,8 @@ import { MatCardModule } from '@angular/material/card';
 export class TeamsPageComponent {
   myTeams = [
     {
-      name: 'Marketing Team',
-      description: 'Responsible for all marketing initiatives and campaigns',
+      name: 'Marketing Team Responsible for all marketing initiatives and campaigns',
+      description: 'Responsible for all marketing initiatives and campaigns, Responsible for all marketing initiatives and campaigns, Responsible for all marketing initiatives and campaigns, Responsible for all marketing initiatives and campaigns',
       members: 8,
       tasks: 12,
       role: 'Admin',

@@ -1,24 +1,40 @@
 <mat-card class="team-card">
-  <button
-    *ngIf="team.isOwner"
-    mat-icon-button
-    color="primary"
-    aria-label="Edit Team"
-    class="edit-btn"
-  >
-    <mat-icon>edit</mat-icon>
-  </button>
-
-  <mat-card-title>{{ team.name }}</mat-card-title>
+  <header class="team-header">
+    <h2 class="team-title" title="{{ team.name }}">{{ team.name }}</h2>
+    <button
+      *ngIf="team.isOwner"
+      mat-icon-button
+      color="primary"
+      aria-label="Edit Team"
+      class="edit-btn"
+    >
+      <mat-icon>edit</mat-icon>
+    </button>
+  </header>
 
   <mat-card-content>
-    <p>{{ team.description }}</p>
-    <p class="team-meta">
-      <mat-icon inline>group</mat-icon> {{ team.members }} members
-      <mat-icon inline class="icon-space">task</mat-icon> {{ team.tasks }} open tasks
+    <p class="team-description" title="{{ team.description }}">
+      {{ team.description }}
     </p>
-    <span class="status-chip" [ngClass]="{ 'in-progress': team.role === 'Admin' }">
-      {{ team.role }}
-    </span>
+
+    <section class="team-meta">
+      <div class="meta-item">
+        <mat-icon class="meta-icon">group</mat-icon>
+        <u>{{ team.members }} members</u>
+      </div>
+      <div class="meta-item">
+        <mat-icon class="meta-icon">task</mat-icon>
+        <u>{{ team.tasks }} open tasks</u>
+      </div>
+    </section>
+
+    <section class="status-container">
+      <mat-chip class="status-chip" [ngClass]="team.role.toLowerCase()">
+        {{ team.role }}
+      </mat-chip>
+      <button mat-icon-button aria-label="More info" class="more-info-btn" (click)="openDetails()">
+        <mat-icon>info</mat-icon>
+      </button>
+    </section>
   </mat-card-content>
 </mat-card>

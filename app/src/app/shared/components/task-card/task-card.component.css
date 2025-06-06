@@ -3,32 +3,81 @@
   padding: 1.5rem;
   border-radius: 1rem;
   box-shadow: 0 0.2em 0.5em rgba(0, 0, 0, 0.1);
-  width: 25rem;
+  width: clamp(20rem, 25vw, 30rem);
 }
 
 mat-card-title {
   font-size: 1.2rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+mat-card-content p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 1rem;
 }
 
 .task-info {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-top: 1em;
+  color: #555;
 }
+
+.task-info small {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem; 
+  color: #555;
+}
+
 
 .task-footer {
   margin-top: 1em;
   font-size: 0.9em;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-.edit-btn {
+/* Top right icons */
+.edit-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 3rem;
+  cursor: pointer;
+}
+
+.unassign-icon {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  z-index: 10;
-  border: none;
-  background: transparent;
   cursor: pointer;
+  color: #f44336; /* Material warn red */
+}
+
+/* Bottom right icon */
+.more-info-icon {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  cursor: pointer;
+  color: #3f51b5;
+}
+
+.status-chip.completed {
+  background-color: #aaebb0;
+  color: #2e7d32;
+}
+
+.status-chip.in-progress {
+  background-color: #fef8bf; 
+  color: #fbc02d; 
 }

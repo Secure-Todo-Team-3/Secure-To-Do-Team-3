@@ -34,7 +34,7 @@ import { TaskCardComponent } from 'src/app/shared/components/task-card/task-card
 export class TodoPageComponent {
   pendingTasks: any[] = [
     {
-      title: 'Q1 Marketing Campaign',
+      title: 'Q1 Marketing Campaign. Q1 Marketing Campaign. Q1 Marketing Campaign',
       description: 'Complete project proposal for Q1 marketing campaign',
       dueDate: '2024-01-11',
       status: 'In Progress',
