@@ -2,6 +2,7 @@ package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.*;
@@ -61,13 +62,44 @@ public class TaskService {
      * @param userGuid The GUID of the user.
      * @return A list of enriched Task entities with the currentStatus field populated.
      */
+    /**
+     * Finds tasks for a user with optional filters for task name, team name, and status.
+     *
+     * @param userGuid The GUID of the user to find tasks for.
+     * @param taskName (Optional) Filter for tasks containing this name.
+     * @param statusName (Optional) Filter for tasks with this current status name.
+     * @param teamName (Optional) Filter for tasks belonging to a team containing this name.
+     * @return A list of enriched Task entities that match the criteria.
+     */
     @Transactional()
-    public List<Task> findEnrichedTasksByAssignedUserGuid(UUID userGuid) {
-        List<Task> tasks = this.findByAssignedUserGuid(userGuid);
+    public List<Task> findEnrichedTasksByAssignedUser(UUID userGuid, String taskName, String statusName, String teamName) {
+        // 1. Build a Specification for filters that can be applied at the database level.
+        Specification<Task> spec = Specification.where(hasAssignedUser(userGuid));
+
+        if (taskName != null && !taskName.isBlank()) {
+            spec = spec.and(nameContains(taskName));
+        }
+        if (teamName != null && !teamName.isBlank()) {
+            spec = spec.and(teamNameContains(teamName));
+        }
+
+        // 2. Fetch the initial list of tasks from the database.
+        List<Task> tasks = taskRepository.findAll(spec);
         if (tasks.isEmpty()) {
             return Collections.emptyList();
         }
+
+        // 3. Enrich all found tasks with their current status.
         enrichTasksWithCurrentStatus(tasks);
+
+        // 4. Apply the status filter in-memory, as it's derived from the transient field.
+        if (statusName != null && !statusName.isBlank()) {
+            return tasks.stream()
+                    .filter(task -> task.getCurrentStatus() != null &&
+                            statusName.equalsIgnoreCase(task.getCurrentStatus().getName()))
+                    .collect(Collectors.toList());
+        }
+
         return tasks;
     }
 
@@ -98,4 +130,17 @@ public class TaskService {
         }
         return taskRepository.findByAssignedToUser(foundUser);
     }
+
+    private Specification<Task> hasAssignedUser(UUID userGuid) {
+        return (root, query, cb) -> cb.equal(root.get("assignedToUser").get("userGuid"), userGuid);
+    }
+
+    private Specification<Task> nameContains(String taskName) {
+        return (root, query, cb) -> cb.like(cb.lower(root.get("name")), "%" + taskName.toLowerCase() + "%");
+    }
+
+    private Specification<Task> teamNameContains(String teamName) {
+        return (root, query, cb) -> cb.like(cb.lower(root.get("team").get("name")), "%" + teamName.toLowerCase() + "%");
+    }
+
 }

@@ -30,8 +30,15 @@ public class TaskController {
     }
 
     @GetMapping("/user-tasks/{userGuid}")
-    public ResponseEntity<List<TaskDto>> findTasksByUserGuid(@PathVariable UUID userGuid){
-        List<Task> foundTasks = taskService.findEnrichedTasksByAssignedUserGuid(userGuid);
+    public ResponseEntity<List<TaskDto>> findTasksByUserGuid(
+            @PathVariable UUID userGuid,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String team) {
+
+        List<Task> foundTasks = taskService.findEnrichedTasksByAssignedUser(
+                userGuid, name, status, team
+        );
 
         List<TaskDto> dtoTasks = taskMapper.convertToDtoList(foundTasks);
         return ResponseEntity.ok(dtoTasks);
