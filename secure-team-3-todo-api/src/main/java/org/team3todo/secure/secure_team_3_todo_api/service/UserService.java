@@ -1,5 +1,6 @@
 package org.team3todo.secure.secure_team_3_todo_api.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -7,6 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.team3todo.secure.secure_team_3_todo_api.dto.UserDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
+import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.UserRepository;
 
 import java.util.Optional;
@@ -22,13 +24,12 @@ public class UserService implements UserDetailsService{
     }
 
     public User findByUserGuid(UUID guid) {
-        Optional<User> user = userRepository.findByUserGuid(guid);
-        return user.get();
+        return userRepository.findByUserGuid(guid).orElseThrow(() -> new ResourceNotFoundException("User does not exist."));
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User with username: " + username + " not found"));
     }
 
     public User findByUserId(Long id){

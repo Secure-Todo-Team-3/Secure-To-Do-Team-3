@@ -1,8 +1,8 @@
 package org.team3todo.secure.secure_team_3_todo_api.service;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.InvalidKeyException;
+import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value; // For injecting properties
@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 
 import jakarta.annotation.PostConstruct; // For @PostConstruct
+import org.team3todo.secure.secure_team_3_todo_api.exception.JwtAuthenticationException;
+
 import java.io.IOException; // Still needed for some method signatures as per original
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -47,7 +49,7 @@ public class JwtService {
 
             if (privateKeyBase64String == null || privateKeyBase64String.isEmpty() ||
                 publicKeyBase64String == null || publicKeyBase64String.isEmpty()) {
-                throw new RuntimeException("JWT key configuration is missing in application properties. " +
+                throw new IllegalStateException("JWT key configuration is missing in application properties. " +
                                            "Please set jwt.secret.private-key-base64 and jwt.secret.public-key-base64.");
             }
 
@@ -75,8 +77,13 @@ public class JwtService {
      * @return The userGuid.
      */
     public UUID extractUserGuid(String token) {
-        UUID userGuid = UUID.fromString(extractClaim(token, Claims::getSubject));
-        return userGuid;
+        try{
+            return UUID.fromString(extractClaim(token, Claims::getSubject));
+        }
+        catch(IllegalArgumentException e){
+            throw new JwtAuthenticationException("Invalid user GUID in token subject.", e);
+        }
+
     }
 
     /**
@@ -102,18 +109,31 @@ public class JwtService {
      * @throws RuntimeException if there's an issue parsing or verifying the token.
      */
     private Claims extractAllClaims(String token) {
+
+        if (this.publicKeyInstance == null) {
+             throw new IllegalStateException("Public key has not been initialized. Check configuration.");
+        }
         try {
-            if (this.publicKeyInstance == null) {
-                 throw new RuntimeException("Public key has not been initialized. Check configuration.");
-            }
             Claims claims = Jwts.parser()
                     .verifyWith(this.publicKeyInstance) 
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
             return claims;
-        } catch (Exception e) {
-            throw new RuntimeException("Invalid token or unable to parse claims.", e);
+        } catch (ExpiredJwtException e) {
+            throw new JwtAuthenticationException("JWT Token has expired.", e);
+        }
+        catch(UnsupportedJwtException e){
+            throw new JwtAuthenticationException("This JWT token is not supported.",e );
+        }
+        catch(MalformedJwtException e){
+            throw new JwtAuthenticationException("Invalid JWT token format.",e );
+        }
+        catch(SignatureException e){
+            throw new JwtAuthenticationException("JWT Signature validation failed.",e );
+        }
+        catch(IllegalArgumentException e){
+            throw new JwtAuthenticationException("JWT Claims string is empty or invalid.",e );
         }
     }
 
@@ -186,9 +206,7 @@ public class JwtService {
     }
 
     private boolean isTokenExpired(String token) {
-        boolean expired = extractExpiration(token).before(new Date());
-        
-        return expired;
+        return extractExpiration(token).before(new Date());
     }
 
     private Date extractExpiration(String token) {
