@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
@@ -11,6 +11,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TaskCardComponent } from 'src/app/shared/components/task-card/task-card.component';
 import { Router } from '@angular/router';
+import { TodoService } from './todo.service';
+import { Task } from 'src/app/shared/models/task.model';
 
 @Component({
   selector: 'app-task-dashboard',
@@ -32,80 +34,35 @@ import { Router } from '@angular/router';
   templateUrl: './todo.component.html',
   styleUrls: ['./todo.component.css'],
 })
-export class TodoPageComponent {
-  constructor(private router: Router) {}
+export class TodoPageComponent implements OnInit {
+  pendingTasks: Task[] = [];
+  completedTasks: Task[] = [];
+  isLoading = true;
 
-  pendingTasks: any[] = [
-    {
-      title: 'Q1 Marketing Campaign. Q1 Marketing Campaign. Q1 Marketing Campaign',
-      description: 'Complete project proposal for Q1 marketing campaign',
-      dueDate: '2024-01-11',
-      status: 'In Progress',
-      team: 'Marketing Team',
-      chipColor: 'primary',
-      icon: 'schedule',
-      chipSelected: true,
-      id: 'task-456',
-    },
-    {
-      title: 'Q2 Marketing Campaign',
-      description: 'Complete project proposal for Q2 marketing campaign',
-      dueDate: '2024-01-12',
-      status: 'In Progress',
-      team: 'Marketing Team',
-      chipColor: 'primary',
-      icon: 'schedule',
-      chipSelected: true,
-      id: 'task-123',
-    },
-    {
-      title: 'Q2 Marketing Campaign',
-      description: 'Complete project proposal for Q2 marketing campaign',
-      dueDate: '2024-01-12',
-      status: 'In Progress',
-      team: 'Marketing Team',
-      chipColor: 'primary',
-      icon: 'schedule',
-      chipSelected: true,
-      id: 'task-123',
-    },
-  ];
+  constructor(private router: Router, private todoService: TodoService) {}
 
-  completedTasks: any[] = [
-    {
-      title: 'Website Redesign',
-      description: 'Complete the company website redesign project',
-      dueDate: '2024-01-05',
-      status: 'Completed',
-      team: 'Marketing Team',
-      chipColor: 'accent',
-      icon: 'check_circle',
-      chipSelected: true,
-      id: 'task-789',
-    },
-    {
-      title: 'Annual Report',
-      description: 'Prepare annual marketing report for stakeholders',
-      dueDate: '2023-12-20',
-      status: 'Completed',
-      team: 'Marketing Team',
-      chipColor: 'accent',
-      icon: 'check_circle',
-      chipSelected: true,
-      id: 'task-456',
-    },
-    {
-      title: 'Team Training',
-      description: 'Conduct training session on new marketing tools',
-      dueDate: '2023-12-15',
-      status: 'Completed',
-      team: 'Marketing Team',
-      chipColor: 'accent',
-      icon: 'check_circle',
-      chipSelected: true,
-      id: 'task-123',
-    },
-  ];
+  ngOnInit(): void {
+    this.isLoading = true;
+    this.todoService.getPendingTasks().subscribe({
+      next: (tasks) => {
+        this.pendingTasks = tasks;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.pendingTasks = [];
+        this.isLoading = false;
+      },
+    });
+
+    this.todoService.getCompletedTasks().subscribe({
+      next: (tasks) => {
+        this.completedTasks = tasks;
+      },
+      error: () => {
+        this.completedTasks = [];
+      },
+    });
+  }
 
   addTask() {
     this.router.navigate(['/create-task']);

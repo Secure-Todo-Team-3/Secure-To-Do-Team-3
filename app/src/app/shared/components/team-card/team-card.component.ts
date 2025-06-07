@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { DetailsDialogComponent } from '../details-dialog/details-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { Team } from '../../models/team.model';
 
 @Component({
   selector: 'app-team-card',
@@ -15,7 +16,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./team-card.component.css'],
 })
 export class TeamCardComponent {
-  @Input() team: any;
+  @Input() team!: Team;
   constructor(private dialog: MatDialog, private router: Router) {}
 
   openDetails() {
@@ -29,7 +30,6 @@ export class TeamCardComponent {
   }
 
   editTeam() {
-    console.log('Edit team clicked', this.team);
     this.router.navigate(['/edit-team', this.team.id]);
   }
 

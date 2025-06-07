@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
-import { TaskEditPageComponent } from '@pages/edit-task.component/task-edit.component';
+import { TaskEditPageComponent } from '@pages/edit-task/task-edit.component';
 import { LoginComponent } from '@pages/login/login.component';
 import { SignupComponent } from '@pages/signup/signup.component';
 import { TeamEditComponent } from '@pages/team-edit/team-edit.component';
-import { TeamMembersComponent } from '@pages/team-members.component';
+import { TeamMembersComponent } from '@pages/team-members/team-members.component';
 import { TeamTasksComponent } from '@pages/teams-tasks/team-tasks.component';
 import { TeamsPageComponent } from '@pages/teams/teams-page.component';
 import { TodoPageComponent } from '@pages/todo/todo.component';
