@@ -13,6 +13,8 @@ import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticationRequest;
 import org.team3todo.secure.secure_team_3_todo_api.dto.RegisterRequest;
 import org.team3todo.secure.secure_team_3_todo_api.entity.SystemRole;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
+import org.team3todo.secure.secure_team_3_todo_api.exception.DuplicateResourceException;
+import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.SystemRoleRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.UserRepository;
 import org.team3todo.secure.secure_team_3_todo_api.util.CustomPasswordEncoder;
@@ -32,7 +34,15 @@ public class AuthService {
     @Transactional
     public AuthenticatedResponse register(RegisterRequest registerRequest) throws InvalidKeyException, IOException {
 
-        SystemRole defaultRole = systemRoleRepository.findByName("REGULAR_USER").orElseThrow(() -> new RuntimeException("Error: Default role REGULAR_USER not found in database."));
+        if (userRepository.findByUsername(registerRequest.getUsername()).isPresent()){
+            throw new DuplicateResourceException("Username: "+registerRequest.getUsername()+" is already taken.");
+        }
+
+        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
+            throw new DuplicateResourceException("Email: "+registerRequest.getUsername()+" is already taken.");
+        }
+
+        SystemRole defaultRole = systemRoleRepository.findByName("REGULAR_USER").orElseThrow(() -> new ResourceNotFoundException("Default role REGULAR_USER not found."));
 
         var user = User.builder()
                 .username(registerRequest.getUsername())
@@ -50,7 +60,7 @@ public class AuthService {
             new UsernamePasswordAuthenticationToken(authenticationReq.getUsername(), authenticationReq.getPassword())
         );
         if(!authentication.isAuthenticated()) return null;
-        var user = userRepository.findByUsername(authenticationReq.getUsername()).orElseThrow();
+        var user = userRepository.findByUsername(authenticationReq.getUsername()).orElseThrow(() -> new ResourceNotFoundException("User not found after successful authentication. This should not happen."));
         var token = jwtService.generateToken(Map.of("userGuid",user.getUserGuid()), user);
         return AuthenticatedResponse.builder().token(token).build();
     }

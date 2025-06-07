@@ -2,28 +2,26 @@ package org.team3todo.secure.secure_team_3_todo_api.mapper;
 
 import org.springframework.stereotype.Component;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
-import org.team3todo.secure.secure_team_3_todo_api.entity.Task;
-import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
-import org.team3todo.secure.secure_team_3_todo_api.entity.User;
+import org.team3todo.secure.secure_team_3_todo_api.entity.*;
+import org.team3todo.secure.secure_team_3_todo_api.repository.TaskStatusHistoryRepository;
 // If you implement status logic within the mapper that needs services:
 // import org.team3todo.secure.secure_team_3_todo_api.service.TaskStatusHistoryService;
 // import org.team3todo.secure.secure_team_3_todo_api.entity.TaskStatusHistory;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
 public class TaskMapper {
 
-    // If you need to fetch additional data (like current status) from a service:
-    // private final TaskStatusHistoryService taskStatusHistoryService;
-    //
-    // public TaskMapper(TaskStatusHistoryService taskStatusHistoryService) {
-    // this.taskStatusHistoryService = taskStatusHistoryService;
-    // }
-    // For now, keeping it simple and assuming status info comes from Task entity or
-    // is set on DTO elsewhere.
+
+     private final TaskStatusHistoryRepository taskStatusHistoryRepository;
+
+     public TaskMapper(TaskStatusHistoryRepository taskStatusHistoryRepository) {
+     this.taskStatusHistoryRepository = taskStatusHistoryRepository;
+     }
 
     public TaskDto convertToDto(Task task) {
         if (task == null) {
@@ -56,26 +54,16 @@ public class TaskMapper {
             builder.creatorUsername(userCreator.getUsername());
         }
 
-        // Regarding currentStatusName and currentStatusId in TaskDto:
-        // The mapping logic you provided does not populate these.
-        // If your Task entity has direct fields for currentStatusName/Id (e.g.,
-        // transient or denormalized),
-        // you would map them here:
-        // builder.currentStatusId(task.getCurrentStatusIdOnEntity());
-        // builder.currentStatusName(task.getCurrentStatusNameOnEntity());
+        Optional<TaskStatusHistory> latestStatusOpt = taskStatusHistoryRepository
+                .findFirstByTaskOrderByChangeTimestampDesc(task);
 
-        // If you were to fetch it via a service injected into this mapper (more
-        // complex mapper):
-        /*
-         * if (taskStatusHistoryService != null) {
-         * TaskStatusHistory latestStatus =
-         * taskStatusHistoryService.getLatestStatusForTask(task.getId());
-         * if (latestStatus != null && latestStatus.getStatus() != null) {
-         * builder.currentStatusId(latestStatus.getStatus().getId());
-         * builder.currentStatusName(latestStatus.getStatus().getName());
-         * }
-         * }
-         */
+        if (latestStatusOpt.isPresent()) {
+            TaskStatus currentStatus = latestStatusOpt.get().getStatus();
+            if (currentStatus != null) {
+                builder.currentStatusId(currentStatus.getId());
+                builder.currentStatusName(currentStatus.getName());
+            }
+        }
 
         return builder.build();
     }

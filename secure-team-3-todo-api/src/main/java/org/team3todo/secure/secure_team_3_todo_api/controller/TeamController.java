@@ -17,6 +17,7 @@ import org.team3todo.secure.secure_team_3_todo_api.service.TeamMembershipService
 import org.team3todo.secure.secure_team_3_todo_api.service.TeamService;
 import org.team3todo.secure.secure_team_3_todo_api.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,7 +49,9 @@ public class TeamController {
     // Get the teams of a user where they are not an owner.
     @GetMapping(value = "/user-teams/{userGuid}", params = "type=member")
     public ResponseEntity<List<TeamDto>> getTeamsUserIsMemberOf(@PathVariable UUID userGuid){
-        List<Team> foundTeams = teamService.findTeamsWhereUserIsMemberByGuid(userGuid);
+        ArrayList<Long> roleIdsToExclude = new ArrayList<Long>();
+        roleIdsToExclude.add(3L); // TODO: Get rid of magic number
+        List<Team> foundTeams = teamService.findTeamsWhereUserIsMemberByGuid(userGuid, roleIdsToExclude);
         List<TeamDto> dtoFoundTeams = teamMapper.convertToDtoList(foundTeams);
         return ResponseEntity.ok(dtoFoundTeams);
     }

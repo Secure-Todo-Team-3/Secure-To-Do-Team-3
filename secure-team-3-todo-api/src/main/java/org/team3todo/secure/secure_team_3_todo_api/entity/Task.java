@@ -1,23 +1,18 @@
 package org.team3todo.secure.secure_team_3_todo_api.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -78,5 +73,22 @@ public class Task {
         if (taskGuid == null) {
             taskGuid = UUID.randomUUID();
         }
+    }
+
+    @Transient // This annotation marks the field to be ignored by JPA
+    private TaskStatus currentStatus;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        // Use a stable, non-null business key. taskGuid is perfect.
+        return taskGuid != null && Objects.equals(taskGuid, task.taskGuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(taskGuid);
     }
 }
