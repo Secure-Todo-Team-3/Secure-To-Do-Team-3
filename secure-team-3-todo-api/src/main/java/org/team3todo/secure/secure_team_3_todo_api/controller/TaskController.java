@@ -24,14 +24,15 @@ public class TaskController {
 
     @GetMapping("/team-tasks/{teamId}")
     public ResponseEntity<List<TaskDto>> findTasksByTeamId(@PathVariable Long teamId){
-        List<Task> foundTasks = taskService.findByTeamId(teamId);
+        List<Task> foundTasks = taskService.findEnrichedTasksByTeamId(teamId);
         List<TaskDto> dtoTasks = taskMapper.convertToDtoList(foundTasks);
         return ResponseEntity.ok(dtoTasks);
     }
 
     @GetMapping("/user-tasks/{userGuid}")
     public ResponseEntity<List<TaskDto>> findTasksByUserGuid(@PathVariable UUID userGuid){
-        List<Task> foundTasks = taskService.findByAssignedUserGuid(userGuid);
+        List<Task> foundTasks = taskService.findEnrichedTasksByAssignedUserGuid(userGuid);
+
         List<TaskDto> dtoTasks = taskMapper.convertToDtoList(foundTasks);
         return ResponseEntity.ok(dtoTasks);
     }

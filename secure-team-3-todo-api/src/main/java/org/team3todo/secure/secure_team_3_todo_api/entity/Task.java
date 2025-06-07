@@ -79,4 +79,7 @@ public class Task {
             taskGuid = UUID.randomUUID();
         }
     }
+
+    @Transient // This annotation marks the field to be ignored by JPA
+    private TaskStatus currentStatus;
 }

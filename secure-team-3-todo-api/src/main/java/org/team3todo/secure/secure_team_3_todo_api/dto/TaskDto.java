@@ -34,10 +34,6 @@ public class TaskDto {
     private UUID creatorUserGuid; // GUID of the user who created the task
     private String creatorUsername; // Optional: for easier display
 
-    // You might also want to include the current status of the task
-    // This would likely come from the latest entry in TaskStatusHistory
-    // or a denormalized 'current_status_id' / 'current_status_name' on the Task entity itself.
-    // For simplicity, I'll add a placeholder. You'd need logic to populate this.
     private String currentStatusName;
     private Long currentStatusId;
 
