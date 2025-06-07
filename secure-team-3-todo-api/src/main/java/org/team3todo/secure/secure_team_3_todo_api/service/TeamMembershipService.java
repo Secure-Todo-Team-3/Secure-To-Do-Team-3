@@ -7,6 +7,8 @@ import org.team3todo.secure.secure_team_3_todo_api.entity.TeamRole;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
 import org.team3todo.secure.secure_team_3_todo_api.entity.TeamMembership;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
+import org.team3todo.secure.secure_team_3_todo_api.exception.DuplicateResourceException;
+import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.RoleRepository; // Assuming you have these
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamMembershipRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamRepository;
@@ -34,14 +36,14 @@ public class TeamMembershipService {
     @Transactional
     public TeamMembership addUserToTeam(Long userId, Long teamId, Long roleId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new RuntimeException("Team not found with id: " + teamId));
+                .orElseThrow(() -> new ResourceNotFoundException("Team not found with id: " + teamId));
         TeamRole teamRole = roleRepository.findById(roleId)
-                .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
 
         if (teamMembershipRepository.existsByUserAndTeamAndTeamRole(user, team, teamRole)) {
-            throw new RuntimeException("User " + user.getUsername() +
+            throw new DuplicateResourceException("User " + user.getUsername() +
                     " is already a member of team " + team.getName() +
                     " with role " + teamRole.getName());
         }
