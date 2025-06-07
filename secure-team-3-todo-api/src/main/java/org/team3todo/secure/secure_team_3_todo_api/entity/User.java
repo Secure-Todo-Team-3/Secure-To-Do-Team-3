@@ -1,10 +1,7 @@
 package org.team3todo.secure.secure_team_3_todo_api.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,7 +13,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -136,5 +134,20 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return Boolean.TRUE.equals(this.isActive);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        // Use a stable, non-null business key for comparison. userGuid is perfect.
+        return userGuid != null && Objects.equals(userGuid, user.userGuid);
+    }
+
+    @Override
+    public int hashCode() {
+        // Base the hash on the same property used in equals()
+        return Objects.hash(userGuid);
     }
 }
