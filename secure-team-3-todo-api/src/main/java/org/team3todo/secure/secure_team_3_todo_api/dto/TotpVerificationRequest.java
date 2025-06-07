@@ -7,11 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticatedResponse {
-    private String token;
-    private boolean totpRequired;
-    private String message;
-    
+@AllArgsConstructor
+public class TotpVerificationRequest {
+    private String username;
+    private String code;
 }

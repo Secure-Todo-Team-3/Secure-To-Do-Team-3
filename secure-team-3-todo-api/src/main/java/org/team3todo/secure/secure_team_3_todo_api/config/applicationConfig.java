@@ -9,11 +9,17 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.team3todo.secure.secure_team_3_todo_api.repository.UserRepository;
 import org.team3todo.secure.secure_team_3_todo_api.util.CustomPasswordEncoder;
 
+import dev.samstevens.totp.code.CodeGenerator;
+import dev.samstevens.totp.code.CodeVerifier;
+import dev.samstevens.totp.code.DefaultCodeGenerator;
+import dev.samstevens.totp.code.DefaultCodeVerifier;
+import dev.samstevens.totp.code.HashingAlgorithm;
+import dev.samstevens.totp.time.SystemTimeProvider;
+import dev.samstevens.totp.time.TimeProvider;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -44,5 +50,15 @@ public class applicationConfig {
     @Bean
     public CustomPasswordEncoder passwordEncoder() {
         return new CustomPasswordEncoder(systemPepper);
+    }
+       @Bean
+    public CodeGenerator codeGenerator() {
+        return new DefaultCodeGenerator(HashingAlgorithm.SHA256, 6);
+    }
+
+    @Bean
+    public CodeVerifier codeVerifier(CodeGenerator codeGenerator) {
+        TimeProvider timeProvider = new SystemTimeProvider();
+        return new DefaultCodeVerifier(codeGenerator, timeProvider);
     }
 }

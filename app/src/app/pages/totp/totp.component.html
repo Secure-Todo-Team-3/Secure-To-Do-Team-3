@@ -1,0 +1,42 @@
+<mat-card class="totp-card">
+  <mat-card-header>
+    <mat-card-title>{{ cardTitle }}</mat-card-title>
+
+    @if (qrCodeImageUri) {
+      <mat-card-subtitle>
+        Scan the image with your authenticator app
+      </mat-card-subtitle>
+    } @else {
+      <mat-card-subtitle>
+        Enter the 6-digit code from your authenticator app
+      </mat-card-subtitle>
+    }
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (qrCodeImageUri) {
+      <div class="qr-code-container">
+        <img [src]="qrCodeImageUri" alt="TOTP QR Code">
+      </div>
+    }
+
+    <form [formGroup]="totpForm" (ngSubmit)="onSubmit()" class="totp-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>6-Digit Verification Code</mat-label>
+        <input matInput formControlName="code" type="text" autocomplete="one-time-code" maxlength="6">
+        
+        @if (totpForm.get('code')?.invalid && totpForm.get('code')?.touched) {
+          <mat-error>Please enter a valid 6-digit code.</mat-error>
+        }
+      </mat-form-field>
+
+      <button mat-raised-button 
+              color="primary" 
+              type="submit" 
+              class="full-width submit-button"
+              [disabled]="totpForm.invalid">
+        Verify
+      </button>
+    </form>
+  </mat-card-content>
+</mat-card>
