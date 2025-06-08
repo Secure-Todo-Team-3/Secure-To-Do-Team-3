@@ -43,12 +43,6 @@ public class TaskService {
         this.teamMembershipService = teamMembershipService;
     }
 
-    /**
-     * Finds all tasks for a team and enriches them with their current status.
-     *
-     * @param teamId The ID of the team.
-     * @return A list of enriched Task entities.
-     */
     @Transactional()
     public List<Task> findEnrichedTasksByTeamId(Long teamId) {
         Team foundTeam = teamService.findById(teamId);
@@ -77,26 +71,18 @@ public class TaskService {
      */
     @Transactional()
     public List<Task> findEnrichedTasksByAssignedUser(UUID userGuid, String taskName, String statusName, String teamName) {
-        // 1. Build a Specification for filters that can be applied at the database level.
         Specification<Task> spec = Specification.where(hasAssignedUser(userGuid));
-
         if (taskName != null && !taskName.isBlank()) {
             spec = spec.and(nameContains(taskName));
         }
         if (teamName != null && !teamName.isBlank()) {
             spec = spec.and(teamNameContains(teamName));
         }
-
-        // 2. Fetch the initial list of tasks from the database.
         List<Task> tasks = taskRepository.findAll(spec);
         if (tasks.isEmpty()) {
             return Collections.emptyList();
         }
-
-        // 3. Enrich all found tasks with their current status.
         enrichTasksWithCurrentStatus(tasks);
-
-        // 4. Apply the status filter in-memory, as it's derived from the transient field.
         if (statusName != null && !statusName.isBlank()) {
             return tasks.stream()
                     .filter(task -> task.getCurrentStatus() != null &&
@@ -127,7 +113,6 @@ public class TaskService {
         if (task == null) {
             return null;
         }
-        // Use the repository method to find the latest status for this single task
         taskStatusHistoryRepository.findFirstByTaskOrderByChangeTimestampDesc(task)
                 .ifPresent(latestStatusHistory -> task.setCurrentStatus(latestStatusHistory.getStatus()));
 
@@ -139,7 +124,7 @@ public class TaskService {
      * This method returns the raw entity list without status enrichment.
      */
     private List<Task> findByAssignedUserGuid(UUID guid) {
-        User foundUser = userService.findByUserGuid(guid); // Assumes this returns User or null
+        User foundUser = userService.findByUserGuid(guid);
         if (foundUser == null) {
             throw new ResourceNotFoundException("User not found with GUID: " + guid);
         }

@@ -16,11 +16,9 @@ import org.team3todo.secure.secure_team_3_todo_api.mapper.TeamMembershipMapper;
 import org.team3todo.secure.secure_team_3_todo_api.mapper.UserMapper;
 import org.team3todo.secure.secure_team_3_todo_api.service.TeamMembershipService;
 import org.team3todo.secure.secure_team_3_todo_api.service.TeamService;
-import org.team3todo.secure.secure_team_3_todo_api.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController

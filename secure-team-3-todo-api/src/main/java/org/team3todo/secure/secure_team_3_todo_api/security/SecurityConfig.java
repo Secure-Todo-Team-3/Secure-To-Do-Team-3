@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @AllArgsConstructor
 public class SecurityConfig {
     private final AuthenticationProvider authenticationProvider;
