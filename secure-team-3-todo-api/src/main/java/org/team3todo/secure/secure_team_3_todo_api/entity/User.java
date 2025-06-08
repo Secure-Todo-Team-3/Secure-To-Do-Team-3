@@ -6,11 +6,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.team3todo.secure.secure_team_3_todo_api.util.StringCryptoConverter;
 
 import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Entity
 @Getter
@@ -38,8 +37,6 @@ public class User implements UserDetails {
     @Column(nullable = false, name = "password_hash", columnDefinition = "TEXT")
     private String passwordHash;
 
-    // REMOVED password_salt field to match the latest DDL
-
     @Column(unique = true, name = "user_guid", columnDefinition = "uuid")
     private UUID userGuid;
 
@@ -61,6 +58,7 @@ public class User implements UserDetails {
     private boolean isTotpEnabled = false; // Renamed to match DDL column name
 
     @Column(name = "totp_secret", columnDefinition = "TEXT")
+    @Convert(converter = StringCryptoConverter.class) 
     private String totpSecret; // Added totp_secret field
 
     @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")

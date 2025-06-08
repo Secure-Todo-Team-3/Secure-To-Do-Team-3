@@ -14,8 +14,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
-import { getInitials } from '../shared/utils/get-initials';
-import { ConfirmDialogComponent } from '../shared/components/confirm-dialog/confirm-dialog.component';
+import { getInitials } from '../../shared/utils/get-initials';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { Router } from '@angular/router';
 
 @Component({

@@ -1,0 +1,31 @@
+.totp-card {
+  max-width: 400px;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.qr-code-container {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: white; 
+  display: inline-block;
+  
+  img {
+    display: block;
+    width: 200px;
+    height: 200px;
+  }
+}
+
+.totp-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.submit-button {
+  margin-top: 1rem;
+}

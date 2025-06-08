@@ -7,6 +7,7 @@ import { CommonModule, NgIf } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { DetailsDialogComponent } from '../details-dialog/details-dialog.component';
 import { Router } from '@angular/router';
+import { Task } from '../../models/task.model';
 
 @Component({
   selector: 'app-task-card',
@@ -23,7 +24,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./task-card.component.css'],
 })
 export class TaskCardComponent {
-  @Input() task: any;
+  @Input() task!: Task;
   @Output() unassigned = new EventEmitter<any>();
 
   constructor(private dialog: MatDialog, private router: Router) {}

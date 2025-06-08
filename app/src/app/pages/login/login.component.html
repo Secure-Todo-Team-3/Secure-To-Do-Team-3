@@ -1,56 +1,64 @@
 <section class="auth-container">
   <app-auth-header></app-auth-header>
-  <mat-card class="auth-card">
-    <mat-card-header>
-      <mat-card-title class="welcome-title">Welcome back</mat-card-title>
-    </mat-card-header>
-    
-    <mat-card-content>
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Email address</mat-label>
-          <input matInput formControlName="email" type="email" autocomplete="email">
-          <mat-error *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
-            {{ getErrorMessage('email') }}
-          </mat-error>
-        </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Password</mat-label>
-          <input matInput 
-                 formControlName="password" 
-                 [type]="hidePassword ? 'password' : 'text'"
-                 autocomplete="current-password">
-          <button mat-icon-button 
-                  matSuffix 
-                  type="button"
-                  (click)="hidePassword = !hidePassword" 
-                  [attr.aria-label]="'Hide password'" 
-                  [attr.aria-pressed]="hidePassword">
-            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+  @if (!showTotpVerification) {
+    <mat-card class="auth-card">
+      <mat-card-header>
+        <mat-card-title class="welcome-title">Welcome back</mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="auth-form">
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email address</mat-label>
+            <input matInput formControlName="email" type="email" autocomplete="email">
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+              <mat-error>{{ getErrorMessage('email') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input matInput 
+                   formControlName="password" 
+                   [type]="hidePassword ? 'password' : 'text'"
+                   autocomplete="current-password">
+            <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+              <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+              <mat-error>{{ getErrorMessage('password') }}</mat-error>
+            }
+          </mat-form-field>
+
+          <button mat-raised-button 
+                  color="primary" 
+                  type="submit" 
+                  class="full-width submit-button"
+                  [disabled]="isLoading || loginForm.invalid">
+            @if (!isLoading) {
+              <span>Sign in</span>
+            } @else {
+              <span>Signing in...</span>
+            }
           </button>
-          <mat-error *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-            {{ getErrorMessage('password') }}
-          </mat-error>
-        </mat-form-field>
+        </form>
+      </mat-card-content>
 
-        <button mat-raised-button 
-                color="primary" 
-                type="submit" 
-                class="full-width submit-button"
-                [disabled]="loginForm.invalid">
-          Sign in
-        </button>
-      </form>
-    </mat-card-content>
+      <mat-card-actions align="end">
+        <p class="switch-text">
+          Don't have an account? 
+          <a mat-button color="primary" routerLink="/signup">Sign up</a>
+        </p>
+      </mat-card-actions>
+    </mat-card>
 
-    <mat-card-actions align="end">
-      <p class="switch-text">
-        Don't have an account? 
-        <a mat-button color="primary" routerLink="/signup">
-          Sign up
-        </a>
-      </p>
-    </mat-card-actions>
-  </mat-card>
+  } @else {
+    <app-totp
+        [username]="loginForm.value.email" cardTitle="Verify Your Identity"
+        (verify)="onVerifyTotpSubmit($event)">
+    </app-totp>
+  }
+
 </section>

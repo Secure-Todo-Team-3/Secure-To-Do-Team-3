@@ -1,15 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { AuthHeaderComponent } from "../../shared/components/auth-header/auth-header.component";
-import { environment } from 'src/app/shared/environments/environment';
+
+import { AuthHeaderComponent } from '../../shared/components/auth-header/auth-header.component';
+import { AuthService } from 'src/app/core/services/auth.service';
+import { TotpComponent } from '@pages/totp/totp.component';
 
 @Component({
   selector: 'app-login',
@@ -24,71 +32,100 @@ import { environment } from 'src/app/shared/environments/environment';
     MatButtonModule,
     MatIconModule,
     MatSnackBarModule,
-    AuthHeaderComponent
-],
+    AuthHeaderComponent,
+    TotpComponent,
+  ],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
-export class LoginComponent {
-  loginForm: FormGroup;
+export class LoginComponent implements OnInit {
+  isLoading = false;
+  showTotpVerification = false;
+
+  loginForm!: FormGroup;
   hidePassword = true;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private snackBar: MatSnackBar
-  ) {
+    private snackBar: MatSnackBar,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required]],
     });
   }
 
-  onSubmit(): void {
-    if (this.loginForm.valid) {
-      const { email, password } = this.loginForm.value;
-      
-      this.snackBar.open('Login successful!', 'Close', {
-        duration: environment.snackbarDuration,
-        panelClass: ['success-snackbar']
-      });
-
-    } else {
+  onLoginSubmit(): void {
+    if (this.loginForm.invalid || this.isLoading) {
       this.markFormGroupTouched();
+      return;
     }
+    this.isLoading = true;
+
+    const { email, password } = this.loginForm.value;
+
+    this.authService.login(email, password).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        if (response.totpRequired) {
+          this.showTotpVerification = true;
+        } else {
+          this.snackBar.open('Login successful!', 'Close', { duration: 2000 });
+          this.router.navigate(['/']);
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.snackBar.open(
+          err.error?.message || 'Invalid email or password.',
+          'Close',
+          { duration: 3000 }
+        );
+      },
+    });
+  }
+
+  onVerifyTotpSubmit(code: string): void {
+    if (this.isLoading) return;
+    this.isLoading = true;
+
+    const username = this.loginForm.value.email;
+
+    this.authService.verifyLogin({ username, code }).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.snackBar.open('Login successful!', 'Close', { duration: 2000 });
+        this.router.navigate(['/']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.snackBar.open(
+          err.error?.message || 'Invalid verification code.',
+          'Close',
+          { duration: 3000 }
+        );
+      },
+    });
   }
 
   private markFormGroupTouched(): void {
-    Object.keys(this.loginForm.controls).forEach(key => {
-      const control = this.loginForm.get(key);
-      control?.markAsTouched();
+    Object.values(this.loginForm.controls).forEach((control) => {
+      control.markAsTouched();
     });
   }
 
   getErrorMessage(controlName: string): string {
     const control = this.loginForm.get(controlName);
-    
     if (control?.hasError('required')) {
-      return `${this.getFieldDisplayName(controlName)} is required`;
+      return 'This field is required';
     }
-    
     if (control?.hasError('email')) {
-      return 'Please enter a valid email address';
+      return 'Not a valid email';
     }
-    
-    if (control?.hasError('minlength')) {
-      const minLength = control.errors?.['minlength'].requiredLength;
-      return `${this.getFieldDisplayName(controlName)} must be at least ${minLength} characters`;
-    }
-    
     return '';
-  }
-
-  private getFieldDisplayName(controlName: string): string {
-    const fieldNames: { [key: string]: string } = {
-      email: 'Email',
-      password: 'Password'
-    };
-    return fieldNames[controlName] || controlName;
   }
 }
