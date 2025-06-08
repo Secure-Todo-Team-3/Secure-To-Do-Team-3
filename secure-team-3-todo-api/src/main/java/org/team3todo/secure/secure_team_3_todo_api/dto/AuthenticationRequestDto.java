@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticatedResponse {
-    private String token;
-    private boolean totpRequired;
-    private String message;
-    
+public class AuthenticationRequestDto {
+    private String username;
+    private String email;
+    private String password;
 }

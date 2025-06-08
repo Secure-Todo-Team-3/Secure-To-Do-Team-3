@@ -54,7 +54,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      username: ['', [Validators.required]],
       password: ['', [Validators.required]],
     });
   }
@@ -66,9 +66,9 @@ export class LoginComponent implements OnInit {
     }
     this.isLoading = true;
 
-    const { email, password } = this.loginForm.value;
+    const { username, password } = this.loginForm.value;
 
-    this.authService.login(email, password).subscribe({
+    this.authService.login(username, password).subscribe({
       next: (response) => {
         this.isLoading = false;
         if (response.totpRequired) {
@@ -81,7 +81,7 @@ export class LoginComponent implements OnInit {
       error: (err) => {
         this.isLoading = false;
         this.snackBar.open(
-          err.error?.message || 'Invalid email or password.',
+          err.error?.message || 'Invalid username or password.',
           'Close',
           { duration: 3000 }
         );
@@ -93,7 +93,7 @@ export class LoginComponent implements OnInit {
     if (this.isLoading) return;
     this.isLoading = true;
 
-    const username = this.loginForm.value.email;
+    const username = this.loginForm.value.username;
 
     this.authService.verifyLogin({ username, code }).subscribe({
       next: () => {
@@ -123,8 +123,8 @@ export class LoginComponent implements OnInit {
     if (control?.hasError('required')) {
       return 'This field is required';
     }
-    if (control?.hasError('email')) {
-      return 'Not a valid email';
+    if (control?.hasError('username')) {
+      return 'Not a valid username';
     }
     return '';
   }
