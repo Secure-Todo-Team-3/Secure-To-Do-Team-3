@@ -7,19 +7,19 @@ import { TeamMembersComponent } from '@pages/team-members/team-members.component
 import { TeamTasksComponent } from '@pages/teams-tasks/team-tasks.component';
 import { TeamsPageComponent } from '@pages/teams/teams-page.component';
 import { TodoPageComponent } from '@pages/todo/todo.component';
+import { publicGuard } from './core/guards/publicGuards';
+import { authGuard } from './core/guards/authGuard';
 
 export const routes: Routes = [
-  // { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: 'signup', component: SignupComponent },
-  { path: 'login', component: LoginComponent },
-  {path: '', component: TodoPageComponent},
-  {path: 'tasks', component: TodoPageComponent},
-  {path: 'teams', component: TeamsPageComponent},
-  {path: 'edit-task/:id', component: TaskEditPageComponent},
-  {path: 'create-task', component: TaskEditPageComponent},
-  {path: 'team-members/:id', component: TeamMembersComponent},
-  {path: 'edit-team/:id', component: TeamEditComponent},
-  {path: 'create-team', component: TeamEditComponent},
-  {path: 'team-tasks/:id', component: TeamTasksComponent},
-  // { path: '**', redirectTo: '/login' }
+  { path: 'signup', component: SignupComponent,canActivate: [publicGuard] },
+  { path: 'login', component: LoginComponent,canActivate: [publicGuard] },
+  {path: '', component: TodoPageComponent,canActivate: [authGuard]},
+  {path: 'tasks', component: TodoPageComponent,canActivate: [authGuard]},
+  {path: 'teams', component: TeamsPageComponent,canActivate: [authGuard]},
+  {path: 'edit-task/:id', component: TaskEditPageComponent,canActivate: [authGuard]},
+  {path: 'create-task', component: TaskEditPageComponent, canActivate: [authGuard]},
+  {path: 'team-members/:id', component: TeamMembersComponent,canActivate: [authGuard]},
+  {path: 'edit-team/:id', component: TeamEditComponent,canActivate: [authGuard]},
+  {path: 'create-team', component: TeamEditComponent,canActivate: [authGuard]},
+  {path: 'team-tasks/:id', component: TeamTasksComponent,canActivate: [authGuard]},
 ];

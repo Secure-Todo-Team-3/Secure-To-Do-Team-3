@@ -8,31 +8,45 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticatedResponse;
 import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticationRequest;
 import org.team3todo.secure.secure_team_3_todo_api.dto.RegisterRequest;
 import org.team3todo.secure.secure_team_3_todo_api.entity.SystemRole;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
+import org.team3todo.secure.secure_team_3_todo_api.exception.DuplicateResourceException;
+import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.SystemRoleRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.UserRepository;
 import org.team3todo.secure.secure_team_3_todo_api.util.CustomPasswordEncoder;
-
+import org.team3todo.secure.secure_team_3_todo_api.dto.TotpSetupResponse;
+import org.team3todo.secure.secure_team_3_todo_api.dto.TotpVerificationRequest;
 import io.jsonwebtoken.security.InvalidKeyException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class AuthService {
     private final CustomPasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final SystemRoleRepository systemRoleRepository;
+    private final TotpService totpService;
 
     @Transactional
-    public AuthenticatedResponse register(RegisterRequest registerRequest) throws InvalidKeyException, IOException {
+    public TotpSetupResponse registerAndInitiateTotp(RegisterRequest registerRequest) throws InvalidKeyException, IOException {
+        String secret = totpService.generateNewSecret();
+        if (userRepository.findByUsername(registerRequest.getUsername()).isPresent()){
+            throw new DuplicateResourceException("Username: "+registerRequest.getUsername()+" is already taken.");
+        }
 
-        SystemRole defaultRole = systemRoleRepository.findByName("REGULAR_USER").orElseThrow(() -> new RuntimeException("Error: Default role REGULAR_USER not found in database."));
+        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
+            throw new DuplicateResourceException("Email: "+registerRequest.getUsername()+" is already taken.");
+        }
+
+        SystemRole defaultRole = systemRoleRepository.findByName("REGULAR_USER").orElseThrow(() -> new ResourceNotFoundException("Default role REGULAR_USER not found."));
 
         var user = User.builder()
                 .username(registerRequest.getUsername())
@@ -40,18 +54,106 @@ public class AuthService {
                 .passwordHash(passwordEncoder.encode(registerRequest.getPassword()))
                 .systemRole(defaultRole)
                 .isTotpEnabled(false)
+                .isActive(false)
+                .totpSecret(secret) 
                 .build();
-        var userCreated = userRepository.save(user);
-        var token = jwtService.generateToken(Map.of("userGuid",userCreated.getUserGuid()), user);
+        
+        userRepository.save(user);
+
+        return TotpSetupResponse.builder()
+                .secret(secret)
+                .qrCodeImageUri(totpService.generateQrCodeImageUri(secret, user.getEmail()))
+                .message("Scan QR code and enter the code to complete registration.")
+                .build();
+    }
+    
+    @Transactional
+    public AuthenticatedResponse verifyInitialTotpAndActivateUser(TotpVerificationRequest verificationRequest) throws InvalidKeyException, IOException {
+        var user = userRepository.findByUsername(verificationRequest.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("User not found during verification."));
+
+        if (user.getIsActive()) {
+            throw new IllegalStateException("User is already active.");
+        }
+
+        if (!totpService.isCodeValid(user.getTotpSecret(), verificationRequest.getCode())) {
+            throw new SecurityException("Invalid TOTP code during registration verification.");
+        }
+
+        user.setIsActive(true);;
+        user.setTotpEnabled(true);
+        userRepository.save(user);
+
+        var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid()), user);
         return AuthenticatedResponse.builder().token(token).build();
     }
+
+
     public AuthenticatedResponse login(AuthenticationRequest authenticationReq) throws InvalidKeyException, IOException {
        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(authenticationReq.getUsername(), authenticationReq.getPassword())
-        );
-        if(!authentication.isAuthenticated()) return null;
-        var user = userRepository.findByUsername(authenticationReq.getUsername()).orElseThrow();
-        var token = jwtService.generateToken(Map.of("userGuid",user.getUserGuid()), user);
-        return AuthenticatedResponse.builder().token(token).build();
+               new UsernamePasswordAuthenticationToken(authenticationReq.getUsername(), authenticationReq.getPassword())
+       );
+       
+       User user = userRepository.findByUsername(authenticationReq.getUsername())
+               .orElseThrow(() -> new IllegalStateException("User not found after authentication"));
+
+       if (user.isTotpEnabled()) {
+           return AuthenticatedResponse.builder()
+                   .totpRequired(true)
+                   .message("TOTP code is required")
+                   .build();
+       }
+       
+       var token = jwtService.generateToken(Map.of("userGuid",user.getUserGuid()), user);
+       return AuthenticatedResponse.builder().token(token).totpRequired(false).build();
+    }
+
+    @Transactional
+    public AuthenticatedResponse loginWithTotp(TotpVerificationRequest verificationRequest) throws InvalidKeyException, IOException {
+        var user = userRepository.findByUsername(verificationRequest.getUsername())
+                     .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        if (!totpService.isCodeValid(user.getTotpSecret(), verificationRequest.getCode())) {
+            throw new SecurityException("Invalid TOTP code.");
+        }
+        
+        var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid()), user);
+        return AuthenticatedResponse.builder().token(token).totpRequired(false).build();
+    }
+    
+    // This method is for EXISTING users who want to set up TOTP later. It is different from the registration flow.
+    @Transactional
+    public TotpSetupResponse setupTotp(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+
+        if (user.isTotpEnabled()) {
+            throw new IllegalStateException("TOTP is already enabled for this user.");
+        }
+
+        String secret = totpService.generateNewSecret();
+        String qrCodeUri = totpService.generateQrCodeImageUri(secret, user.getEmail());
+
+        // Save the secret temporarily until the user verifies it
+        user.setTotpSecret(secret);
+        userRepository.save(user);
+
+        return TotpSetupResponse.builder()
+                .secret(secret) 
+                .qrCodeImageUri(qrCodeUri) 
+                .message("Scan the QR code and verify to enable TOTP.")
+                .build();
+    }
+    
+    // This method is for EXISTING users to finalize their TOTP setup.
+    @Transactional
+    public void verifyAndEnableTotp(Authentication authentication, TotpVerificationRequest verificationRequest) {
+        User user = (User) authentication.getPrincipal();
+        
+        if (!totpService.isCodeValid(user.getTotpSecret(), verificationRequest.getCode())) {
+             throw new SecurityException("Invalid verification code.");
+        }
+
+        user.setTotpEnabled(true);
+        userRepository.save(user);
     }
 }

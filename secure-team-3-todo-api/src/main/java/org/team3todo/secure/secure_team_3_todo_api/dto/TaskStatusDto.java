@@ -7,11 +7,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticatedResponse {
-    private String token;
-    private boolean totpRequired;
-    private String message;
-    
+@AllArgsConstructor
+public class TaskStatusDto {
+    private Long id;
+    private String name;
+    private String description;
 }

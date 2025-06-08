@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { NgIf } from '@angular/common';
 import { getInitials } from './shared/utils/get-initials';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +33,7 @@ export class AppComponent {
   userEmail = 'alex.johnson@example.com';
   getInitials = getInitials;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private authService: AuthService) {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
@@ -44,7 +45,7 @@ export class AppComponent {
   }
 
   logout() {
-    console.log('Logging out...');
+    this.authService.logout();
     this.router.navigate(['/login']);
     this.showSidenav.set(false);
   }

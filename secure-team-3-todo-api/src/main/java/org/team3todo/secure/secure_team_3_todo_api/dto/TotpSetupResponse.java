@@ -7,11 +7,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticatedResponse {
-    private String token;
-    private boolean totpRequired;
+@AllArgsConstructor
+public class TotpSetupResponse {
+    private String secret;
+    private String qrCodeImageUri;
     private String message;
-    
 }
