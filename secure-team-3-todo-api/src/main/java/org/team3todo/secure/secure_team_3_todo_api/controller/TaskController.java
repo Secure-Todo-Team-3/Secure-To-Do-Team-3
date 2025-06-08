@@ -91,4 +91,12 @@ public class TaskController {
         TaskDto responseDto = taskMapper.convertToDto(updatedTask);
         return ResponseEntity.ok(responseDto);
     }
+
+    @PostMapping("/{taskGuid}/add-to-team/{teamId}")
+    public ResponseEntity<TaskDto> addTaskToTeam(@PathVariable UUID taskGuid, @PathVariable Long teamId, Authentication authentication){
+        User currentUser = (User) authentication.getPrincipal();
+        Task reassignedTask = taskService.assignTaskToTeam(taskGuid, teamId, currentUser);
+        TaskDto responseDto = taskMapper.convertToDto(reassignedTask);
+        return ResponseEntity.ok(responseDto);
+    }
 }

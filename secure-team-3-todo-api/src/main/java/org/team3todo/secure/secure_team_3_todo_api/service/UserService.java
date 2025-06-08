@@ -17,6 +17,8 @@ import java.util.UUID;
 @Service
 public class UserService implements UserDetailsService{
     private final UserRepository userRepository;
+    @Value("${security.login.max-attempts}")
+    private int maxLoginAttempts;
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -40,6 +42,23 @@ public class UserService implements UserDetailsService{
     public User findByUserEmail(String email){
         Optional<User> user = userRepository.findByEmail(email);
         return user.orElse(null);
+    }
+
+    public void resetLoginAttempts(String username){
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("This user does not exist. This should not be happening."));
+        user.setLoginAttempts(0);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void handleFailedLoginAttempt(String username){
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("This user does not exist. This should not be happening."));
+        int updatedLoginAttempts = user.getLoginAttempts() +1;
+        user.setLoginAttempts(updatedLoginAttempts);
+        if (updatedLoginAttempts >= maxLoginAttempts){
+            user.setIsLocked(true);
+        }
+        userRepository.save(user);
     }
 
 }

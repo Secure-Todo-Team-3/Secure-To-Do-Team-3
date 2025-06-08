@@ -114,8 +114,6 @@ public class User implements UserDetails {
         return passwordHash;
     }
 
-    // getUsername() is already provided by Lombok's @Data
-
     @Override
     public boolean isAccountNonExpired() {
         return true; // Or add logic for this
@@ -141,13 +139,11 @@ public class User implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        // Use a stable, non-null business key for comparison. userGuid is perfect.
         return userGuid != null && Objects.equals(userGuid, user.userGuid);
     }
 
     @Override
     public int hashCode() {
-        // Base the hash on the same property used in equals()
         return Objects.hash(userGuid);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskCreateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.*;
+import org.team3todo.secure.secure_team_3_todo_api.exception.ForbiddenAccessException;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TaskRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TaskStatusHistoryRepository;
@@ -28,16 +29,18 @@ public class TaskService {
     private final TaskStatusHistoryRepository taskStatusHistoryRepository;
     private final TaskStatusRepository taskStatusRepository;
     private final TeamMembershipRepository teamMembershipRepository;
+    private final TeamMembershipService teamMembershipService;
 
     @Autowired
     public TaskService(TaskRepository taskRepository, UserService userService, TeamService teamService,
-                       TaskStatusHistoryRepository taskStatusHistoryRepository, TaskStatusRepository taskStatusRepository, TeamMembershipRepository teamMembershipRepository) {
+                       TaskStatusHistoryRepository taskStatusHistoryRepository, TaskStatusRepository taskStatusRepository, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService) {
         this.taskRepository = taskRepository;
         this.userService = userService;
         this.teamService = teamService;
         this.taskStatusHistoryRepository = taskStatusHistoryRepository;
         this.taskStatusRepository = taskStatusRepository;
         this.teamMembershipRepository = teamMembershipRepository;
+        this.teamMembershipService = teamMembershipService;
     }
 
     /**
@@ -62,13 +65,7 @@ public class TaskService {
         return tasks;
     }
 
-    /**
-     * Finds all tasks for a user and enriches them with their current status.
-     * This is the method your controller should call.
-     *
-     * @param userGuid The GUID of the user.
-     * @return A list of enriched Task entities with the currentStatus field populated.
-     */
+
     /**
      * Finds tasks for a user with optional filters for task name, team name, and status.
      *
@@ -149,13 +146,6 @@ public class TaskService {
         return taskRepository.findByAssignedToUser(foundUser);
     }
 
-    /**
-     * Creates a new task and sets its initial status to "To Do".
-     *
-     * @param taskRequest The DTO containing the new task's data.
-     * @param creator     The user entity who is creating the task.
-     * @return The newly created and persisted Task entity.
-     */
     @Transactional
     public Task createTask(TaskCreateRequestDto taskRequest, User creator) {
 
@@ -173,7 +163,6 @@ public class TaskService {
         TaskStatus initialStatus = taskStatusRepository.findByName("To Do")
                 .orElseThrow(() -> new IllegalStateException("Default task status 'To Do' not found in database."));
 
-        // 2. Build the new Task entity.
         Task newTask = Task.builder()
                 .name(taskRequest.getName())
                 .description(taskRequest.getDescription())
@@ -183,10 +172,8 @@ public class TaskService {
                 .userCreator(creator)
                 .build();
 
-        // 3. Save the new task.
         Task savedTask = taskRepository.save(newTask);
 
-        // 4. Create the initial status history record for the new task.
         TaskStatusHistory initialHistory = TaskStatusHistory.builder()
                 .task(savedTask)
                 .status(initialStatus)
@@ -199,44 +186,58 @@ public class TaskService {
 
     @Transactional
     public Task assignCurrentUserToTask(UUID taskGuid, User currentUser) {
-        // 1. Fetch the task or throw an exception if not found.
         Task task = taskRepository.findByTaskGuid(taskGuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskGuid));
 
-        // 2. Business Rule: Check if the current user is a member of the task's team.
         boolean isMember = teamMembershipRepository.existsByUserAndTeam(currentUser, task.getTeam());
         if (!isMember) {
             throw new IllegalStateException("Cannot assign task: User '" + currentUser.getUsername() +
                     "' is not a member of team '" + task.getTeam().getName() + "'.");
         }
 
-        // 3. Update the task's assigned user.
         task.setAssignedToUser(currentUser);
         Task updatedTask = taskRepository.save(task);
 
-        // 4. Return the updated task, enriched with its current status.
         return enrichTaskWithCurrentStatus(updatedTask);
     }
 
     @Transactional
     public Task unassignCurrentUserFromTask(UUID taskGuid, User currentUser) {
-        // 1. Fetch the task or throw an exception.
         Task task = taskRepository.findByTaskGuid(taskGuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskGuid));
-
-        // 2. Business Rule: Check if the current user is the one assigned to the task.
         if (!task.getAssignedToUser().equals(currentUser)) {
             throw new IllegalStateException("Cannot unassign task: You are not the currently assigned user.");
         }
-
-        // 3. Reassign the task back to its original creator.
         User originalCreator = task.getUserCreator();
         task.setAssignedToUser(originalCreator);
         Task updatedTask = taskRepository.save(task);
+        return enrichTaskWithCurrentStatus(updatedTask);
+    }
 
-        // Optional: You could change the task status back to "To Do" here and log it.
+    @Transactional
+    public Task assignTaskToTeam(UUID taskGuid, Long teamId, User currentUser) {
+        Task foundTask = taskRepository.findByTaskGuidWithTeam(taskGuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with GUID: " + taskGuid));
 
-        // 4. Return the updated task, enriched with its current status.
+        Team foundDestinationTeam = teamService.findById(teamId);
+        if (foundDestinationTeam == null) {
+            throw new ResourceNotFoundException("Team with ID " + teamId + " does not exist.");
+        }
+
+        Team currentTeam = foundTask.getTeam();
+        if (teamService.getUsersInATeam(currentTeam.getId()).stream().noneMatch(user -> user.equals(currentUser))) {
+            throw new ForbiddenAccessException("You can't reassign this task if you aren't in its currently assigned team.");
+        }
+
+        boolean userInDestinationTeam = teamMembershipService.isUserInTeam(currentUser, foundDestinationTeam);
+        if (!userInDestinationTeam) {
+            throw new ForbiddenAccessException("You cannot assign a task to a team you are not a member of.");
+        }
+        foundTask.setTeam(foundDestinationTeam);
+        User destinationTeamsCreator = foundDestinationTeam.getCreatedByUserId();
+        foundTask.setAssignedToUser(destinationTeamsCreator);
+        Task updatedTask = taskRepository.save(foundTask);
+
         return enrichTaskWithCurrentStatus(updatedTask);
     }
 

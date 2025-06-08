@@ -1,17 +1,20 @@
 package org.team3todo.secure.secure_team_3_todo_api.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
+import java.util.Objects;
+
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "system_roles", indexes = {
         @Index(name = "idx_system_roles_name", columnList = "name")
 })
-@Data // Includes @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
-@NoArgsConstructor
-@AllArgsConstructor
 public class SystemRole {
 
     @Id
@@ -23,4 +26,17 @@ public class SystemRole {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SystemRole role = (SystemRole) o;
+        return id != null && Objects.equals(id, role.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? Objects.hash(id) : getClass().hashCode();
+    }
 }
