@@ -7,6 +7,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { MatChipsModule } from '@angular/material/chips';
 import { Router } from '@angular/router';
+import { TeamTasksService } from './team-tasks.service';
+import { environment } from 'src/app/shared/environments/environment';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface Task {
   id: number;
@@ -33,50 +36,46 @@ interface Task {
   styleUrls: ['./team-tasks.component.css']
 })
 export class TeamTasksComponent {
-  currentUser = 'John Doe';
+toggleAssignment(_t22: Task) {
+throw new Error('Method not implemented.');
+}
+markComplete(arg0: number) {
+throw new Error('Method not implemented.');
+}
+removeTask(arg0: number) {
+throw new Error('Method not implemented.');
+}
+  tasks: Task[] = [];
 
-  tasks: Task[] = [
-    {
-      id: 1,
-      title: 'Design Figma mockups',
-      description: 'Create layout for the dashboard and user flow screens.',
-      dueDate: '2025-06-03',
-      status: 'Pending',
-      assignedTo: 'John Doe'
-    },
-    {
-      id: 2,
-      title: 'Implement authentication',
-      description: 'Setup login and registration with JWT.',
-      dueDate: '2025-06-10',
-      status: 'Pending',
-      assignedTo: ''
-    },
-    {
-      id: 3,
-      title: 'Update documentation',
-      description: 'Revise README and internal API docs.',
-      dueDate: '2025-06-05',
-      status: 'Completed',
-      assignedTo: 'Mike Johnson'
+  constructor(private router: Router, private teamTasksService: TeamTasksService, private snackBar: MatSnackBar) {}
+
+  ngOnInit(): void {
+    const navigation = this.router.getCurrentNavigation();
+    const state = navigation?.extras.state as { tasks: Task[] } | undefined;
+    if (state && state.tasks) {
+      this.tasks = state.tasks;
+    } else {
+      this.teamTasksService.getTasks().subscribe({
+        next: (tasks) => {
+          this.tasks = tasks;
+        },
+        error: () => {
+          this.tasks = [];
+          this.showError('Failed to load tasks. Please try again later.');
+        }   
+      });
     }
-  ];
-
-  constructor(private router: Router) {}
+  }
 
   get openTasksCount(): number {
     return this.tasks.filter(t => t.status === 'Pending').length;
   }
 
-  markComplete(taskId: number): void {
-    const task = this.tasks.find(t => t.id === taskId);
-    if (task) {
-      task.status = 'Completed';
-    }
-  }
-
-  removeTask(taskId: number): void {
-    this.tasks = this.tasks.filter(t => t.id !== taskId);
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: environment.snackbarDuration,
+      panelClass: ['error-snackbar']
+    });
   }
 
   addTask(): void {
@@ -87,11 +86,9 @@ export class TeamTasksComponent {
     this.router.navigate(['/teams']);
   }
 
-  toggleAssignment(task: Task): void {
-    task.assignedTo = task.assignedTo === this.currentUser ? '' : this.currentUser;
-  }
-
   editTask(task: Task): void {
-    console.log('Edit task:', task);
+    this.router.navigate(['/edit-task', task.id], {
+      state: { task }
+    });
   }
 }

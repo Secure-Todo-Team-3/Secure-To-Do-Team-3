@@ -1,10 +1,9 @@
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #drawer class="sidenav" mode="side" [opened]="showSidenav()">
     <mat-toolbar class="user-profile">
-      <div class="avatar">
+      <div class="avatar-circle">
         {{ getInitials(userName) }}
       </div>
-      <span class="username">{{ userName }}</span>
     </mat-toolbar>
 
     <mat-nav-list class="nav-list">

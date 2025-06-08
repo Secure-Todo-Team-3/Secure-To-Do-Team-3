@@ -98,3 +98,17 @@ a.mat-list-item.active {
   height: calc(100vh - 4rem);
   overflow-y: auto;
 }
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  background: #1976d2;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0 auto;
+}

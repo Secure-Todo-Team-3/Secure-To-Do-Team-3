@@ -31,8 +31,8 @@
     </section>
 
     <section class="status-container">
-      <mat-chip class="status-chip" [ngClass]="team.role.toLowerCase()">
-        {{ team.role }}
+      <mat-chip class="status-chip" [ngClass]="team.status.toLowerCase()">
+        {{ team.status }}
       </mat-chip>
       <button mat-icon-button aria-label="More info" class="more-info-btn" (click)="openDetails()">
         <mat-icon>info</mat-icon>
