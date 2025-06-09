@@ -1,0 +1,15 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "263883060207.dkr.ecr.eu-west-1.amazonaws.com/todo-api-repository",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 8080,
+      "HostPort": 80
+
+    }
+  ]
+
+}
