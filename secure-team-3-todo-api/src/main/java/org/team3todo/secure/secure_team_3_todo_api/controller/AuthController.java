@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticatedResponse;
-import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticationRequest;
+import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticatedResponseDto;
+import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticationRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.RegisterRequest;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TotpSetupResponse;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TotpVerificationRequest;
@@ -27,16 +27,16 @@ public class AuthController {
     private final AuthService service; 
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticatedResponse> login(@RequestBody AuthenticationRequest authenticationReq) {
+    public ResponseEntity<AuthenticatedResponseDto> login(@RequestBody AuthenticationRequestDto authenticationReq) {
         try {
-            AuthenticatedResponse response = service.login(authenticationReq);
+            AuthenticatedResponseDto response = service.login(authenticationReq);
             return ResponseEntity.ok(response);
         } catch (InvalidKeyException | IOException e) {
             return ResponseEntity.badRequest().build();
         }
     }
      @PostMapping("/login/verify-totp")
-    public ResponseEntity<AuthenticatedResponse> loginWithTotp(@RequestBody TotpVerificationRequest request) throws InvalidKeyException, IOException {
+    public ResponseEntity<AuthenticatedResponseDto> loginWithTotp(@RequestBody TotpVerificationRequest request) throws InvalidKeyException, IOException {
         return ResponseEntity.ok(service.loginWithTotp(request));
     }
     
@@ -46,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping("register/totp/verify")
-    public ResponseEntity<AuthenticatedResponse> verifyTotp(Authentication authentication, @RequestBody TotpVerificationRequest request) {
+    public ResponseEntity<AuthenticatedResponseDto> verifyTotp(Authentication authentication, @RequestBody TotpVerificationRequest request) {
         
         try {
             return ResponseEntity.ok(service.verifyInitialTotpAndActivateUser(request));

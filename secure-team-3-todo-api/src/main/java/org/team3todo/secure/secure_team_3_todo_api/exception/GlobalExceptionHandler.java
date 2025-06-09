@@ -111,6 +111,21 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ForbiddenAccessException.class)
+    public ResponseEntity<ErrorResponseDto> handleForbiddenAccessException(
+            ForbiddenAccessException ex, WebRequest request) {
+
+        ErrorResponseDto errorResponse = ErrorResponseDto.builder()
+                .timestamp(OffsetDateTime.now())
+                .status(HttpStatus.FORBIDDEN.value())
+                .error("Forbidden")
+                .message(ex.getMessage()) // "You cannot change the tasks of a team you are not in"
+                .path(request.getDescription(false).replace("uri=", ""))
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
     // This method handles generic exceptions as a fallback
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGlobalException(

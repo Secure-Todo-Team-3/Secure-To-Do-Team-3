@@ -16,4 +16,5 @@ public interface TeamRepository extends JpaRepository<Team, Long> {
     List<Team> findByTeamMemberships_User(User user);
     List<Team> findByCreatedByUserId(User user);
     List<Team> findByTeamMemberships_UserAndTeamMemberships_TeamRole_IdNotIn(User user, Collection<Long> roleIdsToExclude);
+    Boolean existsByName(String name);
 }

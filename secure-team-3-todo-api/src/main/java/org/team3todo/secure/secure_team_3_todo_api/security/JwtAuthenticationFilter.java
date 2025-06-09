@@ -3,6 +3,8 @@ package org.team3todo.secure.secure_team_3_todo_api.security;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -43,11 +45,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if(userGuid!=null && SecurityContextHolder.getContext().getAuthentication()==null) {
             User userDetails = this.userDetailsService.findByUserGuid(userGuid);
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            if (userDetails.isAccountNonLocked() && userDetails.isEnabled()) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else if (!userDetails.isEnabled()) {
+                throw new DisabledException("User account is disabled.");
+            } else {
+                throw new LockedException("User account is locked.");
             }
         }
         filterChain.doFilter(request, response);
