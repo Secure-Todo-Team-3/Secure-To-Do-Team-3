@@ -1,19 +1,20 @@
 package org.team3todo.secure.secure_team_3_todo_api.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.team3todo.secure.secure_team_3_todo_api.dto.TeamDto;
+import org.team3todo.secure.secure_team_3_todo_api.dto.TeamCreateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
 import org.team3todo.secure.secure_team_3_todo_api.entity.TeamMembership;
+import org.team3todo.secure.secure_team_3_todo_api.entity.TeamRole;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
+import org.team3todo.secure.secure_team_3_todo_api.exception.DuplicateResourceException;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
-import org.team3todo.secure.secure_team_3_todo_api.mapper.TeamMapper;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamMembershipRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamRepository;
-import org.team3todo.secure.secure_team_3_todo_api.repository.UserRepository;
+import org.team3todo.secure.secure_team_3_todo_api.repository.TeamRoleRepository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -22,14 +23,16 @@ public class TeamService {
     private final UserService userService;
     private final TeamMembershipRepository teamMembershipRepository;
     private final TeamMembershipService teamMembershipService;
+    private final TeamRoleRepository teamRoleRepository;
 
 
     @Autowired
-    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService) {
+    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService, TeamRoleRepository teamRoleRepository) {
         this.teamRepository = teamRepository;
         this.userService = userService;
         this.teamMembershipRepository = teamMembershipRepository;
         this.teamMembershipService = teamMembershipService;
+        this.teamRoleRepository = teamRoleRepository;
     }
 
     public Team findById(Long id) {
@@ -85,5 +88,26 @@ public class TeamService {
             return teamMembershipService.addUserToTeam(user.getId(), teamId, 3L);
         }
 
+    }
+
+    @Transactional
+    public Team createTeam(TeamCreateRequestDto teamRequest, User creator) {
+        if (teamRepository.existsByName(teamRequest.getName())) {
+            throw new DuplicateResourceException("A team with the name '" + teamRequest.getName() + "' already exists.");
+        }
+
+        Team newTeam = Team.builder()
+                .name(teamRequest.getName())
+                .description(teamRequest.getDescription())
+                .createdByUserId(creator)
+                .isActive(true)
+                .build();
+
+        Team savedTeam = teamRepository.save(newTeam);
+        TeamRole adminRole = teamRoleRepository.findByName("Admin")
+                .orElseThrow(() -> new IllegalStateException("Default 'Admin' role not found in database."));
+        teamMembershipService.addUserToTeam(creator.getId(), savedTeam.getId(), adminRole.getId());
+
+        return savedTeam;
     }
 }

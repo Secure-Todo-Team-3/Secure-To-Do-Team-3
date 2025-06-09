@@ -9,8 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticatedResponse;
-import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticationRequest;
+import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticatedResponseDto;
+import org.team3todo.secure.secure_team_3_todo_api.dto.AuthenticationRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.RegisterRequest;
 import org.team3todo.secure.secure_team_3_todo_api.entity.SystemRole;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
@@ -68,7 +68,7 @@ public class AuthService {
     }
     
     @Transactional
-    public AuthenticatedResponse verifyInitialTotpAndActivateUser(TotpVerificationRequest verificationRequest) throws InvalidKeyException, IOException {
+    public AuthenticatedResponseDto verifyInitialTotpAndActivateUser(TotpVerificationRequest verificationRequest) throws InvalidKeyException, IOException {
         var user = userRepository.findByUsername(verificationRequest.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User not found during verification."));
 
@@ -85,11 +85,11 @@ public class AuthService {
         userRepository.save(user);
 
         var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid()), user);
-        return AuthenticatedResponse.builder().token(token).build();
+        return AuthenticatedResponseDto.builder().token(token).build();
     }
 
 
-    public AuthenticatedResponse login(AuthenticationRequest authenticationReq) throws InvalidKeyException, IOException {
+    public AuthenticatedResponseDto login(AuthenticationRequestDto authenticationReq) throws InvalidKeyException, IOException {
        Authentication authentication = authenticationManager.authenticate(
                new UsernamePasswordAuthenticationToken(authenticationReq.getUsername(), authenticationReq.getPassword())
        );
@@ -98,18 +98,18 @@ public class AuthService {
                .orElseThrow(() -> new IllegalStateException("User not found after authentication"));
 
        if (user.isTotpEnabled()) {
-           return AuthenticatedResponse.builder()
+           return AuthenticatedResponseDto.builder()
                    .totpRequired(true)
                    .message("TOTP code is required")
                    .build();
        }
        
        var token = jwtService.generateToken(Map.of("userGuid",user.getUserGuid()), user);
-       return AuthenticatedResponse.builder().token(token).totpRequired(false).build();
+       return AuthenticatedResponseDto.builder().token(token).totpRequired(false).build();
     }
 
     @Transactional
-    public AuthenticatedResponse loginWithTotp(TotpVerificationRequest verificationRequest) throws InvalidKeyException, IOException {
+    public AuthenticatedResponseDto loginWithTotp(TotpVerificationRequest verificationRequest) throws InvalidKeyException, IOException {
         var user = userRepository.findByUsername(verificationRequest.getUsername())
                      .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
@@ -118,7 +118,7 @@ public class AuthService {
         }
         
         var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid()), user);
-        return AuthenticatedResponse.builder().token(token).totpRequired(false).build();
+        return AuthenticatedResponseDto.builder().token(token).totpRequired(false).build();
     }
     
     // This method is for EXISTING users who want to set up TOTP later. It is different from the registration flow.

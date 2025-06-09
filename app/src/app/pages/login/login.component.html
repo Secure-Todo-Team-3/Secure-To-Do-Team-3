@@ -11,10 +11,10 @@
         <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="auth-form">
           
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Email address</mat-label>
-            <input matInput formControlName="email" type="email" autocomplete="email">
-            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
-              <mat-error>{{ getErrorMessage('email') }}</mat-error>
+            <mat-label>Username</mat-label>
+            <input matInput formControlName="username">
+            @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
+              <mat-error>{{ getErrorMessage('username') }}</mat-error>
             }
           </mat-form-field>
 
@@ -56,7 +56,7 @@
 
   } @else {
     <app-totp
-        [username]="loginForm.value.email" cardTitle="Verify Your Identity"
+        [username]="loginForm.value.username" cardTitle="Verify Your Identity"
         (verify)="onVerifyTotpSubmit($event)">
     </app-totp>
   }
