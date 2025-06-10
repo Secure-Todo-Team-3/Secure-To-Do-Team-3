@@ -1,4 +1,3 @@
-
 name: Backend Deploy (Spring Boot)
 
 on:
@@ -6,9 +5,8 @@ on:
     branches:
       - main
     paths:
-   
       - 'secure-team-3-todo-api/**' 
-      - 'db/**'      
+      - 'db/**'                    
       - 'terraform/app_source/Dockerrun.aws.json' 
 
 env:
@@ -20,26 +18,26 @@ env:
 jobs:
   deploy:
     name: "Build and Deploy Spring Boot App"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
 
     permissions:
-      id-token: write
-      contents: read
+      id-token: write   
+      contents: read    
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v4 
         with:
-      
-          role-to-assume: arn:aws:iam::263883060207:role/github-actions-deploy-role
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::263883060207:role/github-actions-deploy-role 
+          aws-region: ${{ env.AWS_REGION }} 
 
       - name: Get RDS DB Endpoint
-        id: rds_endpoint_step
+        id: rds_endpoint_step 
         run: |
+          # Use AWS CLI to get the RDS endpoint and store it in GITHUB_ENV
           DB_ENDPOINT=$(aws rds describe-db-instances \
             --db-instance-identifier ${{ env.RDS_DB_INSTANCE_IDENTIFIER }} \
             --query 'DBInstances[0].Endpoint.Address' \
@@ -48,40 +46,39 @@ jobs:
           echo "Fetched RDS DB Endpoint: $DB_ENDPOINT"
 
       - name: Setup Java for Build and Migration
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v4 
         with:
-         
-          java-version: '21'
-          distribution: 'temurin'
-          cache: 'maven'
+          java-version: '21'        
+          distribution: 'temurin'   
+          cache: 'maven'            
 
       - name: Run Flyway Migrations
        
         run: |
-          cd backend/ # Preserve as requested. Please verify this path for Flyway execution.
+          cd secure-team-3-todo-api/
           mvn clean flyway:migrate \
-            -Dflyway.url="jdbc:postgresql://${{ env.DB_ENDPOINT }}:5432/${{ secrets.RDS_DB_NAME }}" \
+            -Dflyway.url="${{ secrets.DATABASE_URL }}" \
             -Dflyway.user="${{ secrets.DB_USERNAME }}" \
             -Dflyway.password="${{ secrets.DB_PASSWORD }}" \
             -Dflyway.locations="filesystem:../db"
-        env:
-          DB_ENDPOINT: ${{ env.DB_ENDPOINT }}
-          DB_USER: ${{ secrets.RDS_DB_USERNAME }}
-          DB_NAME: ${{ secrets.RDS_DB_NAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        
 
       - name: Build Spring Boot Application
-        
+       
         run: |
-          cd secure-team-3-todo-api/ # Preserve as requested.
+          cd secure-team-3-todo-api/
           mvn clean install
 
       - name: Create EB Deployment Bundle
-     
+        
         run: |
-          cd secure-team-3-todo-api/ 
+          # Create a temporary staging directory for the bundle
+          BUILD_BUNDLE_DIR="eb-bundle-staging"
+          mkdir -p "$BUILD_BUNDLE_DIR"
 
-         
+          # 1. Find the compiled JAR file
+          # Navigate to the secure-team-3-todo-api directory to perform the search
+          cd secure-team-3-todo-api/
           JAR_FILE=$(find target -name "*.jar" -type f -print -quit)
           if [ -z "$JAR_FILE" ]; then
             echo "Error: Spring Boot JAR file not found in target/ within secure-team-3-todo-api/."
@@ -89,27 +86,35 @@ jobs:
           fi
           echo "Found JAR: $JAR_FILE"
 
-        
-          DOCKERRUN_PATH="../terraform/app_source/Dockerrun.aws.json"
-          if [ ! -f "$DOCKERRUN_PATH" ]; then
-            echo "Error: Dockerrun.aws.json not found at $DOCKERRUN_PATH (relative to secure-team-3-todo-api/)."
+          # Copy the JAR file to the staging directory at the repository root
+          # We rename it to 'application.jar' as this is a common convention for Docker images
+          cp "$JAR_FILE" "${GITHUB_WORKSPACE}/$BUILD_BUNDLE_DIR/application.jar"
+          
+          # 2. Navigate back to the repository root for correct pathing to Dockerrun.aws.json
+          cd "$GITHUB_WORKSPACE"
+
+          # Define the path to Dockerrun.aws.json relative to the repository root
+          DOCKERRUN_REPO_PATH="terraform/app_source/Dockerrun.aws.json"
+          if [ ! -f "$DOCKERRUN_REPO_PATH" ]; then
+            echo "Error: Dockerrun.aws.json not found at $DOCKERRUN_REPO_PATH."
             exit 1
           fi
-          echo "Found Dockerrun.aws.json at: $DOCKERRUN_PATH"
+          echo "Found Dockerrun.aws.json at: $DOCKERRUN_REPO_PATH"
 
-          
-          zip -r ../application.zip "$JAR_FILE" "$DOCKERRUN_PATH"
-          echo "Created application.zip at repository root ($GITHUB_WORKSPACE/)."
+          # 3. Copy Dockerrun.aws.json to the staging directory
+          cp "$DOCKERRUN_REPO_PATH" "$BUILD_BUNDLE_DIR/"
+
+          # 4. Create the final 'application.zip' from the contents of the staging directory
+          # The '-j' option (junk paths) is crucial here; it tells zip to store only the filename,
+          # not the full path, ensuring 'application.jar' and 'Dockerrun.aws.json' are at the zip root.
+          zip -j application.zip "$BUILD_BUNDLE_DIR"/*
+          echo "Created application.zip at repository root ($GITHUB_WORKSPACE/application.zip)."
 
       - name: Deploy to Elastic Beanstalk
-        uses: aws/elastic-beanstalk-action@v1
+        uses: aws/elastic-beanstalk-action@v1 
         with:
-        
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          
           application_name: ${{ env.EB_APP_NAME }}
           environment_name: ${{ env.EB_ENV_NAME }}
           version_label: github-sha-${{ github.sha }}
-          region: ${{ env.AWS_REGION }}
-        
-          deployment_package: application.zip
+          deployment_package: application.zip 
