@@ -111,7 +111,7 @@ jobs:
           echo "Created application.zip at repository root ($GITHUB_WORKSPACE/application.zip)."
 
       - name: Deploy to Elastic Beanstalk
-        uses: aws/elastic-beanstalk-action@v1 
+        uses: aws-actions/elastic-beanstalk-deploy@v1 
         with:
           
           application_name: ${{ env.EB_APP_NAME }}
