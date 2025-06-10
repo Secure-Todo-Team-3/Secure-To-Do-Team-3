@@ -10,6 +10,10 @@ export class TeamEditService {
   saveTeam(team: Team, isEditMode: boolean): Observable<void> {
     return isEditMode
       ? this.api.put<void>(`teams/${team.id}`, team)
-      : this.api.post<void>(`teams`, team);
+      : this.api.post<void>(`team/create`, team);
+  }
+
+  loadTeam(id: number): Observable<Team> {
+    return this.api.get<Team>(`team/${id}`);
   }
 }

@@ -47,23 +47,6 @@ mat-card-content p {
   gap: 0.25rem;
 }
 
-/* Top right icons */
-.edit-icon {
-  position: absolute;
-  top: 0.5rem;
-  right: 3rem;
-  cursor: pointer;
-}
-
-.unassign-icon {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  cursor: pointer;
-  color: #f44336; /* Material warn red */
-}
-
-/* Bottom right icon */
 .more-info-icon {
   position: absolute;
   bottom: 0.5rem;
@@ -80,4 +63,13 @@ mat-card-content p {
 .status-chip.in-progress {
   background-color: #fef8bf; 
   color: #fbc02d; 
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.edit-icon{
+  cursor: pointer;
 }

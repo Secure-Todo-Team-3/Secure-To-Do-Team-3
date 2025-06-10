@@ -1,9 +1,12 @@
 export interface Task {
-  id?: string;
-  title: string;
+  taskGuid?: string;
+  name: string;
   description: string;
   dueDate: string;
-  team: string;
-  assignToMyself: boolean;
-  status: string;
+  teamName: string;
+  teamId: number;
+  assignedToMyself: boolean;
+  assignedToUsername?: string;
+  currentStatusName: string;
+  currentStatusId: number;
 }

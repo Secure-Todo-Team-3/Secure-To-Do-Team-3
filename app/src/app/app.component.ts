@@ -32,14 +32,17 @@ export class AppComponent {
   userName = 'Alex Johnson';
   userEmail = 'alex.johnson@example.com';
   getInitials = getInitials;
+  isLoggedIn = false;
 
   constructor(private router: Router, private authService: AuthService) {
+    this.isLoggedIn = this.authService.isLoggedIn();
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
         this.showSidenav.set(
           !this.router.url.includes('/login') &&
-            !this.router.url.includes('/signup')
+            !this.router.url.includes('/signup')&&
+            !this.isLoggedIn
         );
       });
   }

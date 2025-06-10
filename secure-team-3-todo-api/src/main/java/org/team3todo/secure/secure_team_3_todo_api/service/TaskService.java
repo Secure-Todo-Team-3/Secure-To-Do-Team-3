@@ -7,21 +7,28 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskCreateRequestDto;
+import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.*;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ForbiddenAccessException;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TaskRepository;
+import org.team3todo.secure.secure_team_3_todo_api.repository.TaskStatusHistoryRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TaskStatusRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamMembershipRepository;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 
 @Service
 public class TaskService {
     private final TaskRepository taskRepository;
     private final UserService userService;
     private final TeamService teamService;
+    private final TaskStatusHistoryRepository taskStatusHistoryRepository;
     private final TaskStatusRepository taskStatusRepository;
     private final TeamMembershipRepository teamMembershipRepository;
     private final TeamMembershipService teamMembershipService;
@@ -31,10 +38,11 @@ public class TaskService {
     @Autowired
     public TaskService(TaskRepository taskRepository, UserService userService, TeamService teamService,
                        TaskStatusRepository taskStatusRepository, TeamMembershipRepository teamMembershipRepository,
-                       TeamMembershipService teamMembershipService, AuditingService auditingService) {
+                       TeamMembershipService teamMembershipService, AuditingService auditingService, TaskStatusHistoryRepository taskStatusHistoryRepository) {
         this.taskRepository = taskRepository;
         this.userService = userService;
         this.teamService = teamService;
+        this.taskStatusHistoryRepository = taskStatusHistoryRepository;
         this.taskStatusRepository = taskStatusRepository;
         this.teamMembershipRepository = teamMembershipRepository;
         this.teamMembershipService = teamMembershipService;
@@ -70,16 +78,26 @@ public class TaskService {
         return taskRepository.findAll(spec);
     }
 
+    /**
+     * Private helper method to find tasks assigned to a user. Throws an exception if the user is not found.
+     * This method returns the raw entity list without status enrichment.
+     */
+    private List<Task> findByAssignedUserGuid(UUID guid) {
+        User foundUser = userService.findByUserGuid(guid);
+        if (foundUser == null) {
+            throw new ResourceNotFoundException("User not found with GUID: " + guid);
+        }
+        return taskRepository.findByAssignedToUser(foundUser);
+    }
+
     @Transactional
-    public Task createTask(TaskCreateRequestDto taskRequest, User creator) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHNAGE TO UUID IMPL
-
-        auditingService.setAuditUser(currentUser);
-
+    public Task createTask(TaskCreateRequestDto taskRequest, UUID creatorGuid) {
+        User creator = userService.findByUserGuid(creatorGuid);
         Team team = teamService.findById(taskRequest.getTeamId());
-        User assignedUser = userService.findByUserGuid(taskRequest.getAssignedToUserGuid());
+        if (team == null) {
+            throw new ResourceNotFoundException("Cannot create task: Team not found with ID: " + taskRequest.getTeamId());
+        }
 
-        // Fetch the initial status once.
         TaskStatus initialStatus = taskStatusRepository.findByName("To Do")
                 .orElseThrow(() -> new IllegalStateException("Default task status 'To Do' not found in database."));
 
@@ -88,7 +106,7 @@ public class TaskService {
                 .description(taskRequest.getDescription())
                 .dueDate(taskRequest.getDueDate())
                 .team(team)
-                .assignedToUser(assignedUser)
+                .assignedToUser(creator)
                 .userCreator(creator)
                 .taskStatus(initialStatus) // Set status directly on the object.
                 .build();
@@ -110,7 +128,7 @@ public class TaskService {
         }
 
         task.setAssignedToUser(currentUser);
-        return taskRepository.save(task); // No enrichment needed.
+        return taskRepository.save(task);
     }
 
     @Transactional
@@ -147,8 +165,6 @@ public class TaskService {
         return taskRepository.save(foundTask); // No enrichment needed.
     }
 
-    // --- Specification Helper Methods ---
-
     private Specification<Task> hasAssignedUser(UUID userGuid) {
         return (root, query, cb) -> cb.equal(root.get("assignedToUser").get("userGuid"), userGuid);
     }
@@ -172,3 +188,4 @@ public class TaskService {
         };
     }
 }
+

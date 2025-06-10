@@ -1,0 +1,54 @@
+name: Terraform Apply (Infrastructure)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  TF_WORKING_DIR: ./terraform
+
+jobs:
+  terraform_apply:
+    name: "Terraform Apply"
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write 
+      contents: read  
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::263883060207:role/github-actions-deploy-role
+          aws-region: eu-west-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.0 
+
+      - name: Terraform Init
+        id: init
+        run: terraform init -upgrade
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -input=false
+        working-directory: ${{ env.TF_WORKING_DIR }}
+       
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve -input=false
+        working-directory: ${{ env.TF_WORKING_DIR }}

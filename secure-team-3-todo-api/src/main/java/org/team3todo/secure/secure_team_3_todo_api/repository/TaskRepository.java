@@ -14,6 +14,7 @@ import java.util.UUID;
 
 public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
 
+
     // Fetch the task and its key relationships in one query to avoid N+1 issues.
     @Query("SELECT t FROM Task t " +
             "LEFT JOIN FETCH t.taskStatus " +

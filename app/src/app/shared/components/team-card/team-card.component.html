@@ -2,7 +2,7 @@
   <header class="team-header">
     <h2 class="team-title" title="{{ team.name }}">{{ team.name }}</h2>
     <button
-      *ngIf="team.isOwner"
+      *ngIf="team.isLead"
       mat-icon-button
       color="primary"
       aria-label="Edit Team"
@@ -22,17 +22,17 @@
     <section class="team-meta">
       <section class="meta-item" (click)="openMembers()">
         <mat-icon class="meta-icon">group</mat-icon>
-        <u>{{ team.members }} members</u>
+        <u>view members</u>
       </section>
       <section class="meta-item" (click)="openTasks()">
         <mat-icon class="meta-icon">task</mat-icon>
-        <u>{{ team.tasks }} open tasks</u>
+        <u>view open tasks</u>
       </section>
     </section>
 
     <section class="status-container">
-      <mat-chip class="status-chip" [ngClass]="team.status.toLowerCase()">
-        {{ team.status }}
+      <mat-chip class="status-chip" [ngClass]="team.isLead ? 'admin' : 'member'">
+        {{ team.isLead ? 'Admin' : 'Member' }}
       </mat-chip>
       <button mat-icon-button aria-label="More info" class="more-info-btn" (click)="openDetails()">
         <mat-icon>info</mat-icon>
