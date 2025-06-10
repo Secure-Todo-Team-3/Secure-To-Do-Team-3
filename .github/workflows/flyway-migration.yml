@@ -3,25 +3,61 @@ name: Database Migrations with Flyway
 on:
   push:
     branches:
-      - main 
+      - main
     paths:
-      - 'db/**'
+      - 'db/**' 
+
+env:
+  AWS_REGION: eu-west-1 
+  RDS_DB_INSTANCE_IDENTIFIER: todo-team-db 
 
 jobs:
   FlywayMigration:
     name: Run Flyway Migrations
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write   
+      contents: read    
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4 
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4 
+        with:
+        
+          role-to-assume: arn:aws:iam::263883060207:role/github-actions-deploy-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get RDS DB Endpoint and Name
+        id: rds_info 
+        run: |
+          # Use AWS CLI to get the current RDS endpoint address
+          DB_ENDPOINT=$(aws rds describe-db-instances \
+            --db-instance-identifier ${{ env.RDS_DB_INSTANCE_IDENTIFIER }} \
+            --query 'DBInstances[0].Endpoint.Address' \
+            --output text)
+          
+          # Use AWS CLI to get the current RDS database name
+          DB_NAME_FROM_RDS=$(aws rds describe-db-instances \
+            --db-instance-identifier ${{ env.RDS_DB_INSTANCE_IDENTIFIER }} \
+            --query 'DBInstances[0].DBName' \
+            --output text)
+          
+          
+          echo "DB_ENDPOINT=$DB_ENDPOINT" >> "$GITHUB_ENV"
+          echo "DB_NAME_FROM_RDS=$DB_NAME_FROM_RDS" >> "$GITHUB_ENV"
+          
+          echo "Fetched RDS DB Endpoint: $DB_ENDPOINT"
+          echo "Fetched RDS DB Name: $DB_NAME_FROM_RDS"
 
       - name: Execute Flyway Migrations
         run: |
           docker run --rm \
-            --volume ${GITHUB_WORKSPACE}/db:/flyway/sql:ro \
+            --volume "${GITHUB_WORKSPACE}/db:/flyway/sql:ro" \
             redgate/flyway \
-            -url="${{ secrets.DATABASE_URL }}" \
+            -url="jdbc:postgresql://${{ env.DB_ENDPOINT }}:5432/${{ env.DB_NAME_FROM_RDS }}" \
             -user="${{ secrets.DB_USERNAME }}" \
             -password="${{ secrets.DB_PASSWORD }}" \
             migrate
