@@ -38,7 +38,6 @@ export class TeamEditComponent implements OnInit {
   isEditMode = signal(false);
   isLoading = false;
   teamForm!: FormGroup;
-  teamId: string | undefined;
 
   constructor(
     private router: Router,
@@ -51,25 +50,29 @@ export class TeamEditComponent implements OnInit {
   ngOnInit() {
     this.teamForm = this.fb.group({
       name: ['', Validators.required],
-      description: ['', Validators.required]
+      description: ['', Validators.required],
+      teamId: [null]
     });
 
-    const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras.state;
-
-    if (state?.['team']) {
-      this.isEditMode.set(true);
-      const team = state['team'] as Team;
-      this.teamForm.patchValue({
-        name: team.name,
-        description: team.description
+    if (this.router.url.startsWith('/edit-team')) {
+      const teamId: number = Number(this.router.url.split('/').pop());
+      this.teamEditService.loadTeam(teamId).subscribe({
+        next: (team: Team) => {
+          this.isEditMode.set(true);
+          this.teamForm.patchValue({
+            name: team.name,
+            description: team.description,
+            teamId: team.id
+          });
+        },
+        error: (error) => {
+          this.isEditMode.set(false);
+          this.teamForm.reset();
+          this.showError('Failed to load team: ' + (error.message || 'Unknown error'));
+        }
       });
-      this.teamId = team.id;
-    } else if (this.router.url.startsWith('/edit-team')) {
-      this.showError('No team data provided for editing.');
     } else {
       this.isEditMode.set(false);
-      this.teamId = undefined;
       this.teamForm.reset();
     }
   }
@@ -89,13 +92,10 @@ export class TeamEditComponent implements OnInit {
     const formData = this.teamForm.value;
 
     const updatedTeam: Team = {
-      id: this.teamId || '',
+      id: formData.teamId,
       name: formData.name,
       description: formData.description,
-      isOwner: false,
-      members: [],
-      tasks: [],
-      status: ''
+      isLead: false,
     };
 
     this.teamEditService.saveTeam(updatedTeam, this.isEditMode()).subscribe({

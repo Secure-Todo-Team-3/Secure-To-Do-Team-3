@@ -3,56 +3,115 @@
     <button mat-icon-button (click)="onCancel()" class="back-button">
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <h1>{{ isEditing ? 'Edit Task' : 'Create Task' }}</h1>
+    <h1>{{ isEditing ? "Edit Task" : "Create Task" }}</h1>
   </header>
 
   <main class="content">
     <p class="subtitle">
-      {{ isEditing ? 'Make changes to your task here. Click save when you\'re done.' : 'Fill in the details to create a new task.' }}
+      {{
+        isEditing
+          ? "Make changes to your task here. Click save when you're done."
+          : "Fill in the details to create a new task."
+      }}
     </p>
 
-    <form [formGroup]="taskForm" class="task-form">
-      <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Title</mat-label>
-        <input matInput formControlName="title" placeholder="Enter task title" />
-        <mat-error *ngIf="taskForm.get('title')?.hasError('required')">Title is required</mat-error>
-        <mat-error *ngIf="taskForm.get('title')?.hasError('minlength')">Title must be at least 3 characters long</mat-error>
+    <form [formGroup]="taskForm">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Task Name</mat-label>
+        <input matInput formControlName="name" required />
+        @if (taskForm.controls['name'].errors?.['required'] &&
+        taskForm.controls['name'].touched) {
+        <mat-error> Task name is required </mat-error>
+        } @if (taskForm.controls['name'].errors?.['minlength'] &&
+        taskForm.controls['name'].touched) {
+        <mat-error> Task name must be at least 3 characters long </mat-error>
+        }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field">
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Description</mat-label>
-        <textarea matInput formControlName="description" rows="4" placeholder="Enter task description"></textarea>
-        <mat-error *ngIf="taskForm.get('description')?.hasError('required')">Description is required</mat-error>
-        <mat-error *ngIf="taskForm.get('description')?.hasError('minlength')">Description must be at least 10 characters long</mat-error>
+        <textarea
+          matInput
+          formControlName="description"
+          rows="4"
+          required
+        ></textarea>
+        @if (taskForm.controls['description'].errors?.['required'] &&
+        taskForm.controls['description'].touched) {
+        <mat-error> Description is required </mat-error>
+        } @if (taskForm.controls['description'].errors?.['minlength'] &&
+        taskForm.controls['description'].touched) {
+        <mat-error> Description must be at least 10 characters long </mat-error>
+        }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field">
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Due Date</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="dueDate" />
+        <input
+          matInput
+          [matDatepicker]="picker"
+          formControlName="dueDate"
+          required
+        />
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
-        <mat-error *ngIf="taskForm.get('dueDate')?.hasError('required')">Due date is required</mat-error>
+        @if (taskForm.controls['dueDate'].errors?.['required'] &&
+        taskForm.controls['dueDate'].touched) {
+        <mat-error> Due date is required </mat-error>
+        }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field">
+      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Team</mat-label>
-        <mat-select formControlName="team">
-          <mat-option value="">Select a team</mat-option>
-          <mat-option *ngFor="let team of teams" [value]="team">{{ team }}</mat-option>
+        <mat-select formControlName="teamId" required>
+          @for (team of teams; track team) {
+          <mat-option [value]="team.id">{{ team.name }}</mat-option>
+          }
         </mat-select>
-        <mat-error *ngIf="taskForm.get('team')?.hasError('required')">Please select a team</mat-error>
+        @if (taskForm.controls['teamId'].errors?.['required'] &&
+        taskForm.controls['teamId'].touched) {
+        <mat-error> Please select a team </mat-error>
+        }
       </mat-form-field>
 
-      <section class="checkbox-section">
-        <mat-checkbox formControlName="assignToMyself">Assign to myself</mat-checkbox>
-      </section>
-
-      <footer class="actions">
-        <button mat-stroked-button (click)="onCancel()" type="button">Cancel</button>
-        <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="taskForm.invalid || isLoading">
-          {{ isEditing ? 'Save Changes' : 'Create Task' }}
-        </button>
-      </footer>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="currentStatusId" required>
+          @for (status of statuses; track status) {
+          <mat-option [value]="status.id">{{ status.name }}</mat-option>
+          }
+        </mat-select>
+        @if (taskForm.controls['currentStatusId'].errors?.['required'] &&
+        taskForm.controls['currentStatusId'].touched) {
+        <mat-error> Please select a status </mat-error>
+        }
+      </mat-form-field>
     </form>
+
+    
+    <mat-card-actions align="end">
+      <button
+        mat-stroked-button
+        (click)="cancelChanges()"
+        [disabled]="isLoading"
+        class="cancel-button"
+      >
+        Cancel
+      </button>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="saveChanges()"
+        [disabled]="isLoading || taskForm.invalid"
+      >
+        <ng-container *ngIf="!isLoading; else spinnerTpl">
+          {{ isEditing ? 'Save' : 'Create' }}
+        </ng-container>
+        <ng-template #spinnerTpl>
+          <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
+        </ng-template>
+      </button>
+    </mat-card-actions>
   </main>
 </section>

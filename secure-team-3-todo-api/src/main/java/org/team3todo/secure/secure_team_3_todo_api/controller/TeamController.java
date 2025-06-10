@@ -48,18 +48,18 @@ public class TeamController {
         }
     }
 
-    @GetMapping(value = "/user-teams/{userGuid}", params = "type=member")
-    public ResponseEntity<List<TeamDto>> getTeamsUserIsMemberOf(@PathVariable UUID userGuid){
-        ArrayList<Long> roleIdsToExclude = new ArrayList<Long>();
-        roleIdsToExclude.add(3L); // TODO: Get rid of magic number
-        List<Team> foundTeams = teamService.findTeamsWhereUserIsMemberByGuid(userGuid, roleIdsToExclude);
+    @GetMapping(value = "/user-teams", params = "type=member")
+    public ResponseEntity<List<TeamDto>> getTeamsUserIsMemberOf(Authentication authentication) {
+        var userId = (UUID) authentication.getPrincipal();
+        List<Team> foundTeams = teamService.findTeamsWhereUserIsMemberByGuid(userId);
         List<TeamDto> dtoFoundTeams = teamMapper.convertToDtoList(foundTeams);
         return ResponseEntity.ok(dtoFoundTeams);
     }
 
-    @GetMapping(value = "/user-teams/{userGuid}", params = "type=team_lead")
-    public ResponseEntity<List<TeamDto>> getTeamsUserIsLeaderOf(@PathVariable UUID userGuid){
-        List<Team> foundTeams = teamService.findTeamsCreatedByUserGuid(userGuid);
+    @GetMapping(value = "/user-teams", params = "type=team_lead")
+    public ResponseEntity<List<TeamDto>> getTeamsUserIsLeaderOf(Authentication authentication) {
+        var userId = (UUID) authentication.getPrincipal();
+        List<Team> foundTeams = teamService.findTeamsCreatedByUserGuid(userId);
         List<TeamDto> dtoFoundTeams = teamMapper.convertToDtoList(foundTeams);
         return ResponseEntity.ok(dtoFoundTeams);
     }
@@ -88,10 +88,9 @@ public ResponseEntity<TeamDto> createTeam(
         @RequestBody TeamCreateRequestDto teamRequest,
         Authentication authentication) {
     
-    String username = (String) authentication.getPrincipal();
+    UUID userId = (UUID) authentication.getPrincipal();
 
-    User creator =(User) this.userService.loadUserByUsername(username);
-
+    User creator =(User) this.userService.findByUserGuid(userId);
     Team createdTeam = teamService.createTeam(teamRequest, creator);
     TeamDto responseDto = teamMapper.convertToDto(createdTeam);
     return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);

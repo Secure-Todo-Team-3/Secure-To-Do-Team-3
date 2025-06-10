@@ -12,6 +12,5 @@ bootstrapApplication(AppComponent, {
     provideHttpClient(withInterceptors([authInterceptor,credentialsInterceptor,csrfInterceptor])),
     provideRouter(routes),
     provideAnimations(),
-    provideHttpClient(),
   ]
 }).catch(err => console.error(err));

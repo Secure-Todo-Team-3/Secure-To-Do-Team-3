@@ -44,19 +44,19 @@ export class TaskCardComponent {
   }
 
   editTask() {
-    this.router.navigate(['/edit-task', this.task.id]);
+    console.log('Editing task:', this.task);
+    this.router.navigate(['/edit-task', this.task.taskGuid]);
   }
 
-  get statusColor(): string {
-    switch (this.task.status.toLowerCase()) {
-      case 'pending':
-        return 'warn';
-      case 'completed':
-        return 'primary';
-      case 'in progress':
-        return 'accent';
-      default:
-        return '';
+  getstatusColor(status: String): string {
+    const completedStatuses: String[] = ['Completed', 'Done', 'Closed'];
+    const pendingStatuses: String[] = ['Pending', 'In Progress', 'On Hold'];
+    if (completedStatuses.includes(status)) {
+      return 'green';
+    } else if (pendingStatuses.includes(status)) {
+      return 'orange';
+    } else {
+      return 'gray';
     }
   }
 }

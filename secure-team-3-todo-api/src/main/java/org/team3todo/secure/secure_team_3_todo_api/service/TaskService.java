@@ -132,19 +132,13 @@ public class TaskService {
     }
 
     @Transactional
-    public Task createTask(TaskCreateRequestDto taskRequest, User creator) {
-
+    public Task createTask(TaskCreateRequestDto taskRequest, UUID creatorGuid) {
+        User creator = userService.findByUserGuid(creatorGuid);
         Team team = teamService.findById(taskRequest.getTeamId());
         if(team == null){
             throw new ResourceNotFoundException("Cannot create task: Team not found with ID: " + taskRequest.getTeamId());
         }
-
-        User assignedUser = userService.findByUserGuid(taskRequest.getAssignedToUserGuid());
-
-        if(assignedUser == null){
-            throw new ResourceNotFoundException("Cannot create task: Assigned user not found with GUID: " + taskRequest.getAssignedToUserGuid());
-        }
-
+        
         TaskStatus initialStatus = taskStatusRepository.findByName("To Do")
                 .orElseThrow(() -> new IllegalStateException("Default task status 'To Do' not found in database."));
 
@@ -153,7 +147,7 @@ public class TaskService {
                 .description(taskRequest.getDescription())
                 .dueDate(taskRequest.getDueDate())
                 .team(team)
-                .assignedToUser(assignedUser)
+                .assignedToUser(creator)
                 .userCreator(creator)
                 .build();
 
@@ -236,6 +230,11 @@ public class TaskService {
 
     private Specification<Task> teamNameContains(String teamName) {
         return (root, query, cb) -> cb.like(cb.lower(root.get("team").get("name")), "%" + teamName.toLowerCase() + "%");
+    }
+
+    public Task findByTaskGuid(UUID taskGuid) { // needs protection
+        return taskRepository.findByTaskGuid(taskGuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with GUID: " + taskGuid));
     }
 
 }
