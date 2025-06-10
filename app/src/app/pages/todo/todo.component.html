@@ -15,6 +15,9 @@
         <mat-label>Status</mat-label>
         <mat-select>
           <mat-option value="">All Status</mat-option>
+          @for (status of statuses; track status) {
+          <mat-option [value]="status.id">{{ status.name }}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
 
@@ -22,6 +25,9 @@
         <mat-label>Teams</mat-label>
         <mat-select>
           <mat-option value="">All Teams</mat-option>
+          @for (team of teams; track team) {
+          <mat-option [value]="team.id">{{ team.name }}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
 
@@ -32,29 +38,15 @@
     </section>
   </header>
 
-  <section aria-labelledby="pending-tasks">
+  <section aria-labelledby="tasks-tasks">
     <h2 id="pending-tasks" class="section-heading">
-      <mat-icon color="warn" class="heading-icon">schedule</mat-icon>
-      My Pending Tasks ({{ pendingTasks.length }})
+      <mat-icon color="warn" class="heading-icon">task</mat-icon>
+      My Tasks ({{ tasks.length }})
     </h2>
 
     <section class="task-list">
       <app-task-card
-        *ngFor="let task of pendingTasks"
-        [task]="task"
-      ></app-task-card>
-    </section>
-  </section>
-
-  <section aria-labelledby="completed-tasks">
-    <h2 id="completed-tasks" class="section-heading">
-      <mat-icon color="primary" class="heading-icon">check_circle</mat-icon>
-      My Completed Tasks ({{ completedTasks.length }})
-    </h2>
-
-    <section class="task-list">
-      <app-task-card
-        *ngFor="let task of completedTasks"
+        *ngFor="let task of tasks"
         [task]="task"
       ></app-task-card>
     </section>

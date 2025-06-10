@@ -73,6 +73,13 @@
   z-index: 100;
 }
 
+mat-card-actions {
+  padding: 0.5rem 0;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
 @media (max-width: 37.5rem) {
   .page-container {
     padding: 1rem;

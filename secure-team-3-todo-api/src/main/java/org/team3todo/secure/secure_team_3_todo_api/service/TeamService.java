@@ -56,14 +56,15 @@ public class TeamService {
         return memberships.stream().map(TeamMembership::getUser).toList();
     }
 
-    //TODO: Remove magic number. Maybe make this more flexible to select by role id lol
-    public List<Team> findTeamsWhereUserIsMemberByGuid(UUID userGuid, Collection<Long> roleIdsToExclude) {
+    public List<Team> findTeamsWhereUserIsMemberByGuid(UUID userGuid) {
+        List<String> roleNamesToExclude = List.of("Admin", "Team Lead");
         User user = userService.findByUserGuid(userGuid);
-        if (user != null){
-            return teamRepository.findByTeamMemberships_UserAndTeamMemberships_TeamRole_IdNotIn(user, roleIdsToExclude);
-
+        if (user != null) {
+            return teamRepository.findByTeamMemberships_UserAndTeamMemberships_TeamRole_NameNotIn(user, roleNamesToExclude);
         }
-        throw new ResourceNotFoundException("User with GUID: "+userGuid+" does not exist.");
+        else {
+            throw new ResourceNotFoundException("User with GUID: " + userGuid + " does not exist.");
+        }
     }
 
     public List<Team> findTeamsCreatedByUserGuid(UUID userGuid) {

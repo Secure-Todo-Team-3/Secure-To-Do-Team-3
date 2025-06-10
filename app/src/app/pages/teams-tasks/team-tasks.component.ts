@@ -10,15 +10,7 @@ import { Router } from '@angular/router';
 import { TeamTasksService } from './team-tasks.service';
 import { environment } from 'src/app/shared/environments/environment';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  dueDate: string;
-  status: 'Pending' | 'Completed';
-  assignedTo: string;
-}
+import { Task } from 'src/app/shared/models/task.model';
 
 @Component({
   selector: 'app-team-tasks',
@@ -30,51 +22,45 @@ interface Task {
     MatButtonModule,
     MatDividerModule,
     MatIconModule,
-    MatChipsModule
+    MatChipsModule,
   ],
   templateUrl: './team-tasks.component.html',
-  styleUrls: ['./team-tasks.component.css']
+  styleUrls: ['./team-tasks.component.css'],
 })
 export class TeamTasksComponent {
-toggleAssignment(_t22: Task) {
-throw new Error('Method not implemented.');
-}
-markComplete(arg0: number) {
-throw new Error('Method not implemented.');
-}
-removeTask(arg0: number) {
-throw new Error('Method not implemented.');
-}
   tasks: Task[] = [];
 
-  constructor(private router: Router, private teamTasksService: TeamTasksService, private snackBar: MatSnackBar) {}
+  constructor(
+    private router: Router,
+    private teamTasksService: TeamTasksService,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
-    const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras.state as { tasks: Task[] } | undefined;
-    if (state && state.tasks) {
-      this.tasks = state.tasks;
-    } else {
-      this.teamTasksService.getTasks().subscribe({
+    const teamId: number = Number(this.router.url.split('/').pop());
+    if (teamId && !isNaN(teamId)) {
+      this.teamTasksService.getTasks(teamId).subscribe({
         next: (tasks) => {
           this.tasks = tasks;
+          console.log('Tasks loaded:', this.tasks);
         },
         error: () => {
           this.tasks = [];
           this.showError('Failed to load tasks. Please try again later.');
-        }   
+        },
       });
     }
   }
 
   get openTasksCount(): number {
-    return this.tasks.filter(t => t.status === 'Pending').length;
+    return this.tasks.filter((task) => task.currentStatusName === 'Pending')
+      .length;
   }
 
   private showError(message: string): void {
     this.snackBar.open(message, 'Close', {
       duration: environment.snackbarDuration,
-      panelClass: ['error-snackbar']
+      panelClass: ['error-snackbar'],
     });
   }
 
@@ -87,8 +73,18 @@ throw new Error('Method not implemented.');
   }
 
   editTask(task: Task): void {
-    this.router.navigate(['/edit-task', task.id], {
-      state: { task }
+    this.router.navigate(['/edit-task', task.taskGuid], {
+      state: { task },
     });
+  }
+
+  toggleAssignment(task: Task) {
+    throw new Error('Method not implemented.');
+  }
+  markComplete(task: Task) {
+    throw new Error('Method not implemented.');
+  }
+  removeTask(task: Task) {
+    throw new Error('Method not implemented.');
   }
 }

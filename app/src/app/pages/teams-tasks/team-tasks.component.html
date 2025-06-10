@@ -6,7 +6,7 @@
       </button>
       <section class="header-text">
         <mat-card-title>IT - Open Tasks</mat-card-title>
-        <mat-card-subtitle>{{ openTasksCount }} pending tasks</mat-card-subtitle>
+        <mat-card-subtitle>{{ tasks.length }} tasks</mat-card-subtitle>
       </section>
     </section>
   </mat-card-header>
@@ -19,10 +19,10 @@
         <article class="task-card">
           <header class="task-header">
             <section class="task-header-top">
-              <h3 class="task-title">{{ task.title }}</h3>
+              <h3 class="task-title">{{ task.name }}</h3>
               <nav class="task-icons">
-                <button mat-icon-button (click)="toggleAssignment(task)" [attr.aria-label]="task.assignedTo ? 'Unassign' : 'Assign'">
-                  <mat-icon>{{ task.assignedTo ? 'person_remove' : 'person_add' }}</mat-icon>
+                <button mat-icon-button (click)="toggleAssignment(task)" [attr.aria-label]="task.assignedToMyself ? 'Unassign' : 'Assign'">
+                  <mat-icon>{{ task.assignedToMyself ? 'person_remove' : 'person_add' }}</mat-icon>
                 </button>
                 <button mat-icon-button (click)="editTask(task)" aria-label="Edit Task">
                   <mat-icon>edit</mat-icon>
@@ -35,27 +35,23 @@
           <section class="task-details">
             <section class="detail-item">
               <mat-icon class="detail-icon">person</mat-icon>
-              <p>{{ task.assignedTo || 'Unassigned' }}</p>
+              <p>{{ task.assignedToUsername || 'Unassigned' }}</p>
             </section>
             <section class="detail-item">
               <mat-icon class="detail-icon">calendar_today</mat-icon>
-              <p>Due: {{ task.dueDate }}</p>
+              <p>Due: {{ task.dueDate | date : "mediumDate"}}</p>
             </section>
           </section>
 
           <footer class="task-footer">
-            <mat-chip [ngClass]="task.status.toLowerCase()" class="status-chip">
-              {{ task.status }}
+            <mat-chip [ngClass]="task.currentStatusName.toLowerCase()" class="status-chip">
+              {{ task.currentStatusName }}
             </mat-chip>
 
             <section class="task-actions">
-              <button mat-stroked-button color="primary" (click)="markComplete(task.id)" *ngIf="task.status === 'Pending'" class="action-button">
+              <button mat-stroked-button color="primary" (click)="markComplete(task)" *ngIf="task.currentStatusName === 'Pending'" class="action-button">
                 <mat-icon>check_circle</mat-icon>
                 Complete
-              </button>
-              <button mat-stroked-button color="warn" (click)="removeTask(task.id)" class="action-button">
-                <mat-icon>delete</mat-icon>
-                Remove
               </button>
             </section>
           </footer>

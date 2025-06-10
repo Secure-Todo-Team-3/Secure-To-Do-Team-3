@@ -34,13 +34,25 @@ public class TaskController {
         return ResponseEntity.ok(dtoTasks);
     }
 
-    @GetMapping("/user-tasks/{userGuid}")
+    @GetMapping("/{taskGuid}")
+    public ResponseEntity<TaskDto> getTaskByGuid(@PathVariable UUID taskGuid) {
+        Task foundTask = taskService.findByTaskGuid(taskGuid);
+        if (foundTask != null) {
+            TaskDto taskDto = taskMapper.convertToDto(foundTask);
+            return ResponseEntity.ok(taskDto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/user-tasks")
     public ResponseEntity<List<TaskDto>> findTasksByUserGuid(
-            @PathVariable UUID userGuid,
+            Authentication authentication,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String team) {
 
+        UUID userGuid = (UUID) authentication.getPrincipal();
         List<Task> foundTasks = taskService.findEnrichedTasksByAssignedUser(
                 userGuid, name, status, team
         );
@@ -54,19 +66,11 @@ public class TaskController {
             @RequestBody TaskCreateRequestDto taskRequest,
             Authentication authentication) {
 
-        // Get the currently authenticated user who is creating the task.
-        User creator = (User) authentication.getPrincipal();
-
-        // Call the service to create the task.
-        Task createdTask = taskService.createTask(taskRequest, creator);
-
-        // Enrich the single created task with its status before mapping
-        // (The service already set the initial status, but this ensures consistency)
+        UUID creatorGuid = (UUID) authentication.getPrincipal();
+        Task createdTask = taskService.createTask(taskRequest, creatorGuid);
         createdTask = taskService.enrichTaskWithCurrentStatus(createdTask);
 
-        // Map the created entity to a DTO for the response.
-        TaskDto responseDto = taskMapper.convertToDto(createdTask); // Pass empty map or handle status mapping
-
+        TaskDto responseDto = taskMapper.convertToDto(createdTask); 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 

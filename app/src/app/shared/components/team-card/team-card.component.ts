@@ -30,7 +30,9 @@ export class TeamCardComponent {
   }
 
   editTeam() {
-    this.router.navigate(['/edit-team', this.team.id]);
+    this.router.navigate(['/edit-team', this.team.id], {
+      state: { team: this.team },
+    });
   }
 
   openMembers() {

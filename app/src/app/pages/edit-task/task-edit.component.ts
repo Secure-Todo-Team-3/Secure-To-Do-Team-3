@@ -20,6 +20,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TaskEditService } from './task-edit.service';
 import { Task } from '../../shared/models/task.model';
 import { environment } from 'src/app/shared/environments/environment';
+import { Status } from 'src/app/shared/models/status.model';
+import { Team } from 'src/app/shared/models/team.model';
+import { forkJoin, merge } from 'rxjs';
+import { MatCardActions } from '@angular/material/card';
 
 @Component({
   selector: 'app-task-edit-page',
@@ -38,6 +42,7 @@ import { environment } from 'src/app/shared/environments/environment';
     MatIconModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
+    MatCardActions,
   ],
   templateUrl: './task-edit.component.html',
   styleUrls: ['./task-edit.component.css'],
@@ -46,67 +51,62 @@ export class TaskEditPageComponent implements OnInit {
   taskForm: FormGroup;
   isEditing = false;
   isLoading = false;
-  taskId: string| undefined;
-  teams: string[] = [];
-  statuses: string[] = [];
+  teams: Team[] = [];
+  statuses: Status[] = [];
 
   constructor(
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private location: Location,
-    private route: ActivatedRoute,
     private router: Router,
     private taskEditService: TaskEditService
   ) {
     this.taskForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(3)]],
+      name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', [Validators.required, Validators.minLength(10)]],
       dueDate: ['', Validators.required],
-      team: ['', Validators.required],
-      assignToMyself: [false],
-      status: ['', Validators.required],
+      teamId: ['', Validators.required],
+      currentStatusId: ['', Validators.required],
+      id: [null],
     });
   }
 
   ngOnInit(): void {
-    const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras.state;
-    this.teams = state?.['teams'] || [];
-    this.statuses = state?.['statuses'] || [];
-    if (state?.['task']) {
-      this.isEditing = true;
-      const task = state['task'] as Task;
-      this.taskForm.patchValue({
-        title: task.title,
-        description: task.description,
-        dueDate: task.dueDate,
-        team: task.team,
-        assignToMyself: task.assignToMyself,
-        status: task.status,
+    if (this.router.url.startsWith('/edit-task')) {
+      const taskId: string = this.router.url.split('/').pop() || '';
+      forkJoin({
+        task: this.taskEditService.loadTask(taskId),
+        teams: this.taskEditService.loadUserTeams(),
+        statuses: this.taskEditService.loadStatuses(),
+      }).subscribe(({ task, teams, statuses }) => {
+        this.isEditing = true;
+        this.teams = teams;
+        this.statuses = statuses;
+        this.taskForm.patchValue({
+          name: task.name,
+          description: task.description,
+          dueDate: task.dueDate,
+          teamId: task.teamId,
+          currentStatusId: task.currentStatusId,
+          id: task.taskGuid,
+        });
       });
-      this.taskId = task.id;
-    } else if (this.router.url.startsWith('/edit-task')) {
-      this.showError('No task data provided for editing.');
-      this.isEditing = false;
-      this.taskForm.reset({
-        title: '',
-        description: '',
-        dueDate: '',
-        team: this.teams.length > 0 ? this.teams[0] : '',
-        assignToMyself: false,
-        status: this.statuses.length > 0 ? this.statuses[0] : '',
-      });
-      this.taskId = undefined;
     } else {
-      this.isEditing = false;
-      this.taskId = undefined;
-      this.taskForm.reset({
-        title: '',
-        description: '',
-        dueDate: '',
-        team: this.teams.length > 0 ? this.teams[0] : '',
-        assignToMyself: false,
-        status: this.statuses.length > 0 ? this.statuses[0] : '',
+      forkJoin({
+        teams: this.taskEditService.loadUserTeams(),
+        statuses: this.taskEditService.loadStatuses(),
+      }).subscribe(({ teams, statuses }) => {
+        this.isEditing = false;
+        this.teams = teams;
+        this.statuses = statuses;
+        this.taskForm.reset({
+          name: '',
+          description: '',
+          dueDate: '',
+          teamId: teams.length > 0 ? teams[0] : '',
+          currentStatusId: statuses.length > 0 ? statuses[0] : '',
+          id: null,
+        });
       });
     }
   }
@@ -116,7 +116,6 @@ export class TaskEditPageComponent implements OnInit {
       this.isLoading = true;
       const task: Task = {
         ...this.taskForm.value,
-        id: this.taskId,
       };
       this.taskEditService.saveTask(task, this.isEditing).subscribe({
         next: () => {
@@ -154,5 +153,39 @@ export class TaskEditPageComponent implements OnInit {
       duration: environment.snackbarDuration,
       panelClass: ['success-snackbar'],
     });
+  }
+
+  saveChanges() {
+    if (this.taskForm.invalid) {
+      this.taskForm.markAllAsTouched();
+    } else {
+      console.log(this.taskForm.value)
+      this.isLoading = true;
+      const task: Task = {
+        ...this.taskForm.value,
+      };
+
+      this.taskEditService.saveTask(task, this.isEditing).subscribe({
+        next: () => {
+          this.showSuccess(
+            this.isEditing
+              ? 'Task updated successfully!'
+              : 'Task created successfully!'
+          );
+          this.router.navigate(['/tasks']);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          this.showError(
+            'Failed to save task: ' + (error.message || 'Unknown error')
+          );
+          this.isLoading = false;
+        },
+      });
+    }
+  }
+
+  cancelChanges() {
+    this.location.back();
   }
 }

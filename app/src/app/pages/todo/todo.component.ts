@@ -13,6 +13,9 @@ import { TaskCardComponent } from 'src/app/shared/components/task-card/task-card
 import { Router } from '@angular/router';
 import { TodoService } from './todo.service';
 import { Task } from 'src/app/shared/models/task.model';
+import { Status } from 'src/app/shared/models/status.model';
+import { Team } from 'src/app/shared/models/team.model';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-task-dashboard',
@@ -35,31 +38,32 @@ import { Task } from 'src/app/shared/models/task.model';
   styleUrls: ['./todo.component.css'],
 })
 export class TodoPageComponent implements OnInit {
-  pendingTasks: Task[] = [];
-  completedTasks: Task[] = [];
+  tasks: Task[] = [];
+  statuses: Status[] = [];
+  teams: Team[] = [];
   isLoading = true;
 
   constructor(private router: Router, private todoService: TodoService) {}
 
   ngOnInit(): void {
     this.isLoading = true;
-    this.todoService.getPendingTasks().subscribe({
-      next: (tasks) => {
-        this.pendingTasks = tasks;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.pendingTasks = [];
-        this.isLoading = false;
-      },
-    });
 
-    this.todoService.getCompletedTasks().subscribe({
-      next: (tasks) => {
-        this.completedTasks = tasks;
+    forkJoin({
+      tasks: this.todoService.loadTasks(),
+      statuses: this.todoService.loadStatuses(),
+      teams: this.todoService.loadUserTeams(),
+    }).subscribe({
+      next: ({ tasks, statuses, teams }) => {
+        this.tasks = tasks;
+        this.statuses = statuses;
+        this.teams = teams;
+        this.isLoading = false;
       },
       error: () => {
-        this.completedTasks = [];
+        this.tasks = [];
+        this.statuses = [];
+        this.teams = [];
+        this.isLoading = false;
       },
     });
   }
