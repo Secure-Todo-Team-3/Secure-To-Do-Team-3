@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, throwError, catchError } from 'rxjs';
+import { Observable, tap, throwError, catchError, concatMap, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { StorageService } from './storage.service';
 import { AuthenticatedResponse, RegisterRequest, TotpSetupResponse, TotpVerificationRequest } from '../models/AuthModel';
 
@@ -10,6 +11,7 @@ import { AuthenticatedResponse, RegisterRequest, TotpSetupResponse, TotpVerifica
 })
 export class AuthService {
   private apiUrl = 'http://localhost:8080/api/auth';
+  private userApiUrl = 'http://localhost:8080/api/user';
 
   constructor(
     private httpClient: HttpClient,
@@ -22,37 +24,27 @@ export class AuthService {
   }
 
   verifyRegistration(request: TotpVerificationRequest): Observable<AuthenticatedResponse> {
-    return this.httpClient.post<AuthenticatedResponse>(`${this.apiUrl}/register/totp/verify`, request).pipe(
-      tap((res) => {
-        if (res.token) {
-          this.storageService.setToken(res.token);
-        }
-      }),
-      catchError((err) => throwError(() => err)) 
-    );
+    const authResponse$ = this.httpClient.post<AuthenticatedResponse>(`${this.apiUrl}/register/totp/verify`, request);
+    return this._primeCsrfToken(authResponse$);
   }
 
   login(username: string, password: string): Observable<AuthenticatedResponse> {
-    return this.httpClient.post<AuthenticatedResponse>(`${this.apiUrl}/login`, { username, password }).pipe(
-      tap((res) => {
-        if (res.token && !res.totpRequired) {
-          this.storageService.setToken(res.token);
-          this.router.navigate(['/dashboard']);
+    const authResponse$ = this.httpClient.post<AuthenticatedResponse>(`${this.apiUrl}/login`, { username, password });
+
+    return authResponse$.pipe(
+      concatMap(res => {
+        if (res.totpRequired) {
+          return of(res);
         }
+        return this._primeCsrfToken(of(res));
       }),
       catchError((err) => throwError(() => err))
     );
   }
 
   verifyLogin(request: TotpVerificationRequest): Observable<AuthenticatedResponse> {
-    return this.httpClient.post<AuthenticatedResponse>(`${this.apiUrl}/login/verify-totp`, request).pipe(
-      tap((res) => {
-        if (res.token) {
-          this.storageService.setToken(res.token);
-        }
-      }),
-      catchError((err) => throwError(() => err))
-    );
+    const authResponse$ = this.httpClient.post<AuthenticatedResponse>(`${this.apiUrl}/login/verify-totp`, request);
+    return this._primeCsrfToken(authResponse$);
   }
 
   logout(): void {
@@ -62,5 +54,23 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return !!this.storageService.getToken();
+  }
+
+  private _primeCsrfToken(authResponse$: Observable<AuthenticatedResponse>): Observable<AuthenticatedResponse> {
+    return authResponse$.pipe(
+      tap(res => {
+        if (res.token) {
+          this.storageService.setToken(res.token);
+        }
+      }),
+      concatMap(res => {
+        if (!res.token) {
+          return of(res);
+        }
+        return this.httpClient.get<any>(`${this.userApiUrl}/me`).pipe(
+          map(() => res)
+        );
+      })
+    );
   }
 }

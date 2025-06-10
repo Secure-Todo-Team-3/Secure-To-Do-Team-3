@@ -5,9 +5,11 @@ import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { provideHttpClient, withInterceptors, withInterceptorsFromDi } from '@angular/common/http';
 import { authInterceptor } from './app/core/interceptors/authInterceptor';
+import { credentialsInterceptor } from './app/core/interceptors/credentials.interceptor';
+import { csrfInterceptor } from './app/core/interceptors/csrf.interceptor';
 bootstrapApplication(AppComponent, {
   providers: [
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor,credentialsInterceptor,csrfInterceptor])),
     provideRouter(routes),
     provideAnimations(),
     provideHttpClient(),
