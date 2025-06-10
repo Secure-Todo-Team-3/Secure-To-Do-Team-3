@@ -16,6 +16,5 @@ public class TaskUpdateRequestDto {
     private String name;
     private String description;
     private OffsetDateTime dueDate;
-    private UUID assignedToUserGuid;
-    private String status;
+    private Long currentStatusId;
 }

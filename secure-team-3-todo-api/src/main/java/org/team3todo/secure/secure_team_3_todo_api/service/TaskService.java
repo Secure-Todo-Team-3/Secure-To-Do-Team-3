@@ -1,11 +1,10 @@
 package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import jakarta.persistence.criteria.Join;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskCreateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskUpdateRequestDto;
@@ -18,10 +17,10 @@ import org.team3todo.secure.secure_team_3_todo_api.repository.TaskStatusHistoryR
 import org.team3todo.secure.secure_team_3_todo_api.repository.TaskStatusRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamMembershipRepository;
 
-import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -62,7 +61,7 @@ public class TaskService {
         return taskRepository.findByTeam(foundTeam);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional()
     public List<Task> findTasksByAssignedUser(UUID userGuid, String taskName, String statusName, String teamName) {
         // Build a dynamic query using Specifications for database-level filtering.
         Specification<Task> spec = Specification.where(hasAssignedUser(userGuid));
@@ -116,40 +115,6 @@ public class TaskService {
 
         // Save the task. The database trigger will handle the history log automatically.
         return taskRepository.save(newTask);
-    }
-
-    @Transactional
-    public Task updateTask(TaskUpdateRequestDto taskRequest, UUID creatorGuid, UUID taskGuid) {
-        User updater = userService.findByUserGuid(creatorGuid);
-        auditingService.setAuditUser(updater);
-
-        try {
-            Task taskToUpdate = findByGuid(taskGuid);
-            teamMembershipService.verifyUserIsMember(updater.getId(), taskToUpdate.getTeam().getId());
-            if (taskRequest.getName() != null && !taskRequest.getName().isBlank()) {
-                taskToUpdate.setName(taskRequest.getName());
-            }
-            if (taskRequest.getDescription() != null && !taskRequest.getDescription().isBlank()) {
-                taskToUpdate.setDescription(taskRequest.getDescription());
-            }
-            if (taskRequest.getDueDate() != null) {
-                taskToUpdate.setDueDate(taskRequest.getDueDate());
-            }
-            if (taskRequest.getAssignedToUserGuid() != null) {
-                User targetUser = userService.findByUserGuid(taskRequest.getAssignedToUserGuid());
-                teamMembershipService.verifyUserIsMember(targetUser.getId(), taskToUpdate.getTeam().getId());
-                taskToUpdate.setAssignedToUser(targetUser);
-            }
-            if (taskRequest.getStatus() != null && !taskRequest.getStatus().isBlank()) {
-                TaskStatus newStatus = taskStatusRepository.findByName(taskRequest.getStatus())
-                        .orElseThrow(() -> new ResourceNotFoundException("The status of '" + taskRequest.getStatus() + "' does not exist."));
-                taskToUpdate.setTaskStatus(newStatus);
-            }
-            return taskRepository.save(taskToUpdate);
-
-        } finally {
-           // auditingService.clearAuditUser();
-        }
     }
 
     @Transactional
@@ -222,5 +187,43 @@ public class TaskService {
             return criteriaBuilder.like(criteriaBuilder.lower(statusJoin.get("name")), "%" + statusName.toLowerCase() + "%");
         };
     }
-}
 
+    public Task updateTask(UUID taskGuid, TaskUpdateRequestDto taskUpdateRequest, UUID updaterGuid) {
+        Task taskToUpdate = taskRepository.findByTaskGuidWithDetails(taskGuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with GUID: " + taskGuid));
+
+        User updater = userService.findByUserGuid(updaterGuid);
+        if (updater == null) {
+            throw new ResourceNotFoundException("Updater user not found with GUID: " + updaterGuid);
+        }
+
+        Optional<TeamMembership> membership = teamMembershipRepository.findByUserAndTeam(updater, taskToUpdate.getTeam());
+
+        if (membership.isEmpty()) {
+            throw new ForbiddenAccessException("You do not have permission to update this task in team: " + taskToUpdate.getTeam().getName());
+        }
+
+        if (taskUpdateRequest.getName() != null) {
+            taskToUpdate.setName(taskUpdateRequest.getName());
+        }
+        if (taskUpdateRequest.getDescription() != null) {
+            taskToUpdate.setDescription(taskUpdateRequest.getDescription());
+        }
+        if (taskUpdateRequest.getDueDate() != null) {
+            taskToUpdate.setDueDate(taskUpdateRequest.getDueDate());
+        }
+        if (taskUpdateRequest.getCurrentStatusId() != null) {
+            TaskStatus newStatus = taskStatusRepository.findById(taskUpdateRequest.getCurrentStatusId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Task status not found with ID: " + taskUpdateRequest.getCurrentStatusId()));
+            TaskStatusHistory newHistory = TaskStatusHistory.builder()
+                    .task(taskToUpdate)
+                    .status(newStatus)
+                    .changedByUser(updater)
+                    .build();
+            taskStatusHistoryRepository.save(newHistory);
+        }
+
+        return taskRepository.save(taskToUpdate);
+    }
+
+}

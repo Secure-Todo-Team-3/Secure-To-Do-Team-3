@@ -70,14 +70,17 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
-    @PutMapping("/{taskGuid}")
-    public ResponseEntity<TaskDto> updateTask(@RequestBody TaskUpdateRequestDto taskRequest,
-                                              Authentication authentication,
-                                              @PathVariable UUID taskGuid){
-        UUID creatorGuid = (UUID) authentication.getPrincipal();
-        Task createdTask = taskService.updateTask(taskRequest, creatorGuid, taskGuid);
-        TaskDto responseDto = taskMapper.convertToDto(createdTask);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    @PostMapping("/{taskGuid}/update")
+    public ResponseEntity<TaskDto> updateTask(
+            @PathVariable UUID taskGuid,
+            @RequestBody TaskUpdateRequestDto taskUpdateRequest,
+            Authentication authentication) {
+
+        UUID updaterGuid = (UUID) authentication.getPrincipal();
+        Task updatedTask = taskService.updateTask(taskGuid, taskUpdateRequest, updaterGuid);
+
+        TaskDto responseDto = taskMapper.convertToDto(updatedTask);
+        return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping("/{taskGuid}/assign-me")

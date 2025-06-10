@@ -42,6 +42,9 @@ export class TodoPageComponent implements OnInit {
   statuses: Status[] = [];
   teams: Team[] = [];
   isLoading = true;
+  selectedStatus: string = 'all';
+  selectedTeam: string = 'all';
+  searchTerm: string = '';
 
   constructor(private router: Router, private todoService: TodoService) {}
 
@@ -66,6 +69,26 @@ export class TodoPageComponent implements OnInit {
         this.isLoading = false;
       },
     });
+  }
+
+  searchTasks() {
+    this.isLoading = true;
+    this.todoService
+      .searchTasks(
+        this.searchTerm || undefined,
+        this.selectedStatus === 'all' ? undefined : this.selectedStatus,
+        this.selectedTeam === 'all' ? undefined : this.selectedTeam,
+      )
+      .subscribe({
+        next: (tasks) => {
+          this.tasks = tasks;
+          this.isLoading = false;
+        },
+        error: () => {
+          this.tasks = [];
+          this.isLoading = false;
+        },
+      });
   }
 
   addTask() {

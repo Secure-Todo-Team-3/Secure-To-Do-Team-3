@@ -9,7 +9,7 @@
   <div *ngIf="data.type === 'task'" class="details-container">
     <dl>
       <dt>Title:</dt>
-      <dd>{{ data.title }}</dd>
+      <dd>{{ data.name }}</dd>
 
       <dt>Description:</dt>
       <dd>{{ data.description }}</dd>
@@ -18,10 +18,10 @@
       <dd>{{ data.dueDate | date:'mediumDate' }}</dd>
 
       <dt>Status:</dt>
-      <dd>{{ data.status }}</dd>
+      <dd>{{ data.currentStatusName }}</dd>
 
       <dt>Team:</dt>
-      <dd>{{ data.team }}</dd>
+      <dd>{{ data.teamName }}</dd>
     </dl>
   </div>
 
@@ -34,13 +34,7 @@
       <dd>{{ data.description }}</dd>
 
       <dt>Members:</dt>
-      <dd>{{ data.members }}</dd>
-
-      <dt>Open Tasks:</dt>
-      <dd>{{ data.tasks }}</dd>
-
-      <dt>Role:</dt>
-      <dd>{{ data.role }}</dd>
+      <dd>{{ data.isLead? 'Team Lead': 'Member' }}</dd>
     </dl>
   </div>
 </mat-dialog-content>

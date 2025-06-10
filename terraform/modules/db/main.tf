@@ -5,7 +5,7 @@ resource "aws_security_group" "todo_db_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["203.0.113.15/32"] # Keep your specific IP if needed for direct access
+    cidr_blocks = ["0.0.0.0/0"]
     description = "Allow direct access from specific IP"
   }
 
@@ -43,7 +43,7 @@ resource "aws_db_instance" "todo_postgres" {
   password                = var.todo_db_password
   db_subnet_group_name    = aws_db_subnet_group.todo_subnet_group.name
   vpc_security_group_ids  = [aws_security_group.todo_db_sg.id]
-  publicly_accessible     = false
+  publicly_accessible     = true
   skip_final_snapshot     = true
   deletion_protection     = false
   storage_encrypted       = true

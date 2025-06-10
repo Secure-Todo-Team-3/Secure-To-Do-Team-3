@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface TaskStatusRepository extends JpaRepository<TaskStatus, Integer> {
     List<TaskStatus> findAll();
     Optional<TaskStatus> findByName(String name);
+    Optional<TaskStatus> findById(Long id);
 }
