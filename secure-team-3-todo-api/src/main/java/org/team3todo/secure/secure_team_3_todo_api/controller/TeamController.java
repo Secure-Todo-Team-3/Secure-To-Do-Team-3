@@ -56,7 +56,7 @@ public class TeamController {
         return ResponseEntity.ok(dtoFoundTeams);
     }
 
-    @GetMapping(value = "/user-teams/{userGuid}", params = "type=team_lead")
+    @GetMapping(value = "/user-teams/{userGuid}", params = "type=creator")
     public ResponseEntity<List<TeamDto>> getTeamsUserIsLeaderOf(@PathVariable UUID userGuid){
         List<Team> foundTeams = teamService.findTeamsCreatedByUserGuid(userGuid);
         List<TeamDto> dtoFoundTeams = teamMapper.convertToDtoList(foundTeams);
@@ -71,8 +71,8 @@ public class TeamController {
     }
 
     @PostMapping("/{teamId}/add-user")
-    public ResponseEntity<TeamMembershipDto> addUserToteam(@RequestBody String userEmail, @PathVariable Long teamId){
-        TeamMembership returnedTeamMembership = teamService.addUserToTeam(userEmail, teamId);
+    public ResponseEntity<TeamMembershipDto> addUserToteam(@RequestBody AddUserToTeamDto addUserToTeamDto, @PathVariable Long teamId){
+        TeamMembership returnedTeamMembership = teamService.addUserToTeam(addUserToTeamDto.getUserEmail(), teamId);
         if(returnedTeamMembership != null){
             TeamMembershipDto dtoReturnedTeam = teamMembershipMapper.convertToDto(returnedTeamMembership);
             return ResponseEntity.ok(dtoReturnedTeam);
@@ -92,6 +92,7 @@ public class TeamController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
+    // WARNING USES TEAMMEMBERSHIPSERVICE
     @PutMapping("/{teamId}/member/{userGuid}/role")
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<TeamMembershipDto> updateUserRoleInTeam(

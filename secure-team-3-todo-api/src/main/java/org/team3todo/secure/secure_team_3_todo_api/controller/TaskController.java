@@ -11,7 +11,6 @@ import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 import org.team3todo.secure.secure_team_3_todo_api.mapper.TaskMapper;
 import org.team3todo.secure.secure_team_3_todo_api.service.TaskService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +28,7 @@ public class TaskController {
 
     @GetMapping("/team-tasks/{teamId}")
     public ResponseEntity<List<TaskDto>> findTasksByTeamId(@PathVariable Long teamId){
-        List<Task> foundTasks = taskService.findEnrichedTasksByTeamId(teamId);
+        List<Task> foundTasks = taskService.findTasksByTeamId(teamId);
         List<TaskDto> dtoTasks = taskMapper.convertToDtoList(foundTasks);
         return ResponseEntity.ok(dtoTasks);
     }
@@ -41,10 +40,7 @@ public class TaskController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String team) {
 
-        List<Task> foundTasks = taskService.findEnrichedTasksByAssignedUser(
-                userGuid, name, status, team
-        );
-
+        List<Task> foundTasks = taskService.findTasksByAssignedUser(userGuid, name, status, team);
         List<TaskDto> dtoTasks = taskMapper.convertToDtoList(foundTasks);
         return ResponseEntity.ok(dtoTasks);
     }
@@ -53,20 +49,9 @@ public class TaskController {
     public ResponseEntity<TaskDto> createTask(
             @RequestBody TaskCreateRequestDto taskRequest,
             Authentication authentication) {
-
-        // Get the currently authenticated user who is creating the task.
         User creator = (User) authentication.getPrincipal();
-
-        // Call the service to create the task.
         Task createdTask = taskService.createTask(taskRequest, creator);
-
-        // Enrich the single created task with its status before mapping
-        // (The service already set the initial status, but this ensures consistency)
-        createdTask = taskService.enrichTaskWithCurrentStatus(createdTask);
-
-        // Map the created entity to a DTO for the response.
-        TaskDto responseDto = taskMapper.convertToDto(createdTask); // Pass empty map or handle status mapping
-
+        TaskDto responseDto = taskMapper.convertToDto(createdTask);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
@@ -74,7 +59,6 @@ public class TaskController {
     public ResponseEntity<TaskDto> assignTaskToCurrentUser(
             @PathVariable UUID taskGuid,
             Authentication authentication) {
-
         User currentUser = (User) authentication.getPrincipal();
         Task updatedTask = taskService.assignCurrentUserToTask(taskGuid, currentUser);
         TaskDto responseDto = taskMapper.convertToDto(updatedTask);
@@ -85,7 +69,6 @@ public class TaskController {
     public ResponseEntity<TaskDto> unassignTaskFromCurrentUser(
             @PathVariable UUID taskGuid,
             Authentication authentication) {
-
         User currentUser = (User) authentication.getPrincipal();
         Task updatedTask = taskService.unassignCurrentUserFromTask(taskGuid, currentUser);
         TaskDto responseDto = taskMapper.convertToDto(updatedTask);

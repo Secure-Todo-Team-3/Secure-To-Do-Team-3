@@ -21,7 +21,8 @@ import java.util.*;
         @Index(name = "idx_tasks_team_id", columnList = "team_id"),
         @Index(name = "idx_tasks_due_date", columnList = "due_date"),
         @Index(name = "idx_tasks_assigned_to_user_id", columnList = "assigned_to_user_id"),
-        @Index(name = "idx_tasks_task_guid", columnList = "task_guid")
+        @Index(name = "idx_tasks_task_guid", columnList = "task_guid"),
+        @Index(name = "idx_tasks_task_status_id", columnList = "task_status_id")
 })
 public class Task {
 
@@ -30,14 +31,19 @@ public class Task {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id", nullable = false, foreignKey = @ForeignKey(name="fk_tasks_user_id"))
+    @JoinColumn(name="creator_user_id", nullable = false, foreignKey = @ForeignKey(name="fk_tasks_user_id"))
     @OnDelete(action = OnDeleteAction.RESTRICT)
     private User userCreator;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="team_id", nullable = false, foreignKey = @ForeignKey(name="fk_tasks_team_id"))
-    @OnDelete(action = OnDeleteAction.RESTRICT)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Team team;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_status_id", nullable = false, foreignKey = @ForeignKey(name = "fk_tasks_status_id"))
+    @OnDelete(action = OnDeleteAction.RESTRICT)
+    private TaskStatus taskStatus;
 
     @Column(length = 255, nullable = false)
     private String name;
@@ -61,12 +67,8 @@ public class Task {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_to_user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_tasks_assigned_to_user_id"))
-    @OnDelete(action = OnDeleteAction.RESTRICT)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User assignedToUser;
-
-    // vvvvv RELATIONSHIPS vvvvv
-    @OneToMany(mappedBy = "task", cascade = CascadeType.REMOVE) // Assuming ON DELETE CASCADE from task_status_history
-    private List<TaskStatusHistory> statusHistory = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {
@@ -74,9 +76,6 @@ public class Task {
             taskGuid = UUID.randomUUID();
         }
     }
-
-    @Transient // This annotation marks the field to be ignored by JPA
-    private TaskStatus currentStatus;
 
     @Override
     public boolean equals(Object o) {

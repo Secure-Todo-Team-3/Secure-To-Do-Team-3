@@ -8,6 +8,7 @@ import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
 import org.team3todo.secure.secure_team_3_todo_api.entity.TeamMembership;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 import org.team3todo.secure.secure_team_3_todo_api.exception.DuplicateResourceException;
+import org.team3todo.secure.secure_team_3_todo_api.exception.ForbiddenAccessException;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamMembershipRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamRepository;
@@ -76,5 +77,11 @@ public class TeamMembershipService {
 
     public boolean isUserInTeam(User user, Team team){
         return teamMembershipRepository.existsByUserAndTeam(user,team);
+    }
+
+    public void verifyUserIsMember(Long userId, Long teamId) {
+        if (!teamMembershipRepository.existsByUserIdAndTeamId(userId, teamId)) {
+            throw new ForbiddenAccessException("Access denied. User with ID " + userId + " is not a member of team with ID " + teamId + ".");
+        }
     }
 }

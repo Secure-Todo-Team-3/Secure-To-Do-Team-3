@@ -24,10 +24,6 @@ public class UserMapper {
                 .isActive(user.getIsActive())
                 .isLocked(user.getIsLocked())
                 .createdAt(user.getCreatedAt())
-                // If you decide to include createdTeamIds:
-                // .createdTeamIds(user.getCreatedTeams() != null ?
-                // user.getCreatedTeams().stream().map(Team::getId).collect(Collectors.toList()) :
-                // Collections.emptyList())
                 .build();
     }
 
@@ -36,7 +32,7 @@ public class UserMapper {
             return Collections.emptyList();
         }
         return users.stream()
-                .map(this::convertToDto) // Use 'this' for instance method
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
