@@ -24,7 +24,8 @@ jobs:
         with:
           node-version: '20' 
           cache: 'npm'       
-
+        working-directory: ./app
+        
       - name: Install Angular dependencies
         run: npm ci 
         working-directory: ./app 
