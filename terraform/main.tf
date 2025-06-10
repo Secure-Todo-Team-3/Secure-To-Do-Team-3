@@ -61,6 +61,7 @@ module "secrets_manager" {
   jwt_private_key_base64 = var.jwt_private_key_base64_value
   jwt_public_key_base64  = var.jwt_public_key_base64_value
   password_pepper_value  = var.password_pepper_string
+  field_encryption_key_value = var.field_encryption_key_value
 }
 
 module "ecr" {

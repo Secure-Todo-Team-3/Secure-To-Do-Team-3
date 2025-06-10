@@ -8,36 +8,36 @@ variable "db_name" {
 variable "db_username" {
   description = "The username for the database."
   type        = string
-  sensitive   = true # Mark as sensitive
+  sensitive   = true 
 }
 
 variable "db_password" {
   description = "The password for the database."
   type        = string
-  sensitive   = true # Mark as sensitive
+  sensitive   = true 
 }
-/*
-variable "totp_secret" {
-  description = "TOTP shared secret for two-factor authentication (if used by app)."
-  type        = string
-  sensitive   = true
-}
-*/
+
+
+# variable "totp_secret" {
+#   description = "TOTP shared secret for two-factor authentication (if used by app)."
+#   type        = string
+#   sensitive   = true
+# }
 
 
 variable "vpc_cidr" {
   description = "CIDR block for the VPC."
-  default     = "10.0.0.0/16" # Ensure this matches the value in main.tf for the VPC module
+  default     = "10.0.0.0/16" 
   type        = string
 }
 
-variable "public_subnet_cidr" { # This aligns with your modules/vpc/variables.tf
+variable "public_subnet_cidr" {
   description = "Base CIDR for public subnets in the VPC module."
   type        = string
   default     = "10.0.0.0/20"
 }
 
-variable "private_subnet_cidr" { # This aligns with your modules/vpc/variables.tf
+variable "private_subnet_cidr" { 
   description = "Base CIDR for private subnets in the VPC module."
   type        = string
   default     = "10.0.16.0/20"
@@ -46,19 +46,19 @@ variable "private_subnet_cidr" { # This aligns with your modules/vpc/variables.t
 variable "availability_zones" {
   description = "List of availability zones to use for the subnets."
   type        = list(string)
-  default     = ["eu-west-1a", "eu-west-1b"] # Or use the data source directly in main.tf
+  default     = ["eu-west-1a", "eu-west-1b"] 
 }
 
 
 variable "instance_type" {
   description = "The type of EC2 instance to launch (to be removed after EC2 destroy)."
   default     = "t3.micro"
-  type        = string # Explicitly set type
+  type        = string 
 }
 
 variable "ami_id" {
   description = "The Amazon Machine Image (AMI) ID for the EC2 instance (to be removed after EC2 destroy)."
-  default     = "ami-080b2e8ce472c5091" # Note: Your EC2 module uses a data source, this variable might be unused.
+  default     = "ami-080b2e8ce472c5091" 
   type        = string
 }
 
@@ -76,18 +76,17 @@ variable "acm_certificate_arn" {
 }
 
 
-variable "aws_region" { # Added for consistency, though provider hardcodes "eu-west-1"
+variable "aws_region" {
   description = "The AWS region to deploy resources in."
   type        = string
   default     = "eu-west-1"
 }
 
-# variables.tf
 
 variable "name_prefix" {
   description = "A unique prefix for naming all resources."
   type        = string
-  default     = "todo" # Or your preferred default prefix
+  default     = "todoapp" 
 }
 
 variable "db_username_value" {
@@ -105,7 +104,7 @@ variable "db_password_value" {
 variable "db_name_value" {
   description = "The name of the RDS PostgreSQL database."
   type        = string
-  sensitive   = true # Mark as sensitive if its value is sensitive (e.g., if it's dynamic)
+  sensitive   = true 
 }
 
 variable "jwt_private_key_base64_value" {
@@ -126,3 +125,8 @@ variable "password_pepper_string" {
   sensitive   = true
 }
 
+variable "field_encryption_key_value" {
+  description = "The application's field encryption key for Secrets Manager."
+  type        = string
+  sensitive   = true
+}
