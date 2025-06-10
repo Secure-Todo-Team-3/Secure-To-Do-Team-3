@@ -9,7 +9,7 @@ export class ApiService {
   patch<T>(arg0: string, arg1: {}): Observable<import("../../pages/teams-tasks/team-tasks.service").Task> {
       throw new Error('Method not implemented.');
   }
-  private baseUrl = '/api';
+  private baseUrl = 'http://localhost:8080/api';
 
   constructor(private http: HttpClient) {}
 

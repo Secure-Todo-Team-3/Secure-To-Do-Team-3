@@ -35,6 +35,7 @@
         mat-icon-button
         (click)="drawer.toggle()"
         aria-label="Toggle sidenav"
+        *ngIf="isLoggedIn"
       >
         <mat-icon>menu</mat-icon>
       </button>

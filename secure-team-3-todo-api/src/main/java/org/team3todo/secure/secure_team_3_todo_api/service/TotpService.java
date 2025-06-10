@@ -7,8 +7,6 @@ import dev.samstevens.totp.qr.QrGenerator;
 import dev.samstevens.totp.qr.ZxingPngQrGenerator;
 import dev.samstevens.totp.secret.DefaultSecretGenerator;
 import dev.samstevens.totp.secret.SecretGenerator;
-import dev.samstevens.totp.time.SystemTimeProvider;
-import dev.samstevens.totp.time.TimeProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +28,7 @@ public class TotpService {
         QrData data = new QrData.Builder()
                 .label(email)
                 .secret(secret)
-                .issuer("YourAppName") // Replace with your application's name
+                .issuer("Todo")
                 .algorithm(HashingAlgorithm.SHA256)
                 .digits(6)
                 .period(30)
@@ -41,7 +39,6 @@ public class TotpService {
                     qrGenerator.getImageMimeType()
             );
         } catch (QrGenerationException e) {
-            // Handle error appropriately
             throw new RuntimeException("Could not generate QR code", e);
         }
     }

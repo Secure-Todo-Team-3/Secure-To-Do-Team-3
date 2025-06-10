@@ -12,7 +12,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
-/// A custom PasswordEncoder implementation, we should be using BCryptPasswordEncoder impl, but this allows for pepper
 @Component
 public class CustomPasswordEncoder implements PasswordEncoder {
     private static final String HASH_ALGORITHM = "SHA-256"; 

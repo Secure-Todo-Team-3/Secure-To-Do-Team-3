@@ -49,6 +49,9 @@ public class UserService implements UserDetailsService{
         user.setLoginAttempts(0);
         userRepository.save(user);
     }
+     public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
 
     @Transactional
     public void handleFailedLoginAttempt(String username){

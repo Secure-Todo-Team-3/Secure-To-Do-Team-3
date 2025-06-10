@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.team3todo.secure.secure_team_3_todo_api.dto.*;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
@@ -16,6 +15,7 @@ import org.team3todo.secure.secure_team_3_todo_api.mapper.TeamMembershipMapper;
 import org.team3todo.secure.secure_team_3_todo_api.mapper.UserMapper;
 import org.team3todo.secure.secure_team_3_todo_api.service.TeamMembershipService;
 import org.team3todo.secure.secure_team_3_todo_api.service.TeamService;
+import org.team3todo.secure.secure_team_3_todo_api.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,11 @@ public class TeamController {
     private final UserMapper userMapper;
     private final TeamMembershipMapper teamMembershipMapper;
     private final TeamMembershipService teamMembershipService;
+    private final UserService userService;
 
     @Autowired
-    public TeamController(TeamService teamService, TeamMapper teamMapper, UserMapper userMapper, TeamMembershipMapper teamMembershipMapper, TeamMembershipService teamMembershipService) {
-        this.teamService = teamService; this.teamMapper = teamMapper; this.userMapper = userMapper; this.teamMembershipMapper = teamMembershipMapper; this.teamMembershipService = teamMembershipService;
+    public TeamController(TeamService teamService, TeamMapper teamMapper, UserMapper userMapper, TeamMembershipMapper teamMembershipMapper, TeamMembershipService teamMembershipService, UserService userService) {
+        this.teamService = teamService; this.teamMapper = teamMapper; this.userMapper = userMapper; this.teamMembershipMapper = teamMembershipMapper; this.teamMembershipService = teamMembershipService; this.userService = userService;
     }
 
     @GetMapping("/{teamId}")
@@ -82,15 +83,19 @@ public class TeamController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<TeamDto> createTeam(
-            @RequestBody TeamCreateRequestDto teamRequest,
-            Authentication authentication) {
-        User creator = (User) authentication.getPrincipal();
-        Team createdTeam = teamService.createTeam(teamRequest, creator);
-        TeamDto responseDto = teamMapper.convertToDto(createdTeam);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
-    }
+@PostMapping("/create")
+public ResponseEntity<TeamDto> createTeam(
+        @RequestBody TeamCreateRequestDto teamRequest,
+        Authentication authentication) {
+    
+    String username = (String) authentication.getPrincipal();
+
+    User creator =(User) this.userService.loadUserByUsername(username);
+
+    Team createdTeam = teamService.createTeam(teamRequest, creator);
+    TeamDto responseDto = teamMapper.convertToDto(createdTeam);
+    return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+}
 
     @PutMapping("/{teamId}/member/{userGuid}/role")
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")

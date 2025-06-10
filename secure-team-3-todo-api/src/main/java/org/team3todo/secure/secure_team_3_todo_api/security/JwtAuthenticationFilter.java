@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             User userDetails = this.userDetailsService.findByUserGuid(userGuid);
             if (userDetails.isAccountNonLocked() && userDetails.isEnabled()) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
+                        userDetails.getUserGuid(),
                         null,
                         userDetails.getAuthorities()
                 );
