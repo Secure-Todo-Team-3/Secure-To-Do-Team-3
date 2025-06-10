@@ -1,6 +1,7 @@
 package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Important for write operations
 import org.team3todo.secure.secure_team_3_todo_api.entity.TeamRole;
@@ -8,6 +9,7 @@ import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
 import org.team3todo.secure.secure_team_3_todo_api.entity.TeamMembership;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 import org.team3todo.secure.secure_team_3_todo_api.exception.DuplicateResourceException;
+import org.team3todo.secure.secure_team_3_todo_api.exception.ForbiddenAccessException;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamMembershipRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamRepository;
@@ -23,20 +25,30 @@ public class TeamMembershipService {
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
     private final TeamRoleRepository teamRoleRepository;
+    private final AuditingService auditingService;
+    private final UserService userService;
 
     @Autowired
     public TeamMembershipService(TeamMembershipRepository teamMembershipRepository,
                                  UserRepository userRepository,
                                  TeamRepository teamRepository,
-                                 TeamRoleRepository teamRoleRepository) {
+                                 TeamRoleRepository teamRoleRepository,
+                                 AuditingService auditingService,
+                                 UserService userService) {
         this.teamMembershipRepository = teamMembershipRepository;
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
         this.teamRoleRepository = teamRoleRepository;
+        this.auditingService = auditingService;
+        this.userService = userService;
     }
 
     @Transactional
     public TeamMembership addUserToTeam(Long userId, Long teamId, Long roleId) {
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         Team team = teamRepository.findById(teamId)
@@ -60,6 +72,10 @@ public class TeamMembershipService {
 
     @Transactional
     public TeamMembership updateUserRoleInTeam(UUID userGuid, Long teamId, Long newRoleId) {
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
+
         User user = userRepository.findByUserGuid(userGuid)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userGuid));
         Team team = teamRepository.findById(teamId)
@@ -76,5 +92,11 @@ public class TeamMembershipService {
 
     public boolean isUserInTeam(User user, Team team){
         return teamMembershipRepository.existsByUserAndTeam(user,team);
+    }
+
+    public void verifyUserIsMember(Long userId, Long teamId) {
+        if (!teamMembershipRepository.existsByUserIdAndTeamId(userId, teamId)) {
+            throw new ForbiddenAccessException("Access denied. User with ID " + userId + " is not a member of team with ID " + teamId + ".");
+        }
     }
 }

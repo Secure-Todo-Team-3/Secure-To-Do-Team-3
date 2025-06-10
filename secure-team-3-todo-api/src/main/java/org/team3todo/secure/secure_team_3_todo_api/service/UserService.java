@@ -3,6 +3,7 @@ package org.team3todo.secure.secure_team_3_todo_api.service;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,12 +18,15 @@ import java.util.UUID;
 @Service
 public class UserService implements UserDetailsService{
     private final UserRepository userRepository;
+    private final AuditingService auditingService;
+
     @Value("${security.login.max-attempts}")
     private int maxLoginAttempts;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, AuditingService auditingService) {
         this.userRepository = userRepository;
+        this.auditingService = auditingService;
     }
 
     public User findByUserGuid(UUID guid) {
@@ -45,6 +49,10 @@ public class UserService implements UserDetailsService{
     }
 
     public void resetLoginAttempts(String username){
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
+
         User user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("This user does not exist. This should not be happening."));
         user.setLoginAttempts(0);
         userRepository.save(user);
@@ -55,6 +63,9 @@ public class UserService implements UserDetailsService{
 
     @Transactional
     public void handleFailedLoginAttempt(String username){
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
         User user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("This user does not exist. This should not be happening."));
         int updatedLoginAttempts = user.getLoginAttempts() +1;
         user.setLoginAttempts(updatedLoginAttempts);

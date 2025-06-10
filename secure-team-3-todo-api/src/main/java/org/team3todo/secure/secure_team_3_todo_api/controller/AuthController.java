@@ -15,16 +15,16 @@ import org.team3todo.secure.secure_team_3_todo_api.dto.TotpSetupResponse;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TotpVerificationRequest;
 import org.team3todo.secure.secure_team_3_todo_api.service.AuthService;
 
-import io.jsonwebtoken.security.InvalidKeyException; 
+import io.jsonwebtoken.security.InvalidKeyException;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor 
+@RequiredArgsConstructor
 @CrossOrigin("*")
-public class AuthController { 
+public class AuthController {
 
-    private final AuthService service; 
+    private final AuthService service;
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticatedResponseDto> login(@RequestBody AuthenticationRequestDto authenticationReq) {
@@ -35,11 +35,11 @@ public class AuthController {
             return ResponseEntity.badRequest().build();
         }
     }
-     @PostMapping("/login/verify-totp")
+    @PostMapping("/login/verify-totp")
     public ResponseEntity<AuthenticatedResponseDto> loginWithTotp(@RequestBody TotpVerificationRequest request) throws InvalidKeyException, IOException {
         return ResponseEntity.ok(service.loginWithTotp(request));
     }
-    
+
     @PostMapping("/totp/setup")
     public ResponseEntity<TotpSetupResponse> setupTotp(Authentication authentication) {
         return ResponseEntity.ok(service.setupTotp(authentication));
@@ -47,7 +47,7 @@ public class AuthController {
 
     @PostMapping("register/totp/verify")
     public ResponseEntity<AuthenticatedResponseDto> verifyTotp(Authentication authentication, @RequestBody TotpVerificationRequest request) {
-        
+
         try {
             return ResponseEntity.ok(service.verifyInitialTotpAndActivateUser(request));
         } catch (InvalidKeyException | IOException e) {

@@ -2,6 +2,7 @@ package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TeamCreateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
@@ -24,19 +25,25 @@ public class TeamService {
     private final TeamMembershipRepository teamMembershipRepository;
     private final TeamMembershipService teamMembershipService;
     private final TeamRoleRepository teamRoleRepository;
+    private final AuditingService auditingService;
 
 
     @Autowired
-    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService, TeamRoleRepository teamRoleRepository) {
+    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService, TeamRoleRepository teamRoleRepository,AuditingService auditingService) {
         this.teamRepository = teamRepository;
         this.userService = userService;
         this.teamMembershipRepository = teamMembershipRepository;
         this.teamMembershipService = teamMembershipService;
         this.teamRoleRepository = teamRoleRepository;
+        this.auditingService = auditingService;
     }
 
     public Team findById(Long id) {
         return teamRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Team with id: "+id+" does not exist."));
+    }
+
+    public Team findByName(String name) {
+        return teamRepository.findByName(name).orElseThrow(() -> new ResourceNotFoundException("Team with name: "+name+" does not exist."));
     }
 
     public List<Team> findAllByUserGuid(UUID userGuid){
@@ -79,6 +86,10 @@ public class TeamService {
     }
 
     public TeamMembership addUserToTeam(String userEmail, Long teamId){
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
+
         User user = userService.findByUserEmail(userEmail);
         Team team = findById(teamId);
         if(user == null){
@@ -93,6 +104,10 @@ public class TeamService {
 
     @Transactional
     public Team createTeam(TeamCreateRequestDto teamRequest, User creator) {
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
+
         if (teamRepository.existsByName(teamRequest.getName())) {
             throw new DuplicateResourceException("A team with the name '" + teamRequest.getName() + "' already exists.");
         }

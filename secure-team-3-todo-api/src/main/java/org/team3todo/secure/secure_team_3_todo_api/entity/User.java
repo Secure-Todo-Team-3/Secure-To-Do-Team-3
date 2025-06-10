@@ -20,8 +20,7 @@ import java.util.*;
 @Table(name="users", indexes = {
         @Index(name = "idx_users_username", columnList = "username"),
         @Index(name = "idx_users_email", columnList = "email"),
-        @Index(name = "idx_users_user_guid", columnList = "user_guid"),
-        @Index(name = "idx_users_system_role_id", columnList = "system_role_id") // Added index
+        @Index(name = "idx_users_user_guid", columnList = "user_guid")
 })
 public class User implements UserDetails {
     @Id
@@ -55,18 +54,18 @@ public class User implements UserDetails {
 
     @Column(name = "is_totp_enabled", columnDefinition = "BOOLEAN DEFAULT FALSE")
     @Builder.Default
-    private boolean isTotpEnabled = false; // Renamed to match DDL column name
+    private boolean isTotpEnabled = false;
 
     @Column(name = "totp_secret", columnDefinition = "TEXT")
     @Convert(converter = StringCryptoConverter.class) 
-    private String totpSecret; // Added totp_secret field
+    private String totpSecret;
 
     @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
     private Boolean isActive = true;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMPTZ")
     private OffsetDateTime createdAt;
 
     // vvvvv RELATIONSHIPS vvvvv
@@ -86,10 +85,6 @@ public class User implements UserDetails {
     @Builder.Default
     private List<Task> assignedTasks = new ArrayList<>();
 
-    @OneToMany(mappedBy = "changedByUser")
-    @Builder.Default
-    private List<TaskStatusHistory> taskStatusHistories = new ArrayList<>();
-
     @PrePersist
     public void prePersist() {
         if (this.userGuid == null) {
@@ -106,7 +101,6 @@ public class User implements UserDetails {
         return Collections.emptyList();
     }
 
-
     @Override
     public String getPassword() {
         return passwordHash;
@@ -114,7 +108,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // Or add logic for this
+        return true;
     }
 
     @Override
@@ -124,7 +118,7 @@ public class User implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // Or add logic for this
+        return true;
     }
 
     @Override
