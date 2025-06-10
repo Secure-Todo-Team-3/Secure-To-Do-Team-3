@@ -44,3 +44,9 @@ variable "password_pepper_value" {
   type        = string
   sensitive   = true
 }
+
+variable "field_encryption_key_value" {
+  description = "The secret value for the application's field encryption key."
+  type        = string
+  sensitive   = true 
+}
