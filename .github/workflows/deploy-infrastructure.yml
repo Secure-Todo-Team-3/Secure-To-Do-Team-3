@@ -6,9 +6,6 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  TF_WORKING_DIR: ./terraform
-
 jobs:
   terraform_apply:
     name: "Terraform Apply"
@@ -16,6 +13,19 @@ jobs:
     permissions:
       id-token: write 
       contents: read  
+      
+    env:
+      TF_WORKING_DIR: ./terraform
+      TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
+      TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+      TF_VAR_db_username_value: ${{ secrets.DB_USERNAME }}
+      TF_VAR_db_password_value: ${{ secrets.DB_PASSWORD }}
+      TF_VAR_db_name_value: ${{ secrets.RDS_DB_NAME }}
+      TF_VAR_jwt_private_key_base64_value: ${{ secrets.JWT_PRIVATE_KEY_BASE64_VALUE }}
+      TF_VAR_jwt_public_key_base64_value: ${{ secrets.JWT_PUBLIC_KEY_BASE64_VALUE }}
+      TF_VAR_password_pepper_string: ${{ secrets.PASSWORD_PEPPER_STRING }}
+      TF_VAR_field_encryption_key_value: ${{ secrets.FIELD_ENCRYPTION_KEY_VALUE }}
+      TF_VAR_acm_certificate_arn: ${{ secrets.ACM_CERTIFICATE_ARN }}
 
     steps:
       - name: Checkout code
@@ -42,21 +52,9 @@ jobs:
         run: terraform validate
         working-directory: ${{ env.TF_WORKING_DIR }}
 
-      -  name: Terraform Plan
-         env:
-            TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
-            TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
-            TF_VAR_db_username_value: ${{ secrets.DB_USERNAME }}
-            TF_VAR_db_password_value: ${{ secrets.DB_PASSWORD }}
-            TF_VAR_db_name_value: ${{ secrets.RDS_DB_NAME }}
-            TF_VAR_jwt_private_key_base64_value: ${{ secrets.JWT_PRIVATE_KEY_BASE64_VALUE }}
-            TF_VAR_jwt_public_key_base64_value: ${{ secrets.JWT_PUBLIC_KEY_BASE64_VALUE }}
-            TF_VAR_password_pepper_string: ${{ secrets.PASSWORD_PEPPER_STRING }}
-            TF_VAR_field_encryption_key_value: ${{ secrets.FIELD_ENCRYPTION_KEY_VALUE }}
-            TF_VAR_acm_certificate_arn: ${{ secrets.ACM_CERTIFICATE_ARN }}
-          
-         run: terraform plan -no-color -input=false
-         working-directory: ${{ env.TF_WORKING_DIR }}
+      - name: Terraform Plan
+        run: terraform plan -no-color -input=false
+        working-directory: ${{ env.TF_WORKING_DIR }}
          
       - name: Terraform Apply
         id: apply
