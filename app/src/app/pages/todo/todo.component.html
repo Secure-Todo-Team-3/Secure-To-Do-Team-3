@@ -3,8 +3,13 @@
     <section class="search-section">
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Search tasks...</mat-label>
-        <input matInput type="text" />
-        <button mat-icon-button matSuffix>
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="searchTasks()"
+        />
+        <button mat-icon-button matSuffix (click)="searchTasks()">
           <mat-icon>search</mat-icon>
         </button>
       </mat-form-field>
@@ -13,21 +18,21 @@
     <section class="filters-section">
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Status</mat-label>
-        <mat-select>
-          <mat-option value="">All Status</mat-option>
-          @for (status of statuses; track status) {
-          <mat-option [value]="status.id">{{ status.name }}</mat-option>
-          }
+        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="searchTasks()">
+          <mat-option value="all">All Status</mat-option>
+          <ng-container *ngFor="let status of statuses">
+            <mat-option [value]="status.name">{{ status.name }}</mat-option>
+          </ng-container>
         </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Teams</mat-label>
-        <mat-select>
-          <mat-option value="">All Teams</mat-option>
-          @for (team of teams; track team) {
-          <mat-option [value]="team.id">{{ team.name }}</mat-option>
-          }
+        <mat-select [(ngModel)]="selectedTeam" (selectionChange)="searchTasks()">
+          <mat-option value="all">All Teams</mat-option>
+          <ng-container *ngFor="let team of teams">
+            <mat-option [value]="team.name">{{ team.name }}</mat-option>
+          </ng-container>
         </mat-select>
       </mat-form-field>
 

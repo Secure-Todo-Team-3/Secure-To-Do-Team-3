@@ -53,7 +53,11 @@ export class TaskEditPageComponent implements OnInit {
   isLoading = false;
   teams: Team[] = [];
   statuses: Status[] = [];
-
+  maxDueDate: Date = new Date(
+    new Date().setFullYear(new Date().getFullYear() + 2)
+  );
+  minDueDate: Date = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  oldTask: Task | undefined;
   constructor(
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
@@ -78,19 +82,31 @@ export class TaskEditPageComponent implements OnInit {
         task: this.taskEditService.loadTask(taskId),
         teams: this.taskEditService.loadUserTeams(),
         statuses: this.taskEditService.loadStatuses(),
-      }).subscribe(({ task, teams, statuses }) => {
-        this.isEditing = true;
-        this.teams = teams;
-        this.statuses = statuses;
-        this.taskForm.patchValue({
-          name: task.name,
-          description: task.description,
-          dueDate: task.dueDate,
-          teamId: task.teamId,
-          currentStatusId: task.currentStatusId,
-          id: task.taskGuid,
-        });
-      });
+      }).subscribe(
+        ({ task, teams, statuses }) => {
+          this.isEditing = true;
+          this.teams = teams;
+          this.statuses = statuses;
+          this.taskForm.patchValue({
+            name: task.name,
+            description: task.description,
+            dueDate: task.dueDate,
+            teamId: task.teamId,
+            currentStatusId: task.currentStatusId,
+            id: task.taskGuid,
+          });
+          this.oldTask = { ...task };
+        },
+        (error) => {
+          this.showError(
+            'Failed to load task: ' + (error.message || 'Unknown error')
+          );
+          this.isEditing = false;
+          this.taskForm.reset();
+          this.teams = [];
+          this.statuses = [];
+        }
+      );
     } else {
       forkJoin({
         teams: this.taskEditService.loadUserTeams(),
@@ -102,41 +118,23 @@ export class TaskEditPageComponent implements OnInit {
         this.taskForm.reset({
           name: '',
           description: '',
-          dueDate: '',
-          teamId: teams.length > 0 ? teams[0] : '',
-          currentStatusId: statuses.length > 0 ? statuses[0] : '',
+          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default to one week from now
+          teamId: teams.length > 0 ? teams[0].id : '',
+          currentStatusId: statuses.length > 0 ? statuses[0].id : '',
           id: null,
         });
+        this.oldTask = undefined;
+      }, (error) => {
+        this.showError(
+          'Failed to load teams or statuses: ' + (error.message || 'Unknown error')
+        );
+        this.teams = [];
+        this.statuses = [];
+        this.taskForm.reset();
       });
     }
   }
-
-  onSubmit(): void {
-    if (this.taskForm.valid) {
-      this.isLoading = true;
-      const task: Task = {
-        ...this.taskForm.value,
-      };
-      this.taskEditService.saveTask(task, this.isEditing).subscribe({
-        next: () => {
-          this.showSuccess(
-            this.isEditing
-              ? 'Task updated successfully!'
-              : 'Task created successfully!'
-          );
-          this.router.navigate(['/tasks']);
-          this.isLoading = false;
-        },
-        error: () => {
-          this.showSuccess('Failed to save task.');
-          this.isLoading = false;
-        },
-      });
-    } else {
-      this.taskForm.markAllAsTouched();
-    }
-  }
-
+  
   onCancel(): void {
     this.location.back();
   }
@@ -159,13 +157,13 @@ export class TaskEditPageComponent implements OnInit {
     if (this.taskForm.invalid) {
       this.taskForm.markAllAsTouched();
     } else {
-      console.log(this.taskForm.value)
       this.isLoading = true;
       const task: Task = {
         ...this.taskForm.value,
+        taskGuid: this.isEditing ? this.taskForm.value.id : undefined,
       };
 
-      this.taskEditService.saveTask(task, this.isEditing).subscribe({
+      this.taskEditService.saveTask(task, this.isEditing, this.oldTask).subscribe({
         next: () => {
           this.showSuccess(
             this.isEditing
