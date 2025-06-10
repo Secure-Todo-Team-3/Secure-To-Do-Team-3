@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskCreateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
+import org.team3todo.secure.secure_team_3_todo_api.dto.TaskUpdateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.*;
+import org.team3todo.secure.secure_team_3_todo_api.exception.DuplicateResourceException;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ForbiddenAccessException;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TaskRepository;
@@ -16,6 +18,7 @@ import org.team3todo.secure.secure_team_3_todo_api.repository.TaskStatusHistoryR
 import org.team3todo.secure.secure_team_3_todo_api.repository.TaskStatusRepository;
 import org.team3todo.secure.secure_team_3_todo_api.repository.TeamMembershipRepository;
 
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +57,6 @@ public class TaskService {
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with GUID: " + guid));
     }
 
-    @Transactional(readOnly = true)
     public List<Task> findTasksByTeamId(Long teamId) {
         Team foundTeam = teamService.findById(teamId);
         return taskRepository.findByTeam(foundTeam);
@@ -93,6 +95,7 @@ public class TaskService {
     @Transactional
     public Task createTask(TaskCreateRequestDto taskRequest, UUID creatorGuid) {
         User creator = userService.findByUserGuid(creatorGuid);
+        auditingService.setAuditUser(creator);
         Team team = teamService.findById(taskRequest.getTeamId());
         if (team == null) {
             throw new ResourceNotFoundException("Cannot create task: Team not found with ID: " + taskRequest.getTeamId());
@@ -116,10 +119,43 @@ public class TaskService {
     }
 
     @Transactional
-    public Task assignCurrentUserToTask(UUID taskGuid, User currentUser) {
-        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+    public Task updateTask(TaskUpdateRequestDto taskRequest, UUID creatorGuid, UUID taskGuid) {
+        User updater = userService.findByUserGuid(creatorGuid);
+        auditingService.setAuditUser(updater);
 
-        auditingService.setAuditUser(currentAUser);
+        try {
+            Task taskToUpdate = findByGuid(taskGuid);
+            teamMembershipService.verifyUserIsMember(updater.getId(), taskToUpdate.getTeam().getId());
+            if (taskRequest.getName() != null && !taskRequest.getName().isBlank()) {
+                taskToUpdate.setName(taskRequest.getName());
+            }
+            if (taskRequest.getDescription() != null && !taskRequest.getDescription().isBlank()) {
+                taskToUpdate.setDescription(taskRequest.getDescription());
+            }
+            if (taskRequest.getDueDate() != null) {
+                taskToUpdate.setDueDate(taskRequest.getDueDate());
+            }
+            if (taskRequest.getAssignedToUserGuid() != null) {
+                User targetUser = userService.findByUserGuid(taskRequest.getAssignedToUserGuid());
+                teamMembershipService.verifyUserIsMember(targetUser.getId(), taskToUpdate.getTeam().getId());
+                taskToUpdate.setAssignedToUser(targetUser);
+            }
+            if (taskRequest.getStatus() != null && !taskRequest.getStatus().isBlank()) {
+                TaskStatus newStatus = taskStatusRepository.findByName(taskRequest.getStatus())
+                        .orElseThrow(() -> new ResourceNotFoundException("The status of '" + taskRequest.getStatus() + "' does not exist."));
+                taskToUpdate.setTaskStatus(newStatus);
+            }
+            return taskRepository.save(taskToUpdate);
+
+        } finally {
+           // auditingService.clearAuditUser();
+        }
+    }
+
+    @Transactional
+    public Task assignCurrentUserToTask(UUID taskGuid, UUID currentUserUUID) {
+        User currentUser = userService.findByUserGuid(currentUserUUID);
+        auditingService.setAuditUser(currentUser);
         Task task = findByGuid(taskGuid);
 
         boolean isMember = teamMembershipRepository.existsByUserAndTeam(currentUser, task.getTeam());
@@ -132,10 +168,10 @@ public class TaskService {
     }
 
     @Transactional
-    public Task unassignCurrentUserFromTask(UUID taskGuid, User currentUser) {
-        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+    public Task unassignCurrentUserFromTask(UUID taskGuid, UUID currentUserGuid) {
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
 
-        auditingService.setAuditUser(currentAUser);
         Task task = findByGuid(taskGuid);
         if (!currentUser.equals(task.getAssignedToUser())) {
             throw new ForbiddenAccessException("Cannot unassign task: You are not the currently assigned user.");
@@ -145,10 +181,9 @@ public class TaskService {
     }
 
     @Transactional
-    public Task assignTaskToTeam(UUID taskGuid, Long teamId, User currentUser) {
-        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
-
-        auditingService.setAuditUser(currentAUser);
+    public Task assignTaskToTeam(UUID taskGuid, Long teamId, UUID currentUserGuid) {
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
 
         Task foundTask = taskRepository.findByTaskGuidWithTeam(taskGuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with GUID: " + taskGuid));
@@ -160,9 +195,9 @@ public class TaskService {
         teamMembershipService.verifyUserIsMember(currentUser.getId(), destinationTeam.getId());
 
         foundTask.setTeam(destinationTeam);
-        foundTask.setAssignedToUser(destinationTeam.getCreatedByUserId()); // Or another default assignee logic
+        foundTask.setAssignedToUser(destinationTeam.getCreatedByUserId());
 
-        return taskRepository.save(foundTask); // No enrichment needed.
+        return taskRepository.save(foundTask);
     }
 
     private Specification<Task> hasAssignedUser(UUID userGuid) {

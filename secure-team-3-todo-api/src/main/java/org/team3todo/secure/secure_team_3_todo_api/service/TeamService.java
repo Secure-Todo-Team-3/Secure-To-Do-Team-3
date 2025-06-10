@@ -42,6 +42,10 @@ public class TeamService {
         return teamRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Team with id: "+id+" does not exist."));
     }
 
+    public Team findByName(String name) {
+        return teamRepository.findByName(name).orElseThrow(() -> new ResourceNotFoundException("Team with name: "+name+" does not exist."));
+    }
+
     public List<Team> findAllByUserGuid(UUID userGuid){
         User user =  userService.findByUserGuid(userGuid);
         if (user != null){
@@ -82,9 +86,10 @@ public class TeamService {
     }
 
     public TeamMembership addUserToTeam(String userEmail, Long teamId){
-        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
 
-        auditingService.setAuditUser(currentAUser);
         User user = userService.findByUserEmail(userEmail);
         Team team = findById(teamId);
         if(user == null){
@@ -99,9 +104,10 @@ public class TeamService {
 
     @Transactional
     public Team createTeam(TeamCreateRequestDto teamRequest, User creator) {
-        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
 
-        auditingService.setAuditUser(currentAUser);
         if (teamRepository.existsByName(teamRequest.getName())) {
             throw new DuplicateResourceException("A team with the name '" + teamRequest.getName() + "' already exists.");
         }

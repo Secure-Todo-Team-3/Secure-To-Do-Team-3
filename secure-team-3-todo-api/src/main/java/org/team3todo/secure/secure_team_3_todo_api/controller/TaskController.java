@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskCreateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
+import org.team3todo.secure.secure_team_3_todo_api.dto.TaskUpdateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Task;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 import org.team3todo.secure.secure_team_3_todo_api.mapper.TaskMapper;
@@ -36,7 +37,7 @@ public class TaskController {
 
     @GetMapping("/{taskGuid}")
     public ResponseEntity<TaskDto> getTaskByGuid(@PathVariable UUID taskGuid) {
-        Task foundTask = taskService.findByTaskGuid(taskGuid);
+        Task foundTask = taskService.findByGuid(taskGuid);
         if (foundTask != null) {
             TaskDto taskDto = taskMapper.convertToDto(foundTask);
             return ResponseEntity.ok(taskDto);
@@ -69,12 +70,22 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
+    @PutMapping("/{taskGuid}")
+    public ResponseEntity<TaskDto> updateTask(@RequestBody TaskUpdateRequestDto taskRequest,
+                                              Authentication authentication,
+                                              @PathVariable UUID taskGuid){
+        UUID creatorGuid = (UUID) authentication.getPrincipal();
+        Task createdTask = taskService.updateTask(taskRequest, creatorGuid, taskGuid);
+        TaskDto responseDto = taskMapper.convertToDto(createdTask);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
     @PostMapping("/{taskGuid}/assign-me")
     public ResponseEntity<TaskDto> assignTaskToCurrentUser(
             @PathVariable UUID taskGuid,
             Authentication authentication) {
-        User currentUser = (User) authentication.getPrincipal(); // Uses UUID now
-        Task updatedTask = taskService.assignCurrentUserToTask(taskGuid, currentUser);
+        UUID currentUserUUID = (UUID) authentication.getPrincipal(); // Uses UUID now
+        Task updatedTask = taskService.assignCurrentUserToTask(taskGuid, currentUserUUID);
         TaskDto responseDto = taskMapper.convertToDto(updatedTask);
         return ResponseEntity.ok(responseDto);
     }
@@ -83,16 +94,16 @@ public class TaskController {
     public ResponseEntity<TaskDto> unassignTaskFromCurrentUser(
             @PathVariable UUID taskGuid,
             Authentication authentication) {
-        User currentUser = (User) authentication.getPrincipal(); // Uses UUID Now
-        Task updatedTask = taskService.unassignCurrentUserFromTask(taskGuid, currentUser);
+        UUID currentUserUUID = (UUID) authentication.getPrincipal(); // Uses UUID Now
+        Task updatedTask = taskService.unassignCurrentUserFromTask(taskGuid, currentUserUUID);
         TaskDto responseDto = taskMapper.convertToDto(updatedTask);
         return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping("/{taskGuid}/add-to-team/{teamId}")
     public ResponseEntity<TaskDto> addTaskToTeam(@PathVariable UUID taskGuid, @PathVariable Long teamId, Authentication authentication){
-        User currentUser = (User) authentication.getPrincipal(); // Uses UUID Now
-        Task reassignedTask = taskService.assignTaskToTeam(taskGuid, teamId, currentUser);
+        UUID currentUserUUID = (UUID) authentication.getPrincipal(); // Uses UUID Now
+        Task reassignedTask = taskService.assignTaskToTeam(taskGuid, teamId, currentUserUUID);
         TaskDto responseDto = taskMapper.convertToDto(reassignedTask);
         return ResponseEntity.ok(responseDto);
     }

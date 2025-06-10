@@ -26,25 +26,29 @@ public class TeamMembershipService {
     private final TeamRepository teamRepository;
     private final TeamRoleRepository teamRoleRepository;
     private final AuditingService auditingService;
+    private final UserService userService;
 
     @Autowired
     public TeamMembershipService(TeamMembershipRepository teamMembershipRepository,
                                  UserRepository userRepository,
                                  TeamRepository teamRepository,
                                  TeamRoleRepository teamRoleRepository,
-                                 AuditingService auditingService) {
+                                 AuditingService auditingService,
+                                 UserService userService) {
         this.teamMembershipRepository = teamMembershipRepository;
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
         this.teamRoleRepository = teamRoleRepository;
         this.auditingService = auditingService;
+        this.userService = userService;
     }
 
     @Transactional
     public TeamMembership addUserToTeam(Long userId, Long teamId, Long roleId) {
-        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
 
-        auditingService.setAuditUser(currentAUser);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         Team team = teamRepository.findById(teamId)
@@ -68,10 +72,9 @@ public class TeamMembershipService {
 
     @Transactional
     public TeamMembership updateUserRoleInTeam(UUID userGuid, Long teamId, Long newRoleId) {
-        // Get the current user who is performing the action (the auditor)
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHNAGE TO UUID IMPL
-
-        auditingService.setAuditUser(currentUser); // <-- SET THE AUDIT USER
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
 
         User user = userRepository.findByUserGuid(userGuid)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userGuid));

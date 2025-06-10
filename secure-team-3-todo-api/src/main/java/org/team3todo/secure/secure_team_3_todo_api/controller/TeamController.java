@@ -16,6 +16,7 @@ import org.team3todo.secure.secure_team_3_todo_api.mapper.TeamMembershipMapper;
 import org.team3todo.secure.secure_team_3_todo_api.mapper.UserMapper;
 import org.team3todo.secure.secure_team_3_todo_api.service.TeamMembershipService;
 import org.team3todo.secure.secure_team_3_todo_api.service.TeamService;
+import org.team3todo.secure.secure_team_3_todo_api.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,16 @@ public class TeamController {
     @GetMapping("/{teamId}")
     public ResponseEntity<TeamDto> getTeamById(@PathVariable Long teamId){
         Team foundTeam = teamService.findById(teamId);
+        if(foundTeam != null){
+            return ResponseEntity.ok(teamMapper.convertToDto(foundTeam));
+        }
+        else{
+            return ResponseEntity.notFound().build();
+        }
+    }
+    @GetMapping("/name/{teamName}")
+    public ResponseEntity<TeamDto> getTeamByUsername(@PathVariable String teamName){
+        Team foundTeam = teamService.findByName(teamName);
         if(foundTeam != null){
             return ResponseEntity.ok(teamMapper.convertToDto(foundTeam));
         }

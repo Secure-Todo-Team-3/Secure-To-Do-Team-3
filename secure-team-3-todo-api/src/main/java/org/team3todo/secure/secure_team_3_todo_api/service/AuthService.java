@@ -2,6 +2,7 @@ package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,6 +35,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final SystemRoleRepository systemRoleRepository;
     private final TotpService totpService;
+    private final UserService userService;
 
     @Transactional
     public TotpSetupResponse registerAndInitiateTotp(RegisterRequest registerRequest) throws InvalidKeyException, IOException {
@@ -55,9 +57,9 @@ public class AuthService {
                 .systemRole(defaultRole)
                 .isTotpEnabled(false)
                 .isActive(false)
-                .totpSecret(secret) 
+                .totpSecret(secret)
                 .build();
-        
+
         userRepository.save(user);
 
         return TotpSetupResponse.builder()
@@ -66,7 +68,7 @@ public class AuthService {
                 .message("Scan QR code and enter the code to complete registration.")
                 .build();
     }
-    
+
     @Transactional
     public AuthenticatedResponseDto verifyInitialTotpAndActivateUser(TotpVerificationRequest verificationRequest) throws InvalidKeyException, IOException {
         var user = userRepository.findByUsername(verificationRequest.getUsername())
@@ -90,40 +92,41 @@ public class AuthService {
 
 
     public AuthenticatedResponseDto login(AuthenticationRequestDto authenticationReq) throws InvalidKeyException, IOException {
-       Authentication authentication = authenticationManager.authenticate(
-               new UsernamePasswordAuthenticationToken(authenticationReq.getUsername(), authenticationReq.getPassword())
-       );
-       
-       User user = userRepository.findByUsername(authenticationReq.getUsername())
-               .orElseThrow(() -> new IllegalStateException("User not found after authentication"));
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(authenticationReq.getUsername(), authenticationReq.getPassword())
+        );
 
-       if (user.isTotpEnabled()) {
-           return AuthenticatedResponseDto.builder()
-                   .totpRequired(true)
-                   .message("TOTP code is required")
-                   .build();
-       }
-       
-       var token = jwtService.generateToken(Map.of("userGuid",user.getUserGuid()), user);
-       return AuthenticatedResponseDto.builder().token(token).totpRequired(false).build();
+        User user = userRepository.findByUsername(authenticationReq.getUsername())
+                .orElseThrow(() -> new IllegalStateException("User not found after authentication"));
+
+        if (user.isTotpEnabled()) {
+            return AuthenticatedResponseDto.builder()
+                    .totpRequired(true)
+                    .message("TOTP code is required")
+                    .build();
+        }
+
+        var token = jwtService.generateToken(Map.of("userGuid",user.getUserGuid()), user);
+        return AuthenticatedResponseDto.builder().token(token).totpRequired(false).build();
     }
 
     @Transactional
     public AuthenticatedResponseDto loginWithTotp(TotpVerificationRequest verificationRequest) throws InvalidKeyException, IOException {
         var user = userRepository.findByUsername(verificationRequest.getUsername())
-                     .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
-        // if (!totpService.isCodeValid(user.getTotpSecret(), verificationRequest.getCode())) {
-        //     throw new SecurityException("Invalid TOTP code.");
-        // }
-        
+        if (!totpService.isCodeValid(user.getTotpSecret(), verificationRequest.getCode())) {
+            throw new SecurityException("Invalid TOTP code.");
+        }
+
         var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid()), user);
         return AuthenticatedResponseDto.builder().token(token).totpRequired(false).build();
     }
-    
+
     @Transactional
     public TotpSetupResponse setupTotp(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+        UUID userGuid = (UUID) authentication.getPrincipal();
+        User user = userService.findByUserGuid(userGuid);
 
         if (user.isTotpEnabled()) {
             throw new IllegalStateException("TOTP is already enabled for this user.");
@@ -136,18 +139,19 @@ public class AuthService {
         userRepository.save(user);
 
         return TotpSetupResponse.builder()
-                .secret(secret) 
-                .qrCodeImageUri(qrCodeUri) 
+                .secret(secret)
+                .qrCodeImageUri(qrCodeUri)
                 .message("Scan the QR code and verify to enable TOTP.")
                 .build();
     }
-    
+
     @Transactional
     public void verifyAndEnableTotp(Authentication authentication, TotpVerificationRequest verificationRequest) {
-        User user = (User) authentication.getPrincipal();
-        
+        UUID userGuid = (UUID) authentication.getPrincipal();
+        User user = userService.findByUserGuid(userGuid);
+
         if (!totpService.isCodeValid(user.getTotpSecret(), verificationRequest.getCode())) {
-             throw new SecurityException("Invalid verification code.");
+            throw new SecurityException("Invalid verification code.");
         }
 
         user.setTotpEnabled(true);

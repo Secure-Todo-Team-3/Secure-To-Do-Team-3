@@ -37,15 +37,8 @@ public class UserController {
     }
 @GetMapping("/me")
 public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
-    // 1. The principal is now a UUID object, so we cast to UUID.
     UUID userGuid = (UUID) authentication.getPrincipal();
-
-    // 2. Use the GUID to find the user in the database via your service.
-    //    (This assumes you have a findByGuid method in your UserService)
     User user = userService.findByUserGuid(userGuid);
-       //     .orElseThrow(() -> new RuntimeException("Authenticated user with GUID '" + userGuid + "' not found in database."));
-
-    // 3. Convert the User entity to a DTO and return it.
     return ResponseEntity.ok(userMapper.convertToDto(user));
 }
 }
