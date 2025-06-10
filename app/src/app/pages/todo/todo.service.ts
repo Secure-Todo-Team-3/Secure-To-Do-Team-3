@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { forkJoin, map, Observable } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { Task } from 'src/app/shared/models/task.model';
 import { Status } from 'src/app/shared/models/status.model';
@@ -18,7 +18,25 @@ export class TodoService {
   }
 
   loadUserTeams(): Observable<Team[]> {
-    return this.api.get<Team[]>('team/user-teams', { type: 'member' });
+    return forkJoin([
+      this.api.get<Team[]>('team/user-teams', { type: 'member' }),
+      this.api.get<Team[]>('team/user-teams', { type: 'team_lead' })
+    ]).pipe(
+      map(([memberTeams, managerTeams]) => [...memberTeams, ...managerTeams])
+    );
+  }
+
+  searchTasks(
+    name?: string,
+    status?: string,
+    team?: string
+  ): Observable<Task[]> {
+    const params = {
+      ...(name && { name }),
+      ...(status && { status }),
+      ...(team && { team }),
+    };
+    return this.api.get<Task[]>('task/user-tasks', params);
   }
 
 }

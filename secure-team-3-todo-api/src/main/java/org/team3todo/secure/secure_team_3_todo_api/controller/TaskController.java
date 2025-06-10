@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskCreateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
+import org.team3todo.secure.secure_team_3_todo_api.dto.TaskUpdateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Task;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 import org.team3todo.secure.secure_team_3_todo_api.mapper.TaskMapper;
@@ -72,6 +73,20 @@ public class TaskController {
 
         TaskDto responseDto = taskMapper.convertToDto(createdTask); 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
+    @PostMapping("/{taskGuid}/update")
+    public ResponseEntity<TaskDto> updateTask(
+            @PathVariable UUID taskGuid,
+            @RequestBody TaskUpdateRequestDto taskUpdateRequest,
+            Authentication authentication) {
+
+        UUID updaterGuid = (UUID) authentication.getPrincipal();
+        Task updatedTask = taskService.updateTask(taskGuid, taskUpdateRequest, updaterGuid);
+        updatedTask = taskService.enrichTaskWithCurrentStatus(updatedTask);
+
+        TaskDto responseDto = taskMapper.convertToDto(updatedTask);
+        return ResponseEntity.ok(responseDto);
     }
 
     @PostMapping("/{taskGuid}/assign-me")

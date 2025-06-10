@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskCreateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskDto;
+import org.team3todo.secure.secure_team_3_todo_api.dto.TaskUpdateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.*;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ForbiddenAccessException;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
@@ -17,6 +18,7 @@ import org.team3todo.secure.secure_team_3_todo_api.repository.TeamMembershipRepo
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -235,6 +237,45 @@ public class TaskService {
     public Task findByTaskGuid(UUID taskGuid) { // needs protection
         return taskRepository.findByTaskGuid(taskGuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with GUID: " + taskGuid));
+    }
+
+    public Task updateTask(UUID taskGuid, TaskUpdateRequestDto taskUpdateRequest, UUID updaterGuid) {
+        Task taskToUpdate = taskRepository.findByTaskGuid(taskGuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with GUID: " + taskGuid));
+
+        User updater = userService.findByUserGuid(updaterGuid);
+        if (updater == null) {
+            throw new ResourceNotFoundException("Updater user not found with GUID: " + updaterGuid);
+        }
+
+        Optional<TeamMembership> membership = teamMembershipRepository.findByUserAndTeam(updater, taskToUpdate.getTeam());
+
+        if (membership.isEmpty()) {
+            throw new ForbiddenAccessException("You do not have permission to update this task in team: " + taskToUpdate.getTeam().getName());
+        }
+
+        if (taskUpdateRequest.getName() != null) {
+            taskToUpdate.setName(taskUpdateRequest.getName());
+        }
+        if (taskUpdateRequest.getDescription() != null) {
+            taskToUpdate.setDescription(taskUpdateRequest.getDescription());
+        }
+        if (taskUpdateRequest.getDueDate() != null) {
+            taskToUpdate.setDueDate(taskUpdateRequest.getDueDate());
+        }
+        if (taskUpdateRequest.getCurrentStatusId() != null) {
+            TaskStatus newStatus = taskStatusRepository.findById(taskUpdateRequest.getCurrentStatusId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Task status not found with ID: " + taskUpdateRequest.getCurrentStatusId()));
+            TaskStatusHistory newHistory = TaskStatusHistory.builder()
+                    .task(taskToUpdate)
+                    .status(newStatus)
+                    .changedByUser(updater)
+                    .build();
+            taskStatusHistoryRepository.save(newHistory);
+        }
+
+        Task updatedTask = taskRepository.save(taskToUpdate);
+        return enrichTaskWithCurrentStatus(updatedTask);
     }
 
 }

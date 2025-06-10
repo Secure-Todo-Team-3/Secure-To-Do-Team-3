@@ -18,7 +18,7 @@
     <form [formGroup]="taskForm">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Task Name</mat-label>
-        <input matInput formControlName="name" required />
+        <input matInput formControlName="name" required maxlength="50" />
         @if (taskForm.controls['name'].errors?.['required'] &&
         taskForm.controls['name'].touched) {
         <mat-error> Task name is required </mat-error>
@@ -35,6 +35,7 @@
           formControlName="description"
           rows="4"
           required
+          maxlength="200"
         ></textarea>
         @if (taskForm.controls['description'].errors?.['required'] &&
         taskForm.controls['description'].touched) {
@@ -52,6 +53,8 @@
           [matDatepicker]="picker"
           formControlName="dueDate"
           required
+          [min]="minDueDate"
+          [max]="maxDueDate"
         />
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
@@ -61,31 +64,35 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Team</mat-label>
-        <mat-select formControlName="teamId" required>
-          @for (team of teams; track team) {
-          <mat-option [value]="team.id">{{ team.name }}</mat-option>
+      @if (!isEditing) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Team</mat-label>
+          <mat-select formControlName="teamId" required>
+            @for (team of teams; track team) {
+            <mat-option [value]="team.id">{{ team.name }}</mat-option>
+            }
+          </mat-select>
+          @if (taskForm.controls['teamId'].errors?.['required'] &&
+          taskForm.controls['teamId'].touched) {
+          <mat-error> Please select a team </mat-error>
           }
-        </mat-select>
-        @if (taskForm.controls['teamId'].errors?.['required'] &&
-        taskForm.controls['teamId'].touched) {
-        <mat-error> Please select a team </mat-error>
-        }
-      </mat-form-field>
+        </mat-form-field>
+      }
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Status</mat-label>
-        <mat-select formControlName="currentStatusId" required>
-          @for (status of statuses; track status) {
-          <mat-option [value]="status.id">{{ status.name }}</mat-option>
+      @if (isEditing) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="currentStatusId" required>
+            @for (status of statuses; track status) {
+            <mat-option [value]="status.id">{{ status.name }}</mat-option>
+            }
+          </mat-select>
+          @if (taskForm.controls['currentStatusId'].errors?.['required'] &&
+          taskForm.controls['currentStatusId'].touched) {
+          <mat-error> Please select a status </mat-error>
           }
-        </mat-select>
-        @if (taskForm.controls['currentStatusId'].errors?.['required'] &&
-        taskForm.controls['currentStatusId'].touched) {
-        <mat-error> Please select a status </mat-error>
-        }
-      </mat-form-field>
+        </mat-form-field>
+      }
     </form>
 
     
