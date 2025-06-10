@@ -44,6 +44,8 @@ jobs:
 
       -  name: Terraform Plan
          env:
+            TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
+            TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
             TF_VAR_db_username_value: ${{ secrets.DB_USERNAME }}
             TF_VAR_db_password_value: ${{ secrets.DB_PASSWORD }}
             TF_VAR_db_name_value: ${{ secrets.RDS_DB_NAME }}
