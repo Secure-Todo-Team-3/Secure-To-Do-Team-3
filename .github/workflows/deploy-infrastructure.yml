@@ -54,7 +54,8 @@ jobs:
             TF_VAR_acm_certificate_arn: ${{ secrets.ACM_CERTIFICATE_ARN }}
           
          run: terraform plan -no-color -input=false
-
+         working-directory: ${{ env.TF_WORKING_DIR }}
+         
       - name: Terraform Apply
         id: apply
         run: terraform apply -auto-approve -input=false
