@@ -3,6 +3,7 @@ package org.team3todo.secure.secure_team_3_todo_api.service;
 import jakarta.persistence.criteria.Join;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TaskCreateRequestDto;
@@ -24,17 +25,20 @@ public class TaskService {
     private final TaskStatusRepository taskStatusRepository;
     private final TeamMembershipRepository teamMembershipRepository;
     private final TeamMembershipService teamMembershipService;
+    private final AuditingService auditingService;
+
 
     @Autowired
     public TaskService(TaskRepository taskRepository, UserService userService, TeamService teamService,
                        TaskStatusRepository taskStatusRepository, TeamMembershipRepository teamMembershipRepository,
-                       TeamMembershipService teamMembershipService) {
+                       TeamMembershipService teamMembershipService, AuditingService auditingService) {
         this.taskRepository = taskRepository;
         this.userService = userService;
         this.teamService = teamService;
         this.taskStatusRepository = taskStatusRepository;
         this.teamMembershipRepository = teamMembershipRepository;
         this.teamMembershipService = teamMembershipService;
+        this.auditingService = auditingService;
     }
 
     public Task findByGuid(UUID guid) {
@@ -45,7 +49,6 @@ public class TaskService {
     @Transactional(readOnly = true)
     public List<Task> findTasksByTeamId(Long teamId) {
         Team foundTeam = teamService.findById(teamId);
-        // The repository method automatically handles the relationships. No enrichment needed.
         return taskRepository.findByTeam(foundTeam);
     }
 
@@ -61,7 +64,7 @@ public class TaskService {
             spec = spec.and(teamNameContains(teamName));
         }
         if (statusName != null && !statusName.isBlank()) {
-            spec = spec.and(hasStatus(statusName)); // Efficient status filtering!
+            spec = spec.and(hasStatus(statusName));
         }
 
         return taskRepository.findAll(spec);
@@ -69,6 +72,10 @@ public class TaskService {
 
     @Transactional
     public Task createTask(TaskCreateRequestDto taskRequest, User creator) {
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHNAGE TO UUID IMPL
+
+        auditingService.setAuditUser(currentUser);
+
         Team team = teamService.findById(taskRequest.getTeamId());
         User assignedUser = userService.findByUserGuid(taskRequest.getAssignedToUserGuid());
 
@@ -92,6 +99,9 @@ public class TaskService {
 
     @Transactional
     public Task assignCurrentUserToTask(UUID taskGuid, User currentUser) {
+        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+
+        auditingService.setAuditUser(currentAUser);
         Task task = findByGuid(taskGuid);
 
         boolean isMember = teamMembershipRepository.existsByUserAndTeam(currentUser, task.getTeam());
@@ -105,6 +115,9 @@ public class TaskService {
 
     @Transactional
     public Task unassignCurrentUserFromTask(UUID taskGuid, User currentUser) {
+        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+
+        auditingService.setAuditUser(currentAUser);
         Task task = findByGuid(taskGuid);
         if (!currentUser.equals(task.getAssignedToUser())) {
             throw new ForbiddenAccessException("Cannot unassign task: You are not the currently assigned user.");
@@ -115,6 +128,10 @@ public class TaskService {
 
     @Transactional
     public Task assignTaskToTeam(UUID taskGuid, Long teamId, User currentUser) {
+        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+
+        auditingService.setAuditUser(currentAUser);
+
         Task foundTask = taskRepository.findByTaskGuidWithTeam(taskGuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with GUID: " + taskGuid));
 

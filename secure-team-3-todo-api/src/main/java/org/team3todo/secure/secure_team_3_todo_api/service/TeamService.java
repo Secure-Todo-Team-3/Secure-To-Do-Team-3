@@ -2,6 +2,7 @@ package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TeamCreateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
@@ -24,15 +25,17 @@ public class TeamService {
     private final TeamMembershipRepository teamMembershipRepository;
     private final TeamMembershipService teamMembershipService;
     private final TeamRoleRepository teamRoleRepository;
+    private final AuditingService auditingService;
 
 
     @Autowired
-    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService, TeamRoleRepository teamRoleRepository) {
+    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService, TeamRoleRepository teamRoleRepository,AuditingService auditingService) {
         this.teamRepository = teamRepository;
         this.userService = userService;
         this.teamMembershipRepository = teamMembershipRepository;
         this.teamMembershipService = teamMembershipService;
         this.teamRoleRepository = teamRoleRepository;
+        this.auditingService = auditingService;
     }
 
     public Team findById(Long id) {
@@ -78,6 +81,9 @@ public class TeamService {
     }
 
     public TeamMembership addUserToTeam(String userEmail, Long teamId){
+        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+
+        auditingService.setAuditUser(currentAUser);
         User user = userService.findByUserEmail(userEmail);
         Team team = findById(teamId);
         if(user == null){
@@ -92,6 +98,9 @@ public class TeamService {
 
     @Transactional
     public Team createTeam(TeamCreateRequestDto teamRequest, User creator) {
+        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+
+        auditingService.setAuditUser(currentAUser);
         if (teamRepository.existsByName(teamRequest.getName())) {
             throw new DuplicateResourceException("A team with the name '" + teamRequest.getName() + "' already exists.");
         }

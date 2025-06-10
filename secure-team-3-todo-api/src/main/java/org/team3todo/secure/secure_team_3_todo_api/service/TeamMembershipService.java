@@ -1,6 +1,7 @@
 package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Important for write operations
 import org.team3todo.secure.secure_team_3_todo_api.entity.TeamRole;
@@ -24,20 +25,26 @@ public class TeamMembershipService {
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
     private final TeamRoleRepository teamRoleRepository;
+    private final AuditingService auditingService;
 
     @Autowired
     public TeamMembershipService(TeamMembershipRepository teamMembershipRepository,
                                  UserRepository userRepository,
                                  TeamRepository teamRepository,
-                                 TeamRoleRepository teamRoleRepository) {
+                                 TeamRoleRepository teamRoleRepository,
+                                 AuditingService auditingService) {
         this.teamMembershipRepository = teamMembershipRepository;
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
         this.teamRoleRepository = teamRoleRepository;
+        this.auditingService = auditingService;
     }
 
     @Transactional
     public TeamMembership addUserToTeam(Long userId, Long teamId, Long roleId) {
+        User currentAUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHANGE TO UUID IMPL
+
+        auditingService.setAuditUser(currentAUser);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         Team team = teamRepository.findById(teamId)
@@ -61,6 +68,11 @@ public class TeamMembershipService {
 
     @Transactional
     public TeamMembership updateUserRoleInTeam(UUID userGuid, Long teamId, Long newRoleId) {
+        // Get the current user who is performing the action (the auditor)
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(); // CHNAGE TO UUID IMPL
+
+        auditingService.setAuditUser(currentUser); // <-- SET THE AUDIT USER
+
         User user = userRepository.findByUserGuid(userGuid)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userGuid));
         Team team = teamRepository.findById(teamId)
