@@ -3,9 +3,8 @@ name: Database Migrations with Flyway
 on:
   push:
     branches:
-      - main
-    paths:
-      - 'db/**' 
+      - main 
+  workflow_dispatch:
 
 env:
   AWS_REGION: eu-west-1 

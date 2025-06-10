@@ -4,11 +4,8 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'secure-team-3-todo-api/**' 
-      - 'db/**'                    
-      - 'terraform/app_source/Dockerrun.aws.json' 
-
+  workflow_dispatch:
+  
 env:
   EB_APP_NAME: TodoApp
   EB_ENV_NAME: TodoApp-Env
