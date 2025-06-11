@@ -19,5 +19,6 @@ public interface TeamMembershipRepository extends JpaRepository<TeamMembership, 
     @Query("SELECT tm.team FROM TeamMembership tm WHERE tm.user.id = :userId AND tm.teamRole.name = :roleName")
     List<Team> findTeamsByUserIdAndRoleName(@Param("userId") Long userId, @Param("roleName") String roleName);
     boolean existsByUserAndTeam(User user, Team team);
+    boolean existsByUserIdAndTeamId(Long userId, Long teamId);
     boolean existsByUserAndTeamAndTeamRole(User user, Team team, TeamRole teamRole);
 }

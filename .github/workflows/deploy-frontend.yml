@@ -19,13 +19,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4 
 
+      - name: Debug - list app files
+        run: ls -l ./app
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 
         with:
-          node-version: '20' 
+          node-version: '18' 
           cache: 'npm'       
-        
-        
+          cache-dependency-path: app/package-lock.json
+          
       - name: Install Angular dependencies
         run: npm ci 
         working-directory: ./app 
@@ -33,12 +36,10 @@ jobs:
       - name: Build Angular Application
         run: npm run build -- --configuration=production --output-path ../dist_client_code 
         working-directory: ./app 
-       
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4 
         with:
-         
           role-to-assume: arn:aws:iam::263883060207:role/github-actions-frontend-deploy-role 
           aws-region: eu-west-1
 
@@ -46,13 +47,9 @@ jobs:
         env:
           AWS_S3_BUCKET_NAME: ${{ secrets.AWS_CLIENT_BUCKET_NAME }} 
         run: |
-          # The 'dist_client_code' directory is created at the repository root by the build step.
-          # We sync its contents (the built Angular app) to the S3 bucket.
-          # The --delete flag ensures that files removed from your build are also removed from S3.
           aws s3 sync ./dist_client_code s3://${{ env.AWS_S3_BUCKET_NAME }} --delete
 
       - name: Create CloudFront Invalidation (Optional - Recommended for CDN)
-       
         if: success() && env.AWS_CLOUDFRONT_DISTRIBUTION_ID 
         env:
           AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} 

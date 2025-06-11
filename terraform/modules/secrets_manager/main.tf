@@ -1,4 +1,3 @@
-# modules/secrets_manager/main.tf
 
 resource "random_id" "suffix" {
   byte_length = 4
@@ -63,4 +62,18 @@ resource "aws_secretsmanager_secret" "password_pepper_secret" {
 resource "aws_secretsmanager_secret_version" "password_pepper_secret_version" {
   secret_id     = aws_secretsmanager_secret.password_pepper_secret.id
   secret_string = var.password_pepper_value
+}
+
+resource "aws_secretsmanager_secret" "field_encryption_key_secret" {
+  name        = "${var.name_prefix}-field-encryption-key-${random_id.suffix.hex}"
+  description = "Application field encryption key for ${var.name_prefix} application"
+  recovery_window_in_days = 0 
+  tags = {
+    Name = "${var.name_prefix}-field-encryption-key"
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "field_encryption_key_secret_version" {
+  secret_id     = aws_secretsmanager_secret.field_encryption_key_secret.id
+  secret_string = var.field_encryption_key_value 
 }

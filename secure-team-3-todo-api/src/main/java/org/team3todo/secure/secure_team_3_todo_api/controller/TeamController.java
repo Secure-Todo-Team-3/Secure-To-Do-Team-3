@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.team3todo.secure.secure_team_3_todo_api.dto.*;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
@@ -47,6 +48,16 @@ public class TeamController {
             return ResponseEntity.notFound().build();
         }
     }
+    @GetMapping("/name/{teamName}")
+    public ResponseEntity<TeamDto> getTeamByUsername(@PathVariable String teamName){
+        Team foundTeam = teamService.findByName(teamName);
+        if(foundTeam != null){
+            return ResponseEntity.ok(teamMapper.convertToDto(foundTeam));
+        }
+        else{
+            return ResponseEntity.notFound().build();
+        }
+    }
 
     @GetMapping(value = "/user-teams", params = "type=member")
     public ResponseEntity<List<TeamDto>> getTeamsUserIsMemberOf(Authentication authentication) {
@@ -72,8 +83,8 @@ public class TeamController {
     }
 
     @PostMapping("/{teamId}/add-user")
-    public ResponseEntity<TeamMembershipDto> addUserToteam(@RequestBody String userEmail, @PathVariable Long teamId){
-        TeamMembership returnedTeamMembership = teamService.addUserToTeam(userEmail, teamId);
+    public ResponseEntity<TeamMembershipDto> addUserToteam(@RequestBody AddUserToTeamDto addUserToTeamDto, @PathVariable Long teamId){
+        TeamMembership returnedTeamMembership = teamService.addUserToTeam(addUserToTeamDto.getUserEmail(), teamId);
         if(returnedTeamMembership != null){
             TeamMembershipDto dtoReturnedTeam = teamMembershipMapper.convertToDto(returnedTeamMembership);
             return ResponseEntity.ok(dtoReturnedTeam);
@@ -87,7 +98,7 @@ public class TeamController {
 public ResponseEntity<TeamDto> createTeam(
         @RequestBody TeamCreateRequestDto teamRequest,
         Authentication authentication) {
-    
+
     UUID userId = (UUID) authentication.getPrincipal();
 
     User creator =(User) this.userService.findByUserGuid(userId);

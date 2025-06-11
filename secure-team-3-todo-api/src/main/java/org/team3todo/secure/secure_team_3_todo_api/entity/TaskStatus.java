@@ -28,8 +28,8 @@ public class TaskStatus {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @OneToMany(mappedBy = "status")
-    private List<TaskStatusHistory> taskStatusHistories = new ArrayList<>();
+    @OneToMany(mappedBy = "taskStatus")
+    private List<Task> tasks = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
