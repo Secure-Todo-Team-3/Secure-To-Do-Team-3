@@ -113,9 +113,9 @@ public class AuthService {
         var user = userRepository.findByUsername(verificationRequest.getUsername())
                      .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
-        // if (!totpService.isCodeValid(user.getTotpSecret(), verificationRequest.getCode())) {
-        //     throw new SecurityException("Invalid TOTP code.");
-        // }
+        if (!totpService.isCodeValid(user.getTotpSecret(), verificationRequest.getCode())) {
+            throw new SecurityException("Invalid TOTP code.");
+        }
         
         var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid()), user);
         return AuthenticatedResponseDto.builder().token(token).totpRequired(false).build();
