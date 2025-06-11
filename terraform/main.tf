@@ -42,7 +42,7 @@ module "s3_bucket" {
 module "rds_postgres" {
   source              = "./modules/db"
   todo_vpc_id         = module.vpc.vpc_id
-  todo_private_subnet_ids = module.vpc.private_subnet_ids
+  todo_private_subnet_ids = module.vpc.public_subnet_ids
   todo_db_name        = var.db_name_value
   todo_db_username    = var.db_username_value
   todo_db_password    = var.db_password_value
