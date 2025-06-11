@@ -1,59 +1,85 @@
 name: Deploy Frontend to S3 (Angular)
-
+ 
 on:
   push:
     branches:
       - main
       - snapshot  
   workflow_dispatch:
-
+ 
 jobs:
   deploy:
-    runs-on: ubuntu-latest 
-
+    runs-on: ubuntu-latest
+ 
     permissions:
-      id-token: write   
+      id-token: write  
       contents: read    
-
+ 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 
-
+        uses: actions/checkout@v4
+ 
       - name: Debug - list app files
         run: ls -l ./app
-
+ 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 
+        uses: actions/setup-node@v4
         with:
-          node-version: '18' 
-          cache: 'npm'       
+          node-version: '18'
+          cache: 'npm'      
           cache-dependency-path: app/package-lock.json
-          
+         
       - name: Install Angular dependencies
-        run: npm ci 
-        working-directory: ./app 
-
+        run: npm ci
+        working-directory: ./app
+ 
       - name: Build Angular Application
-        run: npm run build -- --configuration=production --output-path ../dist_client_code 
-        working-directory: ./app 
-
+        run: npm run build -- --configuration=production
+        working-directory: ./app
+ 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4 
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::263883060207:role/github-actions-frontend-deploy-role 
+          role-to-assume: arn:aws:iam::263883060207:role/github-actions-frontend-deploy-role
           aws-region: eu-west-1
-
-      - name: Sync build to S3
+ 
+      - name: Sync build to S3 with correct content types
         env:
-          AWS_S3_BUCKET_NAME: ${{ secrets.AWS_CLIENT_BUCKET_NAME }} 
+          AWS_S3_BUCKET_NAME: ${{ secrets.AWS_CLIENT_BUCKET_NAME }}
         run: |
-          aws s3 sync ./dist_client_code s3://${{ env.AWS_S3_BUCKET_NAME }} --delete
-
-      - name: Create CloudFront Invalidation (Optional - Recommended for CDN)
-        if: success() && env.AWS_CLOUDFRONT_DISTRIBUTION_ID 
+          # Upload HTML files
+          aws s3 sync ./app/dist/app s3://${{ env.AWS_S3_BUCKET_NAME }} \
+            --exclude "*" \
+            --include "*.html" \
+            --content-type "text/html" \
+            --delete
+         
+          # Upload JavaScript files
+          aws s3 sync ./app/dist/app s3://${{ env.AWS_S3_BUCKET_NAME }} \
+            --exclude "*" \
+            --include "*.js" \
+            --content-type "application/javascript" \
+            --delete
+         
+          # Upload CSS files
+          aws s3 sync ./app/dist/app s3://${{ env.AWS_S3_BUCKET_NAME }} \
+            --exclude "*" \
+            --include "*.css" \
+            --content-type "text/css" \
+            --delete
+         
+          # Upload other assets
+          aws s3 sync ./app/dist/app s3://${{ env.AWS_S3_BUCKET_NAME }} \
+            --exclude "*.html" \
+            --exclude "*.js" \
+            --exclude "*.css" \
+            --delete
+ 
+      - name: Create CloudFront Invalidation
+        if: success() && env.AWS_CLOUDFRONT_DISTRIBUTION_ID
         env:
-          AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} 
+          AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
           echo "Creating CloudFront invalidation for distribution: ${{ env.AWS_CLOUDFRONT_DISTRIBUTION_ID }}"
           aws cloudfront create-invalidation --distribution-id ${{ env.AWS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
-          echo "CloudFront invalidation requested."
+          echo "CloudFront invalidation requested."  
