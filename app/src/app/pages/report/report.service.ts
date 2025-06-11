@@ -31,6 +31,6 @@ export class ReportService {
   constructor(private api: ApiService) {}
 
   getTaskStatistics(days: number = 7): Observable<TeamTaskStatisticDto[]> {
-    return this.api.get<TeamTaskStatisticDto[]>('tasks', { days });
+    return this.api.get<TeamTaskStatisticDto[]>('statistics/tasks', { days });
   }
 }
