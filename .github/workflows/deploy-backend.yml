@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
   
 env:
-  EB_APP_NAME: TodoApp
-  EB_ENV_NAME: TodoApp-Env
+  EB_APP_NAME: todoapp-TodoApp
+  EB_ENV_NAME: todoapp-TodoApp-Env
   AWS_REGION: eu-west-1
   RDS_DB_INSTANCE_IDENTIFIER: todo-team-db
 
@@ -108,7 +108,7 @@ jobs:
           echo "Created application.zip at repository root ($GITHUB_WORKSPACE/application.zip)."
 
       - name: Deploy to Elastic Beanstalk
-        uses: aws-actions/elastic-beanstalk-deploy@v1 
+        uses:  einaregilsson/beanstalk-deploy@v21 
         with:
           
           application_name: ${{ env.EB_APP_NAME }}
