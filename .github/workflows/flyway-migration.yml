@@ -24,7 +24,7 @@ jobs:
           docker run --rm \
             --volume "${GITHUB_WORKSPACE}/db:/flyway/sql:ro" \
             redgate/flyway \
-            -url="${{ secrets.DATABASE_URL }}" \
+            -url="jdbc:postgresql://todo-team-db.cbsozziiwdya.eu-west-1.rds.amazonaws.com:5432/todo_db" \
             -user="${{ secrets.DB_USERNAME }}" \
             -password="${{ secrets.DB_PASSWORD }}" \
             migrate
