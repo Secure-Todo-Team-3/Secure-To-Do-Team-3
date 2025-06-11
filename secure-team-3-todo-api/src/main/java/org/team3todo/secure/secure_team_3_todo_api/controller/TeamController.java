@@ -1,5 +1,6 @@
 package org.team3todo.secure.secure_team_3_todo_api.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -83,7 +84,7 @@ public class TeamController {
     }
 
     @PostMapping("/{teamId}/add-user")
-    public ResponseEntity<TeamMembershipDto> addUserToteam(@RequestBody AddUserToTeamDto addUserToTeamDto, @PathVariable Long teamId){
+    public ResponseEntity<TeamMembershipDto> addUserToteam(@Valid @RequestBody AddUserToTeamDto addUserToTeamDto, @PathVariable Long teamId){
         TeamMembership returnedTeamMembership = teamService.addUserToTeam(addUserToTeamDto.getUserEmail(), teamId);
         if(returnedTeamMembership != null){
             TeamMembershipDto dtoReturnedTeam = teamMembershipMapper.convertToDto(returnedTeamMembership);
@@ -96,7 +97,7 @@ public class TeamController {
 
 @PostMapping("/create")
 public ResponseEntity<TeamDto> createTeam(
-        @RequestBody TeamCreateRequestDto teamRequest,
+        @Valid @RequestBody TeamCreateRequestDto teamRequest,
         Authentication authentication) {
 
     UUID userId = (UUID) authentication.getPrincipal();
@@ -112,7 +113,7 @@ public ResponseEntity<TeamDto> createTeam(
     public ResponseEntity<TeamMembershipDto> updateUserRoleInTeam(
             @PathVariable Long teamId,
             @PathVariable UUID userGuid,
-            @RequestBody UpdateTeamRoleRequestDto requestDto) {
+            @Valid @RequestBody UpdateTeamRoleRequestDto requestDto) {
 
         TeamMembership updatedMembership = teamMembershipService.updateUserRoleInTeam(
                 userGuid, teamId, requestDto.getNewRoleId()
