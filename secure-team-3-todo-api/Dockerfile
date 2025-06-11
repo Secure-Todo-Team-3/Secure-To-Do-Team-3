@@ -22,7 +22,7 @@ WORKDIR /secure-team-3-todo-api
 
 COPY --from=build /secure-team-3-todo-api/target/*.jar app.jar
  
-EXPOSE 80
+EXPOSE 8080
  
 # Set the entrypoint to run the application
 
