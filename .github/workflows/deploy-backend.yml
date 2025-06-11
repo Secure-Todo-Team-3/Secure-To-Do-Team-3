@@ -40,7 +40,7 @@ jobs:
         run: |
           # Navigate to the directory containing your Dockerfile and application code
           # Ensure this path is correct relative to your repository root
-          cd terraform/app_source/
+          cd secure-team-3-todo-api/
           # Build the Docker image with the full ECR URI and tag
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           # Push the Docker image to ECR
