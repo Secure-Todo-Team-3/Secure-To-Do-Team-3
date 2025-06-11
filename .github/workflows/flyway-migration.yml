@@ -50,7 +50,19 @@ jobs:
           
           echo "Fetched RDS DB Endpoint: $DB_ENDPOINT"
           echo "Fetched RDS DB Name: $DB_NAME_FROM_RDS"
-
+      - name: Debug - Test Database Connectivity
+        run: |
+          DB_HOST="${{ env.DB_ENDPOINT }}"
+          DB_PORT="5432"
+          echo "Attempting to connect to $DB_HOST:$DB_PORT..."
+          # Using netcat for a simple TCP connection test
+          nc -zv $DB_HOST $DB_PORT -w 10 # -w 10 for a 10-second timeout
+          if [ $? -eq 0 ]; then
+            echo "Successfully connected to $DB_HOST:$DB_PORT"
+          else
+            echo "Failed to connect to $DB_HOST:$DB_PORT. Check network, security groups, NACLs, and RDS public accessibility."
+            exit 1 # Fail the workflow if connection test fails
+          fi
       - name: Execute Flyway Migrations
         run: |
           docker run --rm \
