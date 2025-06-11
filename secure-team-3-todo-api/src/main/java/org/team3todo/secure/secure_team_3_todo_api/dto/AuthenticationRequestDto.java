@@ -18,6 +18,5 @@ public class AuthenticationRequestDto {
     @Email(message = "If provided, email must be in a valid format.")
     @Size(max = 255, message = "Email cannot exceed 255 characters.")
     private String email;
-    @ValidPassword
     private String password;
 }

@@ -24,7 +24,6 @@ public class RegisterRequest {
     @NotBlank(message = "Password cannot be blank.")
     @ValidPassword
     private String password;
-    @NotBlank(message = "Password confirmation cannot be blank.")
     private String confirmPassword;
     
 }
