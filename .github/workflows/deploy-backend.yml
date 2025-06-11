@@ -32,6 +32,20 @@ jobs:
           role-to-assume: arn:aws:iam::263883060207:role/github-actions-deploy-role
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Build and Push Docker Image to ECR
+        env:
+          ECR_REGISTRY: 263883060207.dkr.ecr.eu-west-1.amazonaws.com 
+          ECR_REPOSITORY: todoapp-api-repository
+          IMAGE_TAG: latest 
+        run: |
+          # Navigate to the directory containing your Dockerfile and application code
+          # Ensure this path is correct relative to your repository root
+          cd terraform/app_source/
+          # Build the Docker image with the full ECR URI and tag
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          # Push the Docker image to ECR
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      
       - name: Get RDS DB Endpoint
         id: rds_endpoint_step
         run: |
