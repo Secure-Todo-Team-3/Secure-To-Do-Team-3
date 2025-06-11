@@ -34,27 +34,33 @@ public class TeamController {
     private final UserService userService;
 
     @Autowired
-    public TeamController(TeamService teamService, TeamMapper teamMapper, UserMapper userMapper, TeamMembershipMapper teamMembershipMapper, TeamMembershipService teamMembershipService, UserService userService) {
-        this.teamService = teamService; this.teamMapper = teamMapper; this.userMapper = userMapper; this.teamMembershipMapper = teamMembershipMapper; this.teamMembershipService = teamMembershipService; this.userService = userService;
+    public TeamController(TeamService teamService, TeamMapper teamMapper, UserMapper userMapper,
+            TeamMembershipMapper teamMembershipMapper, TeamMembershipService teamMembershipService,
+            UserService userService) {
+        this.teamService = teamService;
+        this.teamMapper = teamMapper;
+        this.userMapper = userMapper;
+        this.teamMembershipMapper = teamMembershipMapper;
+        this.teamMembershipService = teamMembershipService;
+        this.userService = userService;
     }
 
     @GetMapping("/{teamId}")
-    public ResponseEntity<TeamDto> getTeamById(@PathVariable Long teamId){
+    public ResponseEntity<TeamDto> getTeamById(@PathVariable Long teamId) {
         Team foundTeam = teamService.findById(teamId);
-        if(foundTeam != null){
+        if (foundTeam != null) {
             return ResponseEntity.ok(teamMapper.convertToDto(foundTeam));
-        }
-        else{
+        } else {
             return ResponseEntity.notFound().build();
         }
     }
+
     @GetMapping("/name/{teamName}")
-    public ResponseEntity<TeamDto> getTeamByUsername(@PathVariable String teamName){
+    public ResponseEntity<TeamDto> getTeamByUsername(@PathVariable String teamName) {
         Team foundTeam = teamService.findByName(teamName);
-        if(foundTeam != null){
+        if (foundTeam != null) {
             return ResponseEntity.ok(teamMapper.convertToDto(foundTeam));
-        }
-        else{
+        } else {
             return ResponseEntity.notFound().build();
         }
     }
@@ -76,36 +82,49 @@ public class TeamController {
     }
 
     @GetMapping("/{teamId}/users")
-    public ResponseEntity<List<UserDto>> getUsersInATeam(@PathVariable Long teamId){
+    public ResponseEntity<List<UserDto>> getUsersInATeam(@PathVariable Long teamId) {
         List<User> foundUsers = teamService.getUsersInATeam(teamId);
         List<UserDto> dtoFoundUsers = userMapper.convertToDtoList(foundUsers);
         return ResponseEntity.ok(dtoFoundUsers);
     }
 
     @PostMapping("/{teamId}/add-user")
-    public ResponseEntity<TeamMembershipDto> addUserToteam(@RequestBody AddUserToTeamDto addUserToTeamDto, @PathVariable Long teamId){
+    public ResponseEntity<TeamMembershipDto> addUserToteam(@RequestBody AddUserToTeamDto addUserToTeamDto,
+            @PathVariable Long teamId) {
         TeamMembership returnedTeamMembership = teamService.addUserToTeam(addUserToTeamDto.getUserEmail(), teamId);
-        if(returnedTeamMembership != null){
+        if (returnedTeamMembership != null) {
             TeamMembershipDto dtoReturnedTeam = teamMembershipMapper.convertToDto(returnedTeamMembership);
             return ResponseEntity.ok(dtoReturnedTeam);
-        }
-        else{
+        } else {
             return ResponseEntity.badRequest().build();
         }
     }
 
-@PostMapping("/create")
-public ResponseEntity<TeamDto> createTeam(
-        @RequestBody TeamCreateRequestDto teamRequest,
-        Authentication authentication) {
+    @PostMapping("/create")
+    public ResponseEntity<TeamDto> createTeam(
+            @RequestBody TeamCreateRequestDto teamRequest,
+            Authentication authentication) {
 
-    UUID userId = (UUID) authentication.getPrincipal();
+        UUID userId = (UUID) authentication.getPrincipal();
 
-    User creator =(User) this.userService.findByUserGuid(userId);
-    Team createdTeam = teamService.createTeam(teamRequest, creator);
-    TeamDto responseDto = teamMapper.convertToDto(createdTeam);
-    return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
-}
+        User creator = (User) this.userService.findByUserGuid(userId);
+        Team createdTeam = teamService.createTeam(teamRequest, creator);
+        TeamDto responseDto = teamMapper.convertToDto(createdTeam);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
+    @PostMapping("/{teamId}/update")
+    public ResponseEntity<TeamDto> updateTeam(
+            @PathVariable Long teamId,
+            @RequestBody TeamUpdateRequestDto teamUpdateRequest) {
+        Team updatedTeam = teamService.updateTeam(teamId, teamUpdateRequest);
+        if (updatedTeam != null) {
+            TeamDto responseDto = teamMapper.convertToDto(updatedTeam);
+            return ResponseEntity.ok(responseDto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
     @PutMapping("/{teamId}/member/{userGuid}/role")
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
@@ -115,8 +134,7 @@ public ResponseEntity<TeamDto> createTeam(
             @RequestBody UpdateTeamRoleRequestDto requestDto) {
 
         TeamMembership updatedMembership = teamMembershipService.updateUserRoleInTeam(
-                userGuid, teamId, requestDto.getNewRoleId()
-        );
+                userGuid, teamId, requestDto.getNewRoleId());
 
         TeamMembershipDto responseDto = teamMembershipMapper.convertToDto(updatedMembership);
 
