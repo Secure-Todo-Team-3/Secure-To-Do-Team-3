@@ -7,10 +7,15 @@ import { Team } from 'src/app/shared/models/team.model';
 export class TeamEditService {
   constructor(private api: ApiService) {}
 
-  saveTeam(team: Team, isEditMode: boolean): Observable<void> {
-    return isEditMode
-      ? this.api.put<void>(`teams/${team.id}`, team)
-      : this.api.post<void>(`team/create`, team);
+  saveTeam(team: Team, isEditMode: boolean, oldTeam?: Team): Observable<void> {
+    if (isEditMode) {
+      return this.api.post<void>(`team/${team.id}/update`, {
+        ...(oldTeam?.name !== team.name && { name: team.name }),
+        ...(oldTeam?.description !== team.description && { description: team.description }),
+      });
+    } else {
+      return this.api.post<void>('team/create', team);
+    }
   }
 
   loadTeam(id: number): Observable<Team> {

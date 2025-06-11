@@ -38,6 +38,7 @@ export class TeamEditComponent implements OnInit {
   isEditMode = signal(false);
   isLoading = false;
   teamForm!: FormGroup;
+  oldTeam: Team | undefined;
 
   constructor(
     private router: Router,
@@ -64,6 +65,7 @@ export class TeamEditComponent implements OnInit {
             description: team.description,
             teamId: team.id
           });
+          this.oldTeam = { ...team }; // Store the original team for comparison
         },
         error: (error) => {
           this.isEditMode.set(false);
@@ -98,7 +100,7 @@ export class TeamEditComponent implements OnInit {
       isLead: false,
     };
 
-    this.teamEditService.saveTeam(updatedTeam, this.isEditMode()).subscribe({
+    this.teamEditService.saveTeam(updatedTeam, this.isEditMode(), this.oldTeam).subscribe({
       next: () => {
         this.isLoading = false;
         this.router.navigate(['/teams']);
