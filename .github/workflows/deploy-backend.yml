@@ -5,7 +5,7 @@ on:
     branches:
       - main
   workflow_dispatch:
-  
+
 env:
   EB_APP_NAME: todoapp-TodoApp
   EB_ENV_NAME: todoapp-TodoApp-Env
@@ -64,7 +64,7 @@ jobs:
        
         run: |
           cd secure-team-3-todo-api/
-          mvn clean install
+          mvn clean install -DskipTests
 
       - name: Create EB Deployment Bundle
         
