@@ -83,6 +83,10 @@ jobs:
           version_label: github-sha-${{ github.sha }}
           deployment_package: application.zip
           region: ${{ env.AWS_REGION }}
-          aws_access_key: ${{ steps.configure_aws.outputs.aws-access-key-id }}
-          aws_secret_key: ${{ steps.configure_aws.outputs.aws-secret-access-key }}
-          aws_session_token: ${{ steps.configure_aws.outputs.aws-session-token }}
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
+
+          
+  
+    
