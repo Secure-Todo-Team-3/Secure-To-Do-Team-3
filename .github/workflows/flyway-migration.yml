@@ -14,61 +14,17 @@ jobs:
   FlywayMigration:
     name: Run Flyway Migrations
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write   
-      contents: read    
+   
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4 
-        with:
-        
-          role-to-assume: arn:aws:iam::263883060207:role/github-actions-deploy-role
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Get RDS DB Endpoint and Name
-        id: rds_info 
-        run: |
-          # Use AWS CLI to get the current RDS endpoint address
-          DB_ENDPOINT=$(aws rds describe-db-instances \
-            --db-instance-identifier ${{ env.RDS_DB_INSTANCE_IDENTIFIER }} \
-            --query 'DBInstances[0].Endpoint.Address' \
-            --output text)
-          
-          # Use AWS CLI to get the current RDS database name
-          DB_NAME_FROM_RDS=$(aws rds describe-db-instances \
-            --db-instance-identifier ${{ env.RDS_DB_INSTANCE_IDENTIFIER }} \
-            --query 'DBInstances[0].DBName' \
-            --output text)
-          
-          
-          echo "DB_ENDPOINT=$DB_ENDPOINT" >> "$GITHUB_ENV"
-          echo "DB_NAME_FROM_RDS=$DB_NAME_FROM_RDS" >> "$GITHUB_ENV"
-          
-          echo "Fetched RDS DB Endpoint: $DB_ENDPOINT"
-          echo "Fetched RDS DB Name: $DB_NAME_FROM_RDS"
-      - name: Debug - Test Database Connectivity
-        run: |
-          DB_HOST="${{ env.DB_ENDPOINT }}"
-          DB_PORT="5432"
-          echo "Attempting to connect to $DB_HOST:$DB_PORT..."
-          # Using netcat for a simple TCP connection test
-          nc -zv $DB_HOST $DB_PORT -w 10 # -w 10 for a 10-second timeout
-          if [ $? -eq 0 ]; then
-            echo "Successfully connected to $DB_HOST:$DB_PORT"
-          else
-            echo "Failed to connect to $DB_HOST:$DB_PORT. Check network, security groups, NACLs, and RDS public accessibility."
-            exit 1 # Fail the workflow if connection test fails
-          fi
       - name: Execute Flyway Migrations
         run: |
           docker run --rm \
             --volume "${GITHUB_WORKSPACE}/db:/flyway/sql:ro" \
             redgate/flyway \
-            -url="jdbc:postgresql://${{ env.DB_ENDPOINT }}:5432/${{ env.DB_NAME_FROM_RDS }}" \
+            -url="${{ secrets.DATABASE_URL }}" \
             -user="${{ secrets.DB_USERNAME }}" \
             -password="${{ secrets.DB_PASSWORD }}" \
             migrate
