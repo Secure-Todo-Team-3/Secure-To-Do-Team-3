@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  workflow_dispatch:
 
 env:
   EB_APP_NAME: todoapp-TodoApp
@@ -15,52 +15,24 @@ env:
 jobs:
   deploy:
     name: "Build and Deploy Spring Boot App"
-    runs-on: ubuntu-latest # GitHub-hosted runner
+    runs-on: ubuntu-latest
 
     permissions:
-      id-token: write # Required for aws-actions/configure-aws-credentials with OIDC
-      contents: read # Required to checkout your repository code
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS Credentials # Assumes an IAM role via OIDC and sets temporary AWS credentials
-        id: configure_aws # Used to reference outputs from this step
+      - name: Configure AWS Credentials
+        id: configure_aws
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::263883060207:role/github-actions-deploy-role # Your IAM role for GitHub Actions
+          role-to-assume: arn:aws:iam::263883060207:role/github-actions-deploy-role
           aws-region: ${{ env.AWS_REGION }}
 
-      ---
-      # NEW SECTION: Docker Image Build and Push to ECR
-      - name: Login to Amazon ECR # Logs Docker into your ECR registry using the assumed AWS credentials
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        # aws-actions/amazon-ecr-login@v2 automatically picks up credentials
-        # from environment variables set by 'configure_aws' if they are present.
-        # Explicitly passing them here provides an extra layer of clarity/robustness:
-        env:
-          AWS_ACCESS_KEY_ID: ${{ steps.configure_aws.outputs.aws-access-key-id }}
-          AWS_SECRET_ACCESS_KEY: ${{ steps.configure_aws.outputs.aws-secret-access-key }}
-          AWS_SESSION_TOKEN: ${{ steps.configure_aws.outputs.aws-session-token }}
-
-      - name: Build and Push Docker Image to ECR # Builds your app's Docker image and pushes it
-        env:
-          ECR_REGISTRY: 263883060207.dkr.ecr.eu-west-1.amazonaws.com # Your specific ECR registry URI
-          ECR_REPOSITORY: todoapp-api-repository # The name of your ECR repository
-          IMAGE_TAG: latest # The tag for your Docker image, matches Dockerrun.aws.json's implicit tag
-        run: |
-          # Navigate to the directory containing your Dockerfile and application code
-          # Ensure this path is correct relative to your repository root
-          cd secure-team-3-todo-api/
-          # Build the Docker image with the full ECR URI and tag
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          # Push the Docker image to ECR
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-      ---
-
-      - name: Get RDS DB Endpoint # Fetches the RDS endpoint to potentially be used by your application
+      - name: Get RDS DB Endpoint
         id: rds_endpoint_step
         run: |
           DB_ENDPOINT=$(aws rds describe-db-instances \
@@ -70,54 +42,51 @@ jobs:
           echo "DB_ENDPOINT=$DB_ENDPOINT" >> "$GITHUB_ENV"
           echo "Fetched RDS DB Endpoint: $DB_ENDPOINT"
 
-      - name: Setup Java # Sets up Java for building your Spring Boot application (if your Dockerfile copies the JAR)
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Build Spring Boot Application # Builds the JAR file for your Spring Boot application
+      - name: Build Spring Boot Application
         run: |
           cd secure-team-3-todo-api/
           mvn clean install -DskipTests
 
-      - name: Create EB Deployment Bundle # Creates the .zip file for Elastic Beanstalk
+      - name: Create EB Deployment Bundle
         run: |
           BUILD_BUNDLE_DIR="eb-bundle-staging"
           mkdir -p "$BUILD_BUNDLE_DIR"
           cd secure-team-3-todo-api/
-          # Find and copy the built JAR file into the bundle directory
-          # This assumes your Dockerfile then copies this JAR into the image.
           JAR_FILE=$(find target -name "*.jar" -type f -print -quit)
           if [ -z "$JAR_FILE" ]; then
-            echo "Warning: Spring Boot JAR file not found. This is expected if your Dockerfile builds the app from source."
-          else
-            cp "$JAR_FILE" "${GITHUB_WORKSPACE}/$BUILD_BUNDLE_DIR/application.jar"
+            echo "Error: Spring Boot JAR file not found."
+            exit 1
           fi
-
+          cp "$JAR_FILE" "${GITHUB_WORKSPACE}/$BUILD_BUNDLE_DIR/application.jar"
           cd "$GITHUB_WORKSPACE"
           DOCKERRUN_REPO_PATH="terraform/app_source/Dockerrun.aws.json"
           if [ ! -f "$DOCKERRUN_REPO_PATH" ]; then
-            echo "Error: Dockerrun.aws.json not found. This is required for Docker deployments."
+            echo "Error: Dockerrun.aws.json not found."
             exit 1
           fi
-          # Copy your Dockerrun.aws.json into the bundle
           cp "$DOCKERRUN_REPO_PATH" "$BUILD_BUNDLE_DIR/"
-          # Create the final application.zip
           zip -j application.zip "$BUILD_BUNDLE_DIR"/*
           echo "Created application.zip."
 
-      - name: Deploy to Elastic Beanstalk # Deploys your application bundle to Elastic Beanstalk
+      - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v21
         with:
           application_name: ${{ env.EB_APP_NAME }}
           environment_name: ${{ env.EB_ENV_NAME }}
-          # Ensures a unique version label for each deployment attempt
           version_label: github-sha-${{ github.sha }}-${{ github.run_number }}-${{ github.run_attempt }}
           deployment_package: application.zip
           region: ${{ env.AWS_REGION }}
-          # Passes the temporary credentials obtained from 'configure_aws' step's outputs
-          aws_access_key: ${{ steps.configure_aws.outputs.aws-access-key-id }}
-          aws_secret_key: ${{ steps.configure_aws.outputs.aws-secret-access-key }}
-          aws_session_token: ${{ steps.configure_aws.outputs.aws-session-token }}
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
+
+          
+  
+    
