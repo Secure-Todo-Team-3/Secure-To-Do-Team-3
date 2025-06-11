@@ -8,12 +8,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.team3todo.secure.secure_team_3_todo_api.dto.UserDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 import org.team3todo.secure.secure_team_3_todo_api.exception.ResourceNotFoundException;
 import org.team3todo.secure.secure_team_3_todo_api.repository.UserRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService{
@@ -73,6 +76,11 @@ public class UserService implements UserDetailsService{
             user.setIsLocked(true);
         }
         userRepository.save(user);
+    }
+
+    public List<User> findAll() {
+        return userRepository.findAll().stream()
+                .collect(Collectors.toList());
     }
 
 }

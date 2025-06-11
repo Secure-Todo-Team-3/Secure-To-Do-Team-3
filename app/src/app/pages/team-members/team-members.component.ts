@@ -1,22 +1,25 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { map, startWith } from 'rxjs/operators';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatListModule } from '@angular/material/list';
-import { MatSelectModule } from '@angular/material/select';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { MatMenuModule } from '@angular/material/menu';
-import { getInitials } from '../../shared/utils/get-initials';
-import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+
+import { getInitials } from '../../shared/utils/get-initials';
+import { User } from 'src/app/shared/models/user.model';
+import { TeamService } from './team-members.service';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+import { forkJoin } from 'rxjs';
+import { environment } from 'src/app/shared/environments/environment';
 
 @Component({
   selector: 'app-team-members',
@@ -37,154 +40,90 @@ import { Router } from '@angular/router';
     MatDialogModule,
     MatInputModule,
     MatSnackBarModule,
-    MatMenuModule,
+    MatInputModule,
   ],
   templateUrl: './team-members.component.html',
   styleUrls: ['./team-members.component.css'],
 })
-export class TeamMembersComponent {
-  teamMembers = [
-    { id: 1, name: 'Lisa Johnston', role: 'Marketing Specialist' },
-    { id: 2, name: 'Stepko Garcia', role: 'Marketing Team' },
-  ];
-  getInitials = getInitials;
-
-  availableRoles = [
-    'Marketing Specialist',
-    'Content Manager',
-    'SEO Analyst',
-    'Social Media Manager',
-    'Team Lead',
-  ];
-
-  allUsers = [
-    { id: 3, name: 'Jane Gee' },
-    { id: 4, name: 'Mike Brown' },
-    { id: 5, name: 'Sarah Connor' },
-    ...this.teamMembers,
-  ];
-
+export class TeamMembersComponent implements OnInit {
+  teamMembers: User[] = [];
+  allUsers: User[] = [];
   searchControl = new FormControl();
   filteredUsers = this.searchControl.valueChanges.pipe(
     startWith(''),
-    map((value) => this._filterUsers(value || ''))
+    map(value => this._filterUsers(value.username))
   );
 
-  newMember = {
-    name: '',
-    role: '',
-  };
+  newMemberEmail: string | undefined;
+  teamId: number | undefined;
+  getInitials = getInitials;
 
-  editingMember: any = null;
-  originalRole: string = '';
+  constructor(
+    private snackBar: MatSnackBar,
+    private router: Router,
+    private teamService: TeamService
+  ) {}
 
-  constructor(private dialog: MatDialog, private snackBar: MatSnackBar, private router: Router) {}
-
-  private _filterUsers(value: string): any[] {
-    const filterValue = value.toLowerCase();
-    return this.allUsers.filter(
-      (user) =>
-        user.name.toLowerCase().includes(filterValue) &&
-        !this.teamMembers.some((member) => member.id === user.id)
-    );
+  ngOnInit(): void {
+    this.loadInitialData();
   }
+
+  private loadInitialData() {
+    const teamId: number = Number(this.router.url.split('/').pop());
+    this.teamId = teamId;
+    forkJoin([
+      this.teamService.getTeamMembers(teamId),
+      this.teamService.getAllUsers(),
+      this.teamService.getMe()
+    ]).subscribe({
+      next: ([members, users, me]) => {
+        this.teamMembers = members.map(member => ({
+          ...member,
+          role: member.username === me.username ? {name: 'Admin'} : {name: 'Member'}
+        } as User));
+
+        this.allUsers = users;
+
+        this.searchControl.setValue('');
+      },
+      error: (error) => {
+        this.snackBar.open('Failed to load team members: ' + (error.message || 'Unknown error'), 'Close', { duration: environment.snackbarDuration});
+      }
+    });
+  }
+
+  private _filterUsers(value: string): User[] {
+  const filterValue = (value || '').toLowerCase();
+  return this.allUsers.filter(user =>
+    !this.teamMembers.some(member => member.username === user.username) &&
+    user.username.toLowerCase().includes(filterValue)
+  );
+}
+
 
   goBack() {
     this.router.navigate(['/teams']);
   }
 
-  addMember() {
-    if (this.newMember.name && this.newMember.role) {
-      const newId = Math.max(...this.allUsers.map((u) => u.id)) + 1;
-      const newMember = {
-        id: newId,
-        ...this.newMember,
-      };
-      this.teamMembers.push(newMember);
-      this.allUsers.push(newMember);
-      this.resetForm();
-      this.snackBar.open('Member added successfully', 'Close', {
-        duration: 3000,
-      });
-    }
-  }
-
-  startEdit(member: any) {
-    this.editingMember = { ...member };
-  }
-
-  cancelEdit() {
-    this.editingMember = null;
-  }
-
-  confirmRemove(member: any) {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '350px',
-      data: {
-        title: 'Confirm Removal',
-        message: `Are you sure you want to remove ${member.name} from the team?`,
-      },
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.removeMember(member);
-      }
-    });
-  }
-
-  removeMember(member: any) {
-    this.teamMembers = this.teamMembers.filter((m) => m.id !== member.id);
-    this.snackBar.open('Member removed', 'Close', { duration: 3000 });
-  }
-
   resetForm() {
-    this.newMember = { name: '', role: '' };
+    this.newMemberEmail = undefined;
     this.searchControl.setValue('');
   }
 
-  selectUser(user: any) {
-    this.newMember.name = user.name;
+  displayUser(user: User): string {
+    return user && user.username
   }
 
-  displayFn(user: any): string {
-    return user && user.name ? user.name : '';
+  selectUser(user: User) {
+    this.newMemberEmail = user.email;
   }
 
-  confirmRoleChange() {
-    if (this.editingMember.role !== this.originalRole) {
-      const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-        width: '350px',
-        data: {
-          title: 'Confirm Role Change',
-          message: `Change ${this.editingMember.name}'s role from ${this.originalRole} to ${this.editingMember.role}?`,
-        },
-      });
-
-      dialogRef.afterClosed().subscribe((result) => {
-        if (result) {
-          this.saveEdit();
-        } else {
-          this.cancelEdit();
-        }
-      });
-    } else {
-      this.cancelEdit();
-    }
+  addMember() {
+    this.teamService.addMember(this.teamId!, this.newMemberEmail!).subscribe((newMember) => {
+      this.teamMembers.push({ ...newMember, role: { name: 'Member' } } as User);
+      this.snackBar.open(`${newMember.username} added to team`, 'Close', { duration: environment.snackbarDuration });
+      this.resetForm();
+    });
   }
 
-  saveEdit() {
-    if (this.editingMember) {
-      const index = this.teamMembers.findIndex(
-        (m) => m.id === this.editingMember.id
-      );
-      if (index !== -1) {
-        this.teamMembers[index] = { ...this.editingMember };
-        this.snackBar.open('Role updated successfully', 'Close', {
-          duration: 3000,
-        });
-      }
-      this.cancelEdit();
-    }
-  }
 }

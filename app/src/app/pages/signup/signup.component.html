@@ -12,7 +12,7 @@
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Username</mat-label>
-            <input matInput formControlName="username" type="text" autocomplete="username">
+            <input maxlength="30" matInput formControlName="username" type="text" autocomplete="username">
             @if (signupForm.get('username')?.invalid && signupForm.get('username')?.touched) {
               <mat-error>{{ getErrorMessage('username') }}</mat-error>
             }
@@ -20,7 +20,7 @@
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Email address</mat-label>
-            <input matInput formControlName="email" type="email" autocomplete="email">
+            <input maxlength="50" matInput maxformControlName="email" type="email" autocomplete="email">
             @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
               <mat-error>{{ getErrorMessage('email') }}</mat-error>
             }
@@ -29,6 +29,7 @@
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Password</mat-label>
             <input matInput 
+              maxlength="30"
                    formControlName="password" 
                    [type]="hidePassword ? 'password' : 'text'"
                    autocomplete="new-password">
@@ -37,12 +38,16 @@
             </button>
             @if (signupForm.get('password')?.invalid && signupForm.get('password')?.touched) {
               <mat-error>{{ getErrorMessage('password') }}</mat-error>
+            } 
+            @if (signupForm.get('password')?.hasError('pattern')) {
+              <mat-error >Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.</mat-error>
             }
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="full-width">
             <mat-label>Confirm Password</mat-label>
             <input matInput 
+                    maxlength="50"
                    formControlName="confirmPassword" 
                    [type]="hideConfirmPassword ? 'password' : 'text'"
                    autocomplete="new-password">

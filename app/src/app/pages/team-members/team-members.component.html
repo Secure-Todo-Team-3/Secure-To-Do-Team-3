@@ -4,10 +4,10 @@
     <button mat-icon-button (click)="goBack()" aria-label="Back">
       <mat-icon>arrow_back</mat-icon>
     </button>
-    <div>
+    <section>
       <mat-card-title>Marketing Team Members</mat-card-title>
       <mat-card-subtitle>Manage your team members and roles</mat-card-subtitle>
-    </div>
+    </section>
   </mat-card-header>
 </header>
 
@@ -19,35 +19,26 @@
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Search users</mat-label>
         <input
+         maxlength="50"
           type="text"
           matInput
           [formControl]="searchControl"
           [matAutocomplete]="auto" />
         <mat-autocomplete
           #auto="matAutocomplete"
-          [displayWith]="displayFn"
+          [displayWith]="displayUser"
           (optionSelected)="selectUser($event.option.value)">
           <mat-option *ngFor="let user of filteredUsers | async" [value]="user">
-            {{ user.name }}
+            {{ user.username }}
           </mat-option>
         </mat-autocomplete>
         <mat-icon matPrefix>search</mat-icon>
       </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>Role</mat-label>
-        <mat-select [(ngModel)]="newMember.role">
-          <mat-option *ngFor="let role of availableRoles" [value]="role">
-            {{ role }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
       <button
         mat-raised-button
         color="primary"
         (click)="addMember()"
-        [disabled]="!newMember.name || !newMember.role">
+        [disabled]="!newMemberEmail">
         <mat-icon>person_add</mat-icon>
         Add to Team
       </button>
@@ -55,53 +46,13 @@
 <mat-list class="members-list">
   @for (member of teamMembers; track member.id) {
     <mat-list-item class="member-item">
-      <div class="member-info">
-        <div class="avatar">{{ getInitials(member.name) }}</div>
-        <div class="name-role">
-          <span class="member-name">{{ member.name }}</span>
-          <span class="role-badge">{{ member.role }}</span>
-        </div>
-      </div>
-
-      <div class="action-area">
-        @if (editingMember?.id === member.id) {
-          <article class="edit-section">
-            <mat-form-field appearance="fill">
-              <mat-label>Role</mat-label>
-              <mat-select [(ngModel)]="editingMember.role">
-                <mat-option *ngFor="let role of availableRoles" [value]="role">
-                  {{ role }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <footer class="edit-actions">
-              <button mat-button color="primary" (click)="confirmRoleChange()">
-                <mat-icon>save</mat-icon> Save
-              </button>
-              <button mat-button (click)="cancelEdit()">
-                <mat-icon>cancel</mat-icon> Cancel
-              </button>
-            </footer>
-          </article>
-        } @else {
-          <button
-            mat-icon-button
-            [matMenuTriggerFor]="memberMenu"
-            class="menu-button">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #memberMenu="matMenu">
-            <button mat-menu-item (click)="startEdit(member)">
-              <mat-icon>edit</mat-icon>
-              <strong>Edit Role</strong>
-            </button>
-            <button mat-menu-item (click)="confirmRemove(member)">
-              <mat-icon>delete</mat-icon>
-              <strong>Remove</strong>
-            </button>
-          </mat-menu>
-        }
-      </div>
+      <section class="member-info">
+        <p class="avatar">{{ getInitials(member.username) }}</p>
+        <section class="name-role">
+          <p class="member-name">{{ member.username }}</p>
+          <p class="role-badge">{{ member.role?.name }}</p>
+        </section>
+      </section>
     </mat-list-item>
     <mat-divider></mat-divider>
   }

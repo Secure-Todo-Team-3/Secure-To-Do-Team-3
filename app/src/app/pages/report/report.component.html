@@ -1,0 +1,72 @@
+<mat-card class="filter-card">
+  <div class="filter-header">Time Period Filters</div>
+  <div class="filters">
+    <mat-form-field appearance="fill">
+      <mat-label>Time Period</mat-label>
+      <mat-select [(value)]="timePeriod">
+        <mat-option value="week">Week</mat-option>
+        <mat-option value="month">Month</mat-option>
+        <mat-option value="quarter">Quarter</mat-option>
+        <mat-option value="year">Year</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <button mat-flat-button color="primary" (click)="applyFilters()">Apply Filters</button>
+    <button mat-stroked-button (click)="resetFilters()">Reset</button>
+  </div>
+  <small class="caption">Showing data for the {{timePeriod}}</small>
+</mat-card>
+
+<mat-card class="table-card table-container">
+  <h3>Daily User Task Statistics</h3>
+  <div class="table-scroll">
+    <table class="mat-elevation-z1 full-width-table mat-table">
+      <thead>
+        <tr>
+          <th>Details</th>
+          <th>Open</th>
+          <th>Closed</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let team of teams">
+          <tr>
+            <td>
+              <button mat-icon-button (click)="toggleTeam(team)">
+                <mat-icon>{{ team.expanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
+              </button>
+              <strong>{{ team.teamName }}</strong>
+            </td>
+            <td>{{ team.totalOpenTasks }}</td>
+            <td>{{ team.totalClosedTasks }}</td>
+            <td><a href="#" (click)="logTasks(team.teamName)">View Tasks</a></td>
+          </tr>
+
+          <ng-container *ngIf="team.expanded">
+            <ng-container *ngFor="let date of team.dailyBreakdown">
+              <tr class="sub-row">
+                <td class="indent">
+                  <button mat-icon-button (click)="toggleDate(date)">
+                    <mat-icon>{{ date.expanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
+                  </button>
+                  {{ date.date }}
+                </td>
+                <td>{{ date.totalOpenForDay }}</td>
+                <td>{{ date.totalClosedForDay }}</td>
+                <td><a href="#" (click)="logTasks(team.teamName + ' - ' + date.date)">View Tasks</a></td>
+              </tr>
+              <ng-container *ngIf="date.expanded">
+                <tr *ngFor="let user of date.userBreakdown" class="user-row inner-row" class="sub-row">
+                  <td class="deeper">{{ user.username }}</td>
+                  <td>{{ user.openTasks }}</td>
+                  <td>{{ user.closedTasks }}</td>
+                  <td><a href="#" (click)="logTasks(team.teamName + ' - ' + date.date + ' - ' + user.username)">View Tasks</a></td>
+                </tr>
+              </ng-container>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+</mat-card>

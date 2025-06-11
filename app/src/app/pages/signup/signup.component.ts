@@ -57,7 +57,7 @@ export class SignupComponent {
       {
         username: ['', [Validators.required, Validators.minLength(3)]],
         email: ['', [Validators.required, Validators.email]],
-        password: ['', [Validators.required, Validators.minLength(6)]],
+        password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(environment.passwordPattern)]],
         confirmPassword: ['', [Validators.required]],
       },
       { validators: this.passwordMatchValidator }

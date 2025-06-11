@@ -22,12 +22,13 @@
       <form [formGroup]="teamForm">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Team Name</mat-label>
-          <input matInput formControlName="name" required />
+          <input maxlength="50" matInput formControlName="name" required />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Description</mat-label>
           <textarea
+            maxlength="250"
             matInput
             formControlName="description"
             rows="4"
