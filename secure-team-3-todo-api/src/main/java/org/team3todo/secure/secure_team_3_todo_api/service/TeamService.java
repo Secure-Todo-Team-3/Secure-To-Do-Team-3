@@ -1,7 +1,6 @@
 package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import jakarta.transaction.Transactional;
-import org.owasp.html.PolicyFactory; // <-- IMPORT
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,14 +31,13 @@ public class TeamService {
 
 
     @Autowired
-    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService, TeamRoleRepository teamRoleRepository, AuditingService auditingService, PolicyFactory sanitizerPolicy) { // <-- ADD TO CONSTRUCTOR
+    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService, TeamRoleRepository teamRoleRepository, AuditingService auditingService) { // <-- ADD TO CONSTRUCTOR
         this.teamRepository = teamRepository;
         this.userService = userService;
         this.teamMembershipRepository = teamMembershipRepository;
         this.teamMembershipService = teamMembershipService;
         this.teamRoleRepository = teamRoleRepository;
         this.auditingService = auditingService;
-        this.sanitizerPolicy = sanitizerPolicy;
     }
 
     public Team findById(Long id) {
@@ -111,6 +109,8 @@ public class TeamService {
 
         String safeName = sanitizerPolicy.sanitize(teamRequest.getName());
         String safeDescription = sanitizerPolicy.sanitize(teamRequest.getDescription());
+        String safeName = teamRequest.getName();
+        String safeDescription = teamRequest.getDescription();
 
         if (teamRepository.existsByName(safeName)) {
             throw new DuplicateResourceException("A team with the name '" + safeName + "' already exists.");
