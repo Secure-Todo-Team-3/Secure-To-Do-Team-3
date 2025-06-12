@@ -27,7 +27,6 @@ public class TeamService {
     private final TeamMembershipService teamMembershipService;
     private final TeamRoleRepository teamRoleRepository;
     private final AuditingService auditingService;
-    private final PolicyFactory sanitizerPolicy;
 
 
     @Autowired
