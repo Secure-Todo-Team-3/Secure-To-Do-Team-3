@@ -3,6 +3,15 @@
     <mat-spinner diameter="50"></mat-spinner>
   </div>
 
+  <!-- Actions at the top of the page -->
+  <div class="page-actions" *ngIf="!isLoading">
+    <!-- This button now opens the dialog to add a user to a team -->
+    <button mat-stroked-button color="primary" (click)="openAddUserDialog()">
+      <mat-icon>person_add</mat-icon>
+      Add User to Team
+    </button>
+  </div>
+
   <mat-tab-group *ngIf="!isLoading" animationDuration="500ms">
     <mat-tab label="My Teams ({{ myTeams.length }})">
       <section class="team-section">
@@ -11,9 +20,9 @@
             <app-team-card [team]="team"></app-team-card>
           </li>
         </ul>
-        <ng-container *ngIf="myTeams.length === 0">
-          <p>No teams found.</p>
-        </ng-container>
+        <div *ngIf="myTeams.length === 0" class="empty-state">
+          <p>You haven't created or lead any teams yet.</p>
+        </div>
       </section>
     </mat-tab>
 
@@ -24,13 +33,14 @@
             <app-team-card [team]="team"></app-team-card>
           </li>
         </ul>
-        <ng-container *ngIf="joinedTeams.length === 0">
-          <p>No joined teams found.</p>
-        </ng-container>
+        <div *ngIf="joinedTeams.length === 0" class="empty-state">
+          <p>You haven't joined any teams yet.</p>
+        </div>
       </section>
     </mat-tab>
   </mat-tab-group>
 
+  <!-- This FAB is for creating a brand new team -->
   <button
     mat-fab
     color="primary"

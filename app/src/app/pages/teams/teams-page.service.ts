@@ -18,4 +18,9 @@ export class TeamsPageService {
       map(teams => teams.map( team => ({ ...team, isLead: false })))
     );
   }
+
+  addUserToTeam(userEmail: string, teamId: number): Observable<any> {
+    const payload = { userEmail };
+    return this.api.post(`team/${teamId}/add-user`, payload);
+  }
 }
