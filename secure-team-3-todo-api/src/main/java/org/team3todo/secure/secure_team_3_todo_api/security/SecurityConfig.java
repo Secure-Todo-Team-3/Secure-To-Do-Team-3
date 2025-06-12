@@ -30,7 +30,11 @@ public class SecurityConfig {
 
     private final AuthenticationProvider authenticationProvider;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private static final String[] ALLOW_LIST = {"/api/auth/**","/actuator/health"};
+     private static final String[] ALLOW_LIST = {
+        "/api/auth/**",
+        "/actuator/health",
+        "/actuator/info"
+    };
     @Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
