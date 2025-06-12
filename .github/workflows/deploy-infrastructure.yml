@@ -3,6 +3,7 @@ name: Terraform Apply (Infrastructure)
 on:
   workflow_dispatch:
 
+
 jobs:
   terraform_apply:
     name: "Terraform Apply"

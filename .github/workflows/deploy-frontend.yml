@@ -3,7 +3,6 @@ name: Deploy Frontend to S3 (Angular)
 on:
   workflow_dispatch:
    
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
