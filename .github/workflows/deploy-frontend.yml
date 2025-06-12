@@ -2,7 +2,8 @@ name: Deploy Frontend to S3 (Angular)
 
 on:
   workflow_run:
-    workflows: ["Backend Deploy (Spring Boot JAR)"] 
+    workflows: ["Backend Deploy (Spring Boot JAR)"]
+    types:
       - completed
 
 jobs:
