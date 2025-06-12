@@ -1,9 +1,10 @@
 <main class="dashboard">
-  <header class="dashboard-header">
-    <section class="search-section">
+  <section class="controls-container">
+    <section class="search">
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Search tasks...</mat-label>
         <input
+          maxlength="30"
           matInput
           type="text"
           [(ngModel)]="searchTerm"
@@ -15,10 +16,13 @@
       </mat-form-field>
     </section>
 
-    <section class="filters-section">
+    <section class="filters">
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Status</mat-label>
-        <mat-select [(ngModel)]="selectedStatus" (selectionChange)="searchTasks()">
+        <mat-select
+          [(ngModel)]="selectedStatus"
+          (selectionChange)="searchTasks()"
+        >
           <mat-option value="all">All Status</mat-option>
           <ng-container *ngFor="let status of statuses">
             <mat-option [value]="status.name">{{ status.name }}</mat-option>
@@ -28,32 +32,31 @@
 
       <mat-form-field appearance="outline" class="filter-field">
         <mat-label>Teams</mat-label>
-        <mat-select [(ngModel)]="selectedTeam" (selectionChange)="searchTasks()">
+        <mat-select
+          [(ngModel)]="selectedTeam"
+          (selectionChange)="searchTasks()"
+        >
           <mat-option value="all">All Teams</mat-option>
           <ng-container *ngFor="let team of teams">
             <mat-option [value]="team.name">{{ team.name }}</mat-option>
           </ng-container>
         </mat-select>
       </mat-form-field>
-
-      <button mat-flat-button color="primary" type="button" (click)="addTask()">
-        <mat-icon>add</mat-icon>
-        Add Task
-      </button>
-    </section>
-  </header>
-
-  <section aria-labelledby="tasks-tasks">
-    <h2 id="pending-tasks" class="section-heading">
-      <mat-icon color="warn" class="heading-icon">task</mat-icon>
-      My Tasks ({{ tasks.length }})
-    </h2>
-
-    <section class="task-list">
-      <app-task-card
-        *ngFor="let task of tasks"
-        [task]="task"
-      ></app-task-card>
     </section>
   </section>
+
+  <section class="task-list">
+    <app-task-card *ngFor="let task of tasks" [task]="task"></app-task-card>
+  </section>
+
+  <ng-template [ngIf]="!tasks || tasks.length === 0">
+    <div class="no-tasks-message">
+      <mat-icon>info</mat-icon>
+      <p>You don't have tasks yet.</p>
+    </div>
+  </ng-template>
+
+  <button mat-fab color="primary" class="add-task-fab" (click)="addTask()">
+    <mat-icon>add</mat-icon>
+  </button>
 </main>

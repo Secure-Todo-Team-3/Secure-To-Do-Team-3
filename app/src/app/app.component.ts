@@ -29,8 +29,6 @@ import { AuthService } from './core/services/auth.service';
 export class AppComponent {
   showSidenav = signal(false);
   appTitle = 'Task Manager Pro';
-  userName = 'Alex Johnson';
-  userEmail = 'alex.johnson@example.com';
   getInitials = getInitials;
   isLoggedIn = false;
 
@@ -39,11 +37,11 @@ export class AppComponent {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
-        this.showSidenav.set(
-          !this.router.url.includes('/login') &&
-            !this.router.url.includes('/signup')&&
-            !this.isLoggedIn
+        const url = this.router.url;
+        const shouldShowSidenav = !(
+          url.includes('/login') || url.includes('/signup')
         );
+        this.showSidenav.set(shouldShowSidenav);
       });
   }
 

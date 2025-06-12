@@ -2,103 +2,76 @@
   max-width: 50rem;
   margin: 2rem auto;
   padding: 2rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.12);
+  background-color: var(--card-background, #fff);
+  transition: box-shadow 0.3s ease;
+}
+
+.team-card:hover {
+  box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.15);
 }
 
 .add-member-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  display: flex;
   gap: 1rem;
   margin: 1.5rem 0;
   align-items: center;
 }
 
 .search-field {
-  min-width: 15rem;
+  width: 70%;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search-field:focus {
+  outline: none;
+  border-color: var(--primary-color, #1976d2);
+  box-shadow: 0 0 8px rgba(25, 118, 210, 0.5);
+}
+
+.add-member-section button.mat-flat-button {
+  background-color: var(--primary-color, #1976d2);
+  color: white;
+  box-shadow: 0 0.25rem 0.5rem rgba(25, 118, 210, 0.4);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.add-member-section button.mat-flat-button:hover,
+.add-member-section button.mat-flat-button:focus {
+  background-color: #135ba1;
+  box-shadow: 0 0.4rem 0.8rem rgba(19, 91, 161, 0.6);
+  outline: none;
 }
 
 .members-list {
   padding: 0;
-}
-
-.member-item {
-  height: auto !important;
-  padding: 1rem 0;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  position: relative;
-}
-
-.member-details {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.member-name {
-  font-size: 1.125rem;
-  font-weight: 600;
   margin: 0;
-}
-
-.role-badge {
-  background-color: #e3f2fd;
-  color: #1976d2;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.menu-button {
-  color: rgba(0, 0, 0, 0.54);
-}
-
-.edit-section {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.edit-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-@media (max-width: 48rem) {
-  .team-card {
-    padding: 1rem;
-  }
-
-  .add-member-section {
-    grid-template-columns: 1fr;
-  }
-
-  .member-details {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-  }
-
-  .member-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  list-style: none;
 }
 
 .member-item {
-  height: auto !important;
+  height: auto;
   padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.3s ease;
+  border-radius: 0.5rem;
+}
+
+.member-item:hover {
+  background-color: #f9f9f9;
 }
 
 .member-info {
@@ -131,6 +104,7 @@
 .member-name {
   font-weight: 600;
   font-size: 1.1rem;
+  margin: 0;
 }
 
 .role-badge {
@@ -141,6 +115,8 @@
   font-size: 0.875rem;
   font-weight: 500;
   margin-top: 0.2rem;
+  text-align: center;
+  max-width: fit-content;
 }
 
 .action-area {
@@ -153,16 +129,36 @@
 .menu-button {
   margin-left: auto;
   align-self: flex-start;
+  color: rgba(0, 0, 0, 0.54);
 }
 
 mat-list-item {
   position: relative;
-  padding-right: 3rem; 
+  padding-right: 3rem;
 }
-/* 
-.menu-button {
-  position: absolute;
-  top: 0.5rem;    
-  right: 0.5rem;  
-  z-index: 1;
-} */
+
+@media (max-width: 48rem) {
+  .team-card {
+    padding: 1rem;
+  }
+
+  .add-member-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-field {
+    width: 100%;
+  }
+
+  .member-details,
+  .member-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .menu-button {
+    align-self: center;
+  }
+}

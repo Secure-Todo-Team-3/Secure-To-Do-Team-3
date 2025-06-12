@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { TeamsPageService } from './teams-page.service';
 import { Team } from 'src/app/shared/models/team.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @Component({
   selector: 'app-teams-page',
@@ -25,6 +26,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatButtonModule,
     TeamCardComponent,
     MatProgressSpinnerModule,
+    MatTabsModule,
   ],
   templateUrl: './teams-page.component.html',
   styleUrls: ['./teams-page.component.css'],

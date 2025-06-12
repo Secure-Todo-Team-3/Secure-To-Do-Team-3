@@ -10,6 +10,7 @@ import org.team3todo.secure.secure_team_3_todo_api.entity.User;
 import org.team3todo.secure.secure_team_3_todo_api.mapper.UserMapper;
 import org.team3todo.secure.secure_team_3_todo_api.service.UserService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -40,5 +41,16 @@ public ResponseEntity<UserDto> getCurrentUser(Authentication authentication) {
     UUID userGuid = (UUID) authentication.getPrincipal();
     User user = userService.findByUserGuid(userGuid);
     return ResponseEntity.ok(userMapper.convertToDto(user));
+}
+
+@GetMapping()
+public ResponseEntity<List<UserDto>> getAllUsers() {
+    List<User> users = userService.findAll();
+    if (users.isEmpty()) {
+        return ResponseEntity.ok(List.of());
+    } else {
+        return ResponseEntity.ok(userMapper.convertToDtoList(users));
+    }
+
 }
 }

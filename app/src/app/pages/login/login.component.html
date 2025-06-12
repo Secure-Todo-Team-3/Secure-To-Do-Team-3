@@ -1,6 +1,4 @@
 <section class="auth-container">
-  <app-auth-header></app-auth-header>
-
   @if (!showTotpVerification) {
     <mat-card class="auth-card">
       <mat-card-header>
@@ -12,7 +10,7 @@
           
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Username</mat-label>
-            <input matInput formControlName="username">
+            <input maxlength="30" matInput formControlName="username">
             @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
               <mat-error>{{ getErrorMessage('username') }}</mat-error>
             }
@@ -20,7 +18,7 @@
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Password</mat-label>
-            <input matInput 
+            <input maxlength="30" matInput 
                    formControlName="password" 
                    [type]="hidePassword ? 'password' : 'text'"
                    autocomplete="current-password">

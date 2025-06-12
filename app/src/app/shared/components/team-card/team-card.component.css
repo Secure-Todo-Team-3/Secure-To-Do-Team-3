@@ -1,11 +1,13 @@
 .team-card {
   padding: 1.2rem;
   border-radius: 1rem;
-  background-color: #fff;
-  box-shadow: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.1);
+  background-color: var(--background-color);
+  box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.1);
   max-width: 90vw;
-  width: 25rem;
+  width: 23.5rem;
   overflow: hidden;
+  color: var(--text-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .team-header {
@@ -15,23 +17,30 @@
 }
 
 .team-title {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 600;
   margin: 0;
   max-width: 80%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--primary-color);
 }
 
 .edit-btn {
-  color: var(--primary-color);
+  color: var(--accent-color);
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.edit-btn:hover {
+  color: darken(var(--accent-color), 15%);
 }
 
 .team-description {
   margin-top: 0.5rem;
-  color: #444;
-  font-size: 0.95rem;
+  color: #666;
+  font-size: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -42,19 +51,26 @@
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
+  color: #777;
+  font-size: 0.95rem;
 }
 
 .meta-item {
   display: flex;
   align-items: baseline;
-  font-size: 0.95rem;
-  color: #666;
   cursor: pointer;
+  transition: color 0.15s ease-in-out;
+}
+
+.meta-item:hover {
+  color: var(--accent-color);
 }
 
 .meta-icon {
-  font-size: 1rem;
+  font-size: 1.1rem;
   vertical-align: middle;
+  margin-right: 0.3rem;
+  color: var(--primary-color);
 }
 
 .status-container {
@@ -65,22 +81,54 @@
 }
 
 .status-chip {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.9rem;
   padding: 0.3rem 1rem;
   border-radius: 1rem;
+  user-select: none;
 }
 
 .status-chip.admin {
-  background-color: rgb(252, 227, 181);
-  color: #311900;
+  background-color: #fce5b7;
+  color: #7a4c00;          
 }
 
 .status-chip.member {
-  background-color: rgb(198, 211, 249);
-  color: #001a34;
+  background-color: #c6d3f9; 
+  color: #00264d;  
 }
 
 .more-info-btn {
-  color: var(--primary-color);
+  color: var(--accent-color);
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.2s ease-in-out;
+}
+
+.more-info-btn:hover {
+  color: darken(var(--accent-color), 15%);
+}
+
+.team-card {
+  padding: 1.2rem;
+  border-radius: 1rem;
+  background-color: var(--background-color);
+  box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.1);
+  max-width: 90vw;
+  width: 23.5rem;
+  overflow: hidden;
+  color: var(--text-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: 
+    box-shadow 0.3s ease, 
+    transform 0.3s ease, 
+    background-color 0.3s ease;
+}
+
+.team-card:hover,
+.team-card:focus-within {
+  background-color: #f5f5f5; 
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+  transform: translateY(-0.1rem);
+  cursor: pointer;
 }

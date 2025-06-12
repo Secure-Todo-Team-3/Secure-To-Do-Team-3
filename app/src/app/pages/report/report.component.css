@@ -1,0 +1,160 @@
+.full-width-table {
+  width: 100%;
+  box-sizing: border-box;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+.report-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--background-color);
+}
+
+.full-width-table th,
+.full-width-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 0.0625rem solid #e0e0e0;
+}
+
+.full-width-table thead {
+  background-color: var(--card-background);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 0.125rem solid var(--primary-color);
+}
+
+.full-width-table tbody tr:hover {
+  background-color: var(--hover-background, #f5f5f5);
+  transition: background-color 0.25s ease;
+  cursor: pointer;
+}
+
+.sub-row {
+  background-color: var(--subtle-background, #f9f9f9);
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.user-row {
+  background-color: var(--card-background);
+  font-weight: normal;
+}
+
+.indent {
+  padding-left: 2.5rem;
+  font-weight: 500;
+}
+
+.deeper {
+  padding-left: 5rem;
+  font-weight: 400;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+a:hover,
+a:focus {
+  text-decoration: underline;
+  color: var(--primary-dark);
+  outline: none;
+}
+
+button.mat-icon-button {
+  vertical-align: middle;
+  margin-right: 0.015625rem;
+  color: var(--primary-color);
+  transition: color 0.3s ease;
+}
+
+button.mat-icon-button:hover {
+  color: var(--primary-dark);
+}
+
+.filters button {
+  background-color: var(--primary-color);
+  color: #eee; 
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.6);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.filters button:hover {
+  background-color: #444;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.8);
+}
+
+.table-container {
+  padding: 1.5rem;
+  overflow-x: auto;
+  border-radius: 1rem;
+  background-color: var(--card-background);
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+}
+
+.table-card {
+  margin: 1rem 0;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.15);
+  background-color: var(--card-background);
+}
+
+.filter-card {
+  margin: 1rem 0;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.15);
+  background-color: var(--nav-background);
+}
+
+.filter-header {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filters mat-form-field {
+  flex: 1 1 11.25rem;
+  min-width: 11.25rem;
+}
+
+.caption {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 37.5rem) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filters mat-form-field,
+  .filters button {
+    width: 100%;
+  }
+}
+
+.time-period-select {
+  max-width: 15rem;
+}

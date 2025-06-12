@@ -58,15 +58,18 @@
   font-size: 1rem;
   font-weight: 500;
   margin-top: 0.5rem;
-  background: #1976d2;
+  background: #121212;
+  color: aliceblue;
 }
 
 .submit-button:hover:not(:disabled) {
-  background: #1565c0;
+  background: #121212;
+  color: aliceblue;
 }
 
 .submit-button:disabled {
   background: #ccc;
+
 }
 
 .switch-text {
@@ -101,4 +104,21 @@
   .signup-title {
     font-size: 1.25rem;
   }
+}
+
+mat-form-field {
+  display: block;
+  margin-bottom: 1rem;
+  transition: margin-bottom 0.3s ease;
+}
+
+mat-form-field.has-error {
+  margin-bottom: 3.5rem;
+}
+
+
+mat-error {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
 }

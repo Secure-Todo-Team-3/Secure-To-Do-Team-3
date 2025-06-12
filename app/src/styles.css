@@ -1,12 +1,13 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 :root {
-  --primary-color: #3f51b5;
-  --accent-color: #ff4081;
-  --background-color: #e6edf7;
-  --text-color: #212121;
-  --nav-background:#e6edf7;
+  --primary-color: #212121;      
+  --accent-color: #37474f;     
+  --background-color: #fafafa;  
+  --text-color: #121212;     
+  --nav-background: #f0f0f0;
 }
+
 
 html, body {
   margin: 0;

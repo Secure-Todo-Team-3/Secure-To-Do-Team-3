@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.team3todo.secure.secure_team_3_todo_api.dto.TeamCreateRequestDto;
+import org.team3todo.secure.secure_team_3_todo_api.dto.TeamUpdateRequestDto;
 import org.team3todo.secure.secure_team_3_todo_api.entity.Team;
 import org.team3todo.secure.secure_team_3_todo_api.entity.TeamMembership;
 import org.team3todo.secure.secure_team_3_todo_api.entity.TeamRole;
@@ -125,5 +126,30 @@ public class TeamService {
         teamMembershipService.addUserToTeam(creator.getId(), savedTeam.getId(), adminRole.getId());
 
         return savedTeam;
+    }
+
+    public Team updateTeam(Long teamId, TeamUpdateRequestDto teamUpdateRequest) {
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
+
+        Team teamToUpdate = findById(teamId);
+
+        if (currentUser.getId() != teamToUpdate.getCreatedByUserId().getId()) {
+            throw new ResourceNotFoundException("You do not have permission to update this team.");
+        }
+
+        if (teamUpdateRequest.getName() != null && !teamUpdateRequest.getName().isEmpty()) {
+            if (teamRepository.existsByName(teamUpdateRequest.getName())) {
+                throw new DuplicateResourceException("A team with the name '" + teamUpdateRequest.getName() + "' already exists.");
+            }
+            teamToUpdate.setName(teamUpdateRequest.getName());
+        }
+
+        if (teamUpdateRequest.getDescription() != null) {
+            teamToUpdate.setDescription(teamUpdateRequest.getDescription());
+        }
+
+        return teamRepository.save(teamToUpdate);
     }
 }

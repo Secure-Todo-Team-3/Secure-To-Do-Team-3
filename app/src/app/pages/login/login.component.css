@@ -50,11 +50,11 @@
   font-size: 1rem;
   font-weight: 500;
   margin-top: 0.5rem;
-  background: #1976d2;
+  background: #121212;
 }
 
 .submit-button:hover:not(:disabled) {
-  background: #1565c0;
+  background: #121212;
 }
 
 .submit-button:disabled {
