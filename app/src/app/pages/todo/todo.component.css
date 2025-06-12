@@ -48,7 +48,8 @@
 .task-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 2vh;
+  gap: 1rem;
+  justify-content: center;
 }
 
 .add-task-fab {

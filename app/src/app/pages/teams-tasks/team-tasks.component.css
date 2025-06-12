@@ -127,15 +127,40 @@ mat-card-subtitle {
   display: inline-block;
 }
 
-.pending {
-  background-color: #fff8e1;
-  color: #ff8f00;
+.no-tasks-message {
+  margin-left: 1rem;
 }
 
-.completed {
-  background-color: #e8f5e9;
-  color: #2e7d32;
+.status-chip.to-do {
+  background-color: #d1e7dd; 
+  color: #2f5d3b;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.3rem 1rem;
+  border-radius: 1rem;
+  user-select: none;
 }
+
+.status-chip.in-progress {
+  background-color: #fff3cd; 
+  color: #b38600;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.3rem 1rem;
+  border-radius: 1rem;
+  user-select: none;
+}
+
+.status-chip.in-review {
+  background-color: #cfe2ff; 
+  color: #1a3d8f;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.3rem 1rem;
+  border-radius: 1rem;
+  user-select: none;
+}
+
 
 .card-actions {
   display: flex;

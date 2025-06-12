@@ -1,8 +1,11 @@
 <mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #drawer class="sidenav" mode="over" [opened]="showSidenav()">
+  <mat-sidenav #drawer class="sidenav" mode="over">
     <mat-toolbar class="user-profile">
       <p class="avatar-circle">
-        TP
+        {{ getInitials(username()) }}
+      </p>
+      <p class="username">
+        {{ username() }}
       </p>
     </mat-toolbar>
 

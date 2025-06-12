@@ -63,13 +63,7 @@
               signupForm.get('password')?.invalid
             "
           >
-            @if (signupForm.get('password')?.hasError('required')) { Password is
-            required. } @else if
-            (signupForm.get('password')?.hasError('pattern')) { Password must at least 10 characters
-            contain at least one uppercase letter, one lowercase letter, one
-            number, and one special character. } @else {
-            {{ getErrorMessage("password") }}
-            }
+            Your password should be 10 characters or more, with at least one uppercase letter, one lowercase letter, a number, and a special character (like &#33;, &#64;, &#35;, etc.).
           </mat-error>
         </mat-form-field>
 
@@ -109,7 +103,7 @@
           [disabled]="isLoading || signupForm.invalid"
         >
           @if (!isLoading) {
-          <p>Create Account & Proceed to 2FA</p>
+          <p>Create Account</p>
           } @else {
           <p>Creating...</p>
           }
