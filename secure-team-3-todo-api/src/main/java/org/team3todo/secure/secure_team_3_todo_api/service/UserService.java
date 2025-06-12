@@ -52,10 +52,6 @@ public class UserService implements UserDetailsService{
     }
 
     public void resetLoginAttempts(String username){
-        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User currentUser = findByUserGuid(currentUserGuid);
-        auditingService.setAuditUser(currentUser);
-
         User user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("This user does not exist. This should not be happening."));
         user.setLoginAttempts(0);
         userRepository.save(user);
@@ -66,9 +62,6 @@ public class UserService implements UserDetailsService{
 
     @Transactional
     public void handleFailedLoginAttempt(String username){
-        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User currentUser = findByUserGuid(currentUserGuid);
-        auditingService.setAuditUser(currentUser);
         User user = userRepository.findByUsername(username).orElseThrow(() -> new ResourceNotFoundException("This user does not exist. This should not be happening."));
         int updatedLoginAttempts = user.getLoginAttempts() +1;
         user.setLoginAttempts(updatedLoginAttempts);
