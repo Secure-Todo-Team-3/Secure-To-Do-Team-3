@@ -6,6 +6,8 @@ import { map } from 'rxjs/operators';
 import { StorageService } from './storage.service';
 import { AuthenticatedResponse, RegisterRequest, TotpSetupResponse, TotpVerificationRequest } from '../models/AuthModel';
 import { environment } from 'src/app/shared/environments/environment';
+import { UserStoreService } from './userStore.service';
+import { UserStore } from '../models/user.store';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +19,8 @@ export class AuthService {
   constructor(
     private httpClient: HttpClient,
     private router: Router,
-    private storageService: StorageService
+    private storageService: StorageService,
+    private userStoreService: UserStoreService
   ) { }
 
   registerAndInitiateTotp(request: RegisterRequest): Observable<TotpSetupResponse> {
@@ -50,6 +53,7 @@ export class AuthService {
 
   logout(): void {
     this.storageService.clearToken();
+    this.userStoreService.clearUserStore();
     this.router.navigate(['/login']);
   }
 
@@ -68,7 +72,8 @@ export class AuthService {
         if (!res.token) {
           return of(res);
         }
-        return this.httpClient.get<any>(`${this.userApiUrl}/me`).pipe(
+        return this.httpClient.get<UserStore>(`${this.userApiUrl}/me`).pipe(
+          tap(user => this.userStoreService.updateUserStore(user)),
           map(() => res)
         );
       })
