@@ -41,7 +41,8 @@ export class AppComponent {
       .subscribe(() => {
         this.showSidenav.set(
           !this.router.url.includes('/login') &&
-            !this.router.url.includes('/signup')
+            !this.router.url.includes('/signup')&&
+            !this.isLoggedIn
         );
       });
   }

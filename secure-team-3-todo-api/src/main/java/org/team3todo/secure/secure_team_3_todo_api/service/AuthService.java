@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
-import org.owasp.html.PolicyFactory; // <-- IMPORT
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -37,27 +36,23 @@ public class AuthService {
     private final SystemRoleRepository systemRoleRepository;
     private final TotpService totpService;
     private final UserService userService;
-    private final PolicyFactory sanitizerPolicy; // <-- INJECT THE SANITIZER POLICY
 
     @Transactional
     public TotpSetupResponse registerAndInitiateTotp(RegisterRequest registerRequest) throws InvalidKeyException, IOException {
-        String safeUsername = sanitizerPolicy.sanitize(registerRequest.getUsername());
-        String safeEmail = sanitizerPolicy.sanitize(registerRequest.getEmail());
-
         String secret = totpService.generateNewSecret();
-        if (userRepository.findByUsername(safeUsername).isPresent()){
-            throw new DuplicateResourceException("Username: " + safeUsername + " is already taken.");
+        if (userRepository.findByUsername(registerRequest.getUsername()).isPresent()){
+            throw new DuplicateResourceException("Username: "+registerRequest.getUsername()+" is already taken.");
         }
 
-        if(userRepository.findByEmail(safeEmail).isPresent()){
-            throw new DuplicateResourceException("Email: " + safeEmail + " is already taken.");
+        if(userRepository.findByEmail(registerRequest.getEmail()).isPresent()){
+            throw new DuplicateResourceException("Email: "+registerRequest.getUsername()+" is already taken.");
         }
 
         SystemRole defaultRole = systemRoleRepository.findByName("REGULAR_USER").orElseThrow(() -> new ResourceNotFoundException("Default role REGULAR_USER not found."));
 
         var user = User.builder()
-                .username(safeUsername)
-                .email(safeEmail)
+                .username(registerRequest.getUsername())
+                .email(registerRequest.getEmail())
                 .passwordHash(passwordEncoder.encode(registerRequest.getPassword()))
                 .systemRole(defaultRole)
                 .isTotpEnabled(false)
@@ -87,11 +82,11 @@ public class AuthService {
             throw new SecurityException("Invalid TOTP code during registration verification.");
         }
 
-        user.setIsActive(true);
+        user.setIsActive(true);;
         user.setTotpEnabled(true);
         userRepository.save(user);
 
-        var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid().toString()), user);
+        var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid()), user);
         return AuthenticatedResponseDto.builder().token(token).build();
     }
 
@@ -111,7 +106,7 @@ public class AuthService {
                     .build();
         }
 
-        var token = jwtService.generateToken(Map.of("userGuid",user.getUserGuid().toString()), user);
+        var token = jwtService.generateToken(Map.of("userGuid",user.getUserGuid()), user);
         return AuthenticatedResponseDto.builder().token(token).totpRequired(false).build();
     }
 
@@ -124,7 +119,7 @@ public class AuthService {
             throw new SecurityException("Invalid TOTP code.");
         }
 
-        var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid().toString()), user);
+        var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid()), user);
         return AuthenticatedResponseDto.builder().token(token).totpRequired(false).build();
     }
 

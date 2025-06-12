@@ -1,6 +1,5 @@
 package org.team3todo.secure.secure_team_3_todo_api.controller;
 
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -63,7 +62,7 @@ public class TaskController {
 
     @PostMapping
     public ResponseEntity<TaskDto> createTask(
-            @Valid @RequestBody TaskCreateRequestDto taskRequest,
+            @RequestBody TaskCreateRequestDto taskRequest,
             Authentication authentication) {
         UUID creatorGuid = (UUID) authentication.getPrincipal();
         Task createdTask = taskService.createTask(taskRequest, creatorGuid);
@@ -73,7 +72,7 @@ public class TaskController {
 
     @PostMapping("/{taskGuid}/update")
     public ResponseEntity<TaskDto> updateTask(
-            @Valid @PathVariable UUID taskGuid,
+            @PathVariable UUID taskGuid,
             @RequestBody TaskUpdateRequestDto taskUpdateRequest,
             Authentication authentication) {
 

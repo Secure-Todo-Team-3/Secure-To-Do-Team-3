@@ -1,11 +1,9 @@
 name: Deploy Frontend to S3 (Angular)
 
 on:
-  push:
-    branches:
-      - main
-      - snapshot
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Backend Deploy (Spring Boot JAR)"] 
+      - completed
 
 jobs:
   deploy:

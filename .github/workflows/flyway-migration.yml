@@ -1,11 +1,11 @@
 name: Database Migrations with Flyway
 
 on:
-  push:
-    branches:
-      - main 
-  workflow_dispatch:
-
+  workflow_run:
+    workflows: ["Terraform Apply (Infrastructure)"]  
+    types:
+      - completed
+      
 env:
   AWS_REGION: eu-west-1 
   RDS_DB_INSTANCE_IDENTIFIER: todo-team-db 

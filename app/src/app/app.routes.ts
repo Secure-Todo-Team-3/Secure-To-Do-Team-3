@@ -9,12 +9,11 @@ import { TeamsPageComponent } from '@pages/teams/teams-page.component';
 import { TodoPageComponent } from '@pages/todo/todo.component';
 import { publicGuard } from './core/guards/publicGuards';
 import { authGuard } from './core/guards/authGuard';
-import { ReportComponent } from '@pages/report/report.component';
 
 export const routes: Routes = [
   { path: 'signup', component: SignupComponent,canActivate: [publicGuard] },
   { path: 'login', component: LoginComponent,canActivate: [publicGuard] },
-  {path: '', component: ReportComponent,canActivate: [authGuard]},
+  {path: '', component: TodoPageComponent,canActivate: [authGuard]},
   {path: 'tasks', component: TodoPageComponent,canActivate: [authGuard]},
   {path: 'teams', component: TeamsPageComponent,canActivate: [authGuard]},
   {path: 'edit-task/:id', component: TaskEditPageComponent,canActivate: [authGuard]},
@@ -23,5 +22,4 @@ export const routes: Routes = [
   {path: 'edit-team/:id', component: TeamEditComponent,canActivate: [authGuard]},
   {path: 'create-team', component: TeamEditComponent,canActivate: [authGuard]},
   {path: 'team-tasks/:id', component: TeamTasksComponent,canActivate: [authGuard]},
-  {path: 'reports', component: ReportComponent,canActivate: [authGuard] },
 ];

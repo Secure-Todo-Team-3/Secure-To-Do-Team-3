@@ -2,7 +2,6 @@ package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import jakarta.persistence.criteria.Join;
 import jakarta.transaction.Transactional;
-import org.owasp.html.PolicyFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -36,14 +35,12 @@ public class TaskService {
     private final TeamMembershipRepository teamMembershipRepository;
     private final TeamMembershipService teamMembershipService;
     private final AuditingService auditingService;
-    private final PolicyFactory sanitizerPolicy;
 
 
     @Autowired
     public TaskService(TaskRepository taskRepository, UserService userService, TeamService teamService,
                        TaskStatusRepository taskStatusRepository, TeamMembershipRepository teamMembershipRepository,
-                       TeamMembershipService teamMembershipService, AuditingService auditingService, TaskStatusHistoryRepository taskStatusHistoryRepository,
-                       PolicyFactory sanitizerPolicy) {
+                       TeamMembershipService teamMembershipService, AuditingService auditingService, TaskStatusHistoryRepository taskStatusHistoryRepository) {
         this.taskRepository = taskRepository;
         this.userService = userService;
         this.teamService = teamService;
@@ -52,7 +49,6 @@ public class TaskService {
         this.teamMembershipRepository = teamMembershipRepository;
         this.teamMembershipService = teamMembershipService;
         this.auditingService = auditingService;
-        this.sanitizerPolicy = sanitizerPolicy;
     }
 
     public Task findByGuid(UUID guid) {
@@ -99,8 +95,6 @@ public class TaskService {
     public Task createTask(TaskCreateRequestDto taskRequest, UUID creatorGuid) {
         User creator = userService.findByUserGuid(creatorGuid);
         auditingService.setAuditUser(creator);
-        String safeName = sanitizerPolicy.sanitize(taskRequest.getName());
-        String safeDescription = sanitizerPolicy.sanitize(taskRequest.getDescription());
         Team team = teamService.findById(taskRequest.getTeamId());
         if (team == null) {
             throw new ResourceNotFoundException("Cannot create task: Team not found with ID: " + taskRequest.getTeamId());
@@ -110,8 +104,8 @@ public class TaskService {
                 .orElseThrow(() -> new IllegalStateException("Default task status 'To Do' not found in database."));
 
         Task newTask = Task.builder()
-                .name(safeName)
-                .description(safeDescription)
+                .name(taskRequest.getName())
+                .description(taskRequest.getDescription())
                 .dueDate(taskRequest.getDueDate())
                 .team(team)
                 .assignedToUser(creator)
@@ -161,6 +155,7 @@ public class TaskService {
 
         Team destinationTeam = teamService.findById(teamId);
 
+        // Authorization checks...
         teamMembershipService.verifyUserIsMember(currentUser.getId(), foundTask.getTeam().getId());
         teamMembershipService.verifyUserIsMember(currentUser.getId(), destinationTeam.getId());
 
@@ -209,10 +204,10 @@ public class TaskService {
         }
 
         if (taskUpdateRequest.getName() != null) {
-            taskToUpdate.setName(sanitizerPolicy.sanitize(taskUpdateRequest.getName()));
+            taskToUpdate.setName(taskUpdateRequest.getName());
         }
         if (taskUpdateRequest.getDescription() != null) {
-            taskToUpdate.setDescription(sanitizerPolicy.sanitize(taskUpdateRequest.getDescription()));
+            taskToUpdate.setDescription(taskUpdateRequest.getDescription());
         }
         if (taskUpdateRequest.getDueDate() != null) {
             taskToUpdate.setDueDate(taskUpdateRequest.getDueDate());

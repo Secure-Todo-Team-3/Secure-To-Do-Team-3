@@ -1,8 +1,6 @@
 package org.team3todo.secure.secure_team_3_todo_api.controller;
 
 import java.io.IOException;
-
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -29,7 +27,7 @@ public class AuthController {
     private final AuthService service;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticatedResponseDto> login(@Valid @RequestBody AuthenticationRequestDto authenticationReq) {
+    public ResponseEntity<AuthenticatedResponseDto> login(@RequestBody AuthenticationRequestDto authenticationReq) {
         try {
             AuthenticatedResponseDto response = service.login(authenticationReq);
             return ResponseEntity.ok(response);
@@ -38,7 +36,7 @@ public class AuthController {
         }
     }
     @PostMapping("/login/verify-totp")
-    public ResponseEntity<AuthenticatedResponseDto> loginWithTotp(@Valid @RequestBody TotpVerificationRequest request) throws InvalidKeyException, IOException {
+    public ResponseEntity<AuthenticatedResponseDto> loginWithTotp(@RequestBody TotpVerificationRequest request) throws InvalidKeyException, IOException {
         return ResponseEntity.ok(service.loginWithTotp(request));
     }
 
@@ -47,8 +45,8 @@ public class AuthController {
         return ResponseEntity.ok(service.setupTotp(authentication));
     }
 
-    @PostMapping("/register/totp/verify")
-    public ResponseEntity<AuthenticatedResponseDto> verifyTotp(Authentication authentication, @Valid @RequestBody TotpVerificationRequest request) {
+    @PostMapping("register/totp/verify")
+    public ResponseEntity<AuthenticatedResponseDto> verifyTotp(Authentication authentication, @RequestBody TotpVerificationRequest request) {
 
         try {
             return ResponseEntity.ok(service.verifyInitialTotpAndActivateUser(request));
@@ -58,7 +56,7 @@ public class AuthController {
     }
 
     @PostMapping("/registerAndInitiateTotp")
-    public ResponseEntity<TotpSetupResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<TotpSetupResponse> register(@RequestBody RegisterRequest registerRequest) {
         try {
             return ResponseEntity.ok(service.registerAndInitiateTotp(registerRequest));
         } catch (InvalidKeyException | IOException e) {

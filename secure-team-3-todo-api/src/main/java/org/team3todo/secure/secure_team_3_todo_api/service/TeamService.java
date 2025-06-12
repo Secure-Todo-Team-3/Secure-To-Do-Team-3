@@ -1,7 +1,6 @@
 package org.team3todo.secure.secure_team_3_todo_api.service;
 
 import jakarta.transaction.Transactional;
-import org.owasp.html.PolicyFactory; // <-- IMPORT
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -27,18 +26,16 @@ public class TeamService {
     private final TeamMembershipService teamMembershipService;
     private final TeamRoleRepository teamRoleRepository;
     private final AuditingService auditingService;
-    private final PolicyFactory sanitizerPolicy;
 
 
     @Autowired
-    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService, TeamRoleRepository teamRoleRepository, AuditingService auditingService, PolicyFactory sanitizerPolicy) { // <-- ADD TO CONSTRUCTOR
+    public TeamService(TeamRepository teamRepository, UserService userService, TeamMembershipRepository teamMembershipRepository, TeamMembershipService teamMembershipService, TeamRoleRepository teamRoleRepository,AuditingService auditingService) {
         this.teamRepository = teamRepository;
         this.userService = userService;
         this.teamMembershipRepository = teamMembershipRepository;
         this.teamMembershipService = teamMembershipService;
         this.teamRoleRepository = teamRoleRepository;
         this.auditingService = auditingService;
-        this.sanitizerPolicy = sanitizerPolicy;
     }
 
     public Team findById(Long id) {
@@ -55,14 +52,14 @@ public class TeamService {
             return teamRepository.findByTeamMemberships_User(user);
         }
         else{
-            throw new ResourceNotFoundException("User with GUID: "+userGuid+" does not exist.");
+             throw new ResourceNotFoundException("User with GUID: "+userGuid+" does not exist.");
         }
     }
 
     public List<User> getUsersInATeam(Long teamId){
         Team foundTeam = teamRepository.findById(teamId)
                 .orElseThrow(() -> new ResourceNotFoundException("Team not found with ID: " + teamId));
-        List<TeamMembership> memberships = teamMembershipRepository.findByTeam(foundTeam);
+        List<TeamMembership> memberships = teamMembershipRepository.findByTeam(foundTeam); // Pass the ID
         return memberships.stream().map(TeamMembership::getUser).toList();
     }
 
@@ -102,22 +99,22 @@ public class TeamService {
         } else{
             return teamMembershipService.addUserToTeam(user.getId(), teamId, 3L);
         }
+
     }
 
     @Transactional
     public Team createTeam(TeamCreateRequestDto teamRequest, User creator) {
-        auditingService.setAuditUser(creator);
+        UUID currentUserGuid = (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userService.findByUserGuid(currentUserGuid);
+        auditingService.setAuditUser(currentUser);
 
-        String safeName = sanitizerPolicy.sanitize(teamRequest.getName());
-        String safeDescription = sanitizerPolicy.sanitize(teamRequest.getDescription());
-
-        if (teamRepository.existsByName(safeName)) {
-            throw new DuplicateResourceException("A team with the name '" + safeName + "' already exists.");
+        if (teamRepository.existsByName(teamRequest.getName())) {
+            throw new DuplicateResourceException("A team with the name '" + teamRequest.getName() + "' already exists.");
         }
 
         Team newTeam = Team.builder()
-                .name(safeName)
-                .description(safeDescription)
+                .name(teamRequest.getName())
+                .description(teamRequest.getDescription())
                 .createdByUserId(creator)
                 .isActive(true)
                 .build();
