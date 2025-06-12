@@ -10,8 +10,8 @@ import { AuthenticatedResponse, RegisterRequest, TotpSetupResponse, TotpVerifica
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/auth';
-  private userApiUrl = 'http://localhost:8080/api/user';
+  private apiUrl = 'https://api.hint-rush.co.za/api/auth';
+  private userApiUrl = 'https://api.hint-rush.co.za/api/user';
 
   constructor(
     private httpClient: HttpClient,
