@@ -1,9 +1,9 @@
 <mat-sidenav-container class="sidenav-container">
-  <mat-sidenav #drawer class="sidenav" mode="side" [opened]="showSidenav()">
+  <mat-sidenav #drawer class="sidenav" mode="over" [opened]="showSidenav()">
     <mat-toolbar class="user-profile">
-      <div class="avatar-circle">
-        {{ getInitials(userName) }}
-      </div>
+      <p class="avatar-circle">
+        TP
+      </p>
     </mat-toolbar>
 
     <mat-nav-list class="nav-list">
@@ -35,7 +35,7 @@
         mat-icon-button
         (click)="drawer.toggle()"
         aria-label="Toggle sidenav"
-        *ngIf="isLoggedIn"
+        *ngIf="showSidenav()"
       >
         <mat-icon>menu</mat-icon>
       </button>

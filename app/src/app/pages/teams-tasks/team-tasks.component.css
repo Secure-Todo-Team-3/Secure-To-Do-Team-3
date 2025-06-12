@@ -31,12 +31,25 @@ mat-card-subtitle {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .task-item {
-  padding-block: 1.5rem;
-  padding-inline: 1.5rem;
-  border-block-end: 1px solid #e0e0e0;
+  padding: 1.5rem;
+  background-color: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0.125rem 0.375rem rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+.task-item:hover {
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  transform: translateY(-0.125rem);
 }
 
 .task-card {
@@ -109,6 +122,9 @@ mat-card-subtitle {
 .status-chip {
   font-weight: 500;
   font-size: 0.875rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  display: inline-block;
 }
 
 .pending {
@@ -122,13 +138,8 @@ mat-card-subtitle {
 }
 
 .card-actions {
-  padding: 1rem 1.5rem;
-}
-
-.action-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 1rem;
   width: 100%;
 }
 
@@ -136,19 +147,19 @@ mat-card-subtitle {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-}
-
-.cancel-button {
-  color: #757575;
+  margin: 1rem;
+  background-color: #121212;
+  color: #fafafa;
 }
 
 .tasks-card {
-  max-width: 90vw; /* default width: 90% of viewport width */
+  max-width: 90vw;
   width: 100%;
   margin-inline: auto;
   margin-block: 2rem;
   border-radius: 1rem;
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  background-color: #fafafa;
 }
 
 @media (min-width: 600px) {

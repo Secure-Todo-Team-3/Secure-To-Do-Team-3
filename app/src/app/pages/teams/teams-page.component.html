@@ -1,54 +1,43 @@
-<section class="toolbar">
-  <form class="filter-form" role="search">
-    <mat-form-field class="search-field" appearance="outline">
-      <input maxlength="30" matInput placeholder="Search teams..." />
-      <button mat-icon-button matSuffix>
-        <mat-icon>search</mat-icon>
-      </button>
-    </mat-form-field>
-
-    <button mat-flat-button color="primary" type="button" (click)="addTeam()">
-      <mat-icon>add</mat-icon>
-      Add Team
-    </button>
-  </form>
-</section>
 <main class="teams-page">
   <div *ngIf="isLoading" class="loading-overlay">
     <mat-spinner diameter="50"></mat-spinner>
   </div>
 
-  <div *ngIf="!isLoading">
-    <section class="team-section">
-      <h2 class="section-title">
-        <mat-icon color="warn">workspace_premium</mat-icon>
-        My Teams ({{ myTeams.length }})
-      </h2>
-      <ul class="team-list">
-        <li *ngFor="let team of myTeams">
-          <app-team-card [team]="team"></app-team-card>
-        </li>
-      </ul>
-    </section>
+  <mat-tab-group *ngIf="!isLoading" animationDuration="500ms">
+    <mat-tab label="My Teams ({{ myTeams.length }})">
+      <section class="team-section">
+        <ul class="team-list my-teams-list">
+          <li *ngFor="let team of myTeams">
+            <app-team-card [team]="team"></app-team-card>
+          </li>
+        </ul>
+        <ng-container *ngIf="myTeams.length === 0">
+          <p>No teams found.</p>
+        </ng-container>
+      </section>
+    </mat-tab>
 
-    <section class="team-section">
-      <h2 class="section-title">
-        <mat-icon color="primary">group</mat-icon>
-        Joined Teams ({{ joinedTeams.length }})
-      </h2>
-      <ul class="team-list">
-        <li *ngFor="let team of joinedTeams">
-          <app-team-card [team]="team"></app-team-card>
-        </li>
-      </ul>
-    </section>
+    <mat-tab label="Joined Teams ({{ joinedTeams.length }})">
+      <section class="team-section">
+        <ul class="team-list">
+          <li *ngFor="let team of joinedTeams">
+            <app-team-card [team]="team"></app-team-card>
+          </li>
+        </ul>
+        <ng-container *ngIf="joinedTeams.length === 0">
+          <p>No joined teams found.</p>
+        </ng-container>
+      </section>
+    </mat-tab>
+  </mat-tab-group>
 
-    <ng-template #noMyTeams>
-      <p>No teams found.</p>
-    </ng-template>
-
-    <ng-template #noJoinedTeams>
-      <p>No joined teams found.</p>
-    </ng-template>
-  </div>
+  <button
+    mat-fab
+    color="primary"
+    aria-label="Add Team"
+    class="add-team-fab"
+    (click)="addTeam()"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
 </main>

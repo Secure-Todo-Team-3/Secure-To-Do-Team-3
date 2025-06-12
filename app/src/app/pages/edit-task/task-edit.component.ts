@@ -7,7 +7,7 @@ import {
 } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Location, CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -118,7 +118,7 @@ export class TaskEditPageComponent implements OnInit {
         this.taskForm.reset({
           name: '',
           description: '',
-          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default to one week from now
+          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
           teamId: teams.length > 0 ? teams[0].id : '',
           currentStatusId: statuses.length > 0 ? statuses[0].id : '',
           id: null,

@@ -1,11 +1,11 @@
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 :root {
-  --primary-color: #2c3e50;       /* Deep slate blue */
-  --accent-color: #e67e22;        /* Soft orange for accents */
-  --background-color: #f9f9f9;    /* Very light grey, almost white */
-  --text-color: #2d2d2d;          /* Rich neutral for good readability */
-  --nav-background: #ffffff;      /* Clean and modern white navbar */
+  --primary-color: #212121;      
+  --accent-color: #37474f;     
+  --background-color: #fafafa;  
+  --text-color: #121212;     
+  --nav-background: #f0f0f0;
 }
 
 

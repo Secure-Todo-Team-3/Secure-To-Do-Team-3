@@ -29,8 +29,6 @@ import { AuthService } from './core/services/auth.service';
 export class AppComponent {
   showSidenav = signal(false);
   appTitle = 'Task Manager Pro';
-  userName = 'Alex Johnson';
-  userEmail = 'alex.johnson@example.com';
   getInitials = getInitials;
   isLoggedIn = false;
 
