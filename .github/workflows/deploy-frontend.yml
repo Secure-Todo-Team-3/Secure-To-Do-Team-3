@@ -1,11 +1,8 @@
 name: Deploy Frontend to S3 (Angular)
 
 on:
-  workflow_run:
-    workflows: ["Backend Deploy (Spring Boot JAR)"]
-    types:
-      - completed
-
+  workflow_dispatch:
+   
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -30,7 +27,7 @@ jobs:
         working-directory: ./app
 
       - name: Build Angular Application
-        run: npm run build -- --configuration=production --base-href /browser/
+        run: npm run build -- --configuration=production --base-href /app/
         working-directory: ./app
 
       - name: Configure AWS credentials
@@ -41,7 +38,7 @@ jobs:
 
       - name: Sync build to S3 
         run: |
-          aws s3 sync ./app/dist/app/browser s3://${{ secrets.AWS_CLIENT_BUCKET_NAME }}/browser --delete
+          aws s3 sync ./app/dist/app/browser s3://${{ secrets.AWS_CLIENT_BUCKET_NAME }}/app --delete
 
       - name: Create CloudFront Invalidation
         if: success()
