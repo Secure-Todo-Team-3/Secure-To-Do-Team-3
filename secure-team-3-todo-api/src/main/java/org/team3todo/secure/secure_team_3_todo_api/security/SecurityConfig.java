@@ -39,37 +39,35 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private List<String> allowedOrigins;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
-        requestHandler.setCsrfRequestAttributeName(null);
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+    repository.setCookieCustomizer(customizer -> customizer.sameSite(SameSite.NONE.name()).secure(true));
 
-        http.addFilterBefore(new SimpleRateLimitingFilter(), CsrfFilter.class)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            
-            .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()
-                    .cookieCustomizer(cookie->{
-                        cookie.setSameSite("None");
-                        cookie.setSecure(true);
-                    }
-                                    )
-                .csrfTokenRequestHandler(requestHandler)
-                .ignoringRequestMatchers(ALLOW_LIST)
-            )
-            
-            .authorizeHttpRequests(req -> req
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(ALLOW_LIST).permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+    requestHandler.setCsrfRequestAttributeName(null);
 
-        return http.build();
-    }
+    http
+        .addFilterBefore(new SimpleRateLimitingFilter(), CsrfFilter.class)
+        
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(csrf -> csrf
+            .csrfTokenRepository(repository)
+            .csrfTokenRequestHandler(requestHandler)
+            .ignoringRequestMatchers(ALLOW_LIST)
+        )
+        .authorizeHttpRequests(req -> req
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            .requestMatchers(ALLOW_LIST).permitAll()
+            .anyRequest().authenticated()
+        )
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authenticationProvider)
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
+    return http.build();
+  }
+    
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
