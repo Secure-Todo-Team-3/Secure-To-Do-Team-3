@@ -107,8 +107,6 @@ public class TeamService {
     public Team createTeam(TeamCreateRequestDto teamRequest, User creator) {
         auditingService.setAuditUser(creator);
 
-        String safeName = sanitizerPolicy.sanitize(teamRequest.getName());
-        String safeDescription = sanitizerPolicy.sanitize(teamRequest.getDescription());
         String safeName = teamRequest.getName();
         String safeDescription = teamRequest.getDescription();
 
