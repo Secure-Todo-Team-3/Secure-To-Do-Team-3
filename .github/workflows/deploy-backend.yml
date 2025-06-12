@@ -1,11 +1,9 @@
 name: Backend Deploy (Spring Boot JAR)
 
 on:
-  workflow_run:
-    workflows: ["Database Migrations with Flyway"] 
-    types:
-      - completed
+  workflow_dispatch:
 
+  
 env:
   EB_APP_NAME: todoapp-TodoApp
   EB_ENV_NAME: todoapp-TodoApp-Env
