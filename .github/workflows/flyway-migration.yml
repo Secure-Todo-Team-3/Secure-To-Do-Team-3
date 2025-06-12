@@ -1,10 +1,7 @@
 name: Database Migrations with Flyway
 
 on:
-  workflow_run:
-    workflows: ["Terraform Apply (Infrastructure)"]  
-    types:
-      - completed
+  workflow_dispatch:
       
 env:
   AWS_REGION: eu-west-1 
