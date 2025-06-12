@@ -61,7 +61,7 @@ data "aws_secretsmanager_secret_version" "password_pepper_version" {
 resource "aws_elastic_beanstalk_environment" "todo_app_env" {
   name                = var.env_name
   application         = aws_elastic_beanstalk_application.todo_app_eb.name
-  solution_stack_name = "64bit Amazon Linux 2023 v4.5.2 running Docker"
+  solution_stack_name = "64bit Amazon Linux 2023 v4.2.5 running Corretto 21"
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
