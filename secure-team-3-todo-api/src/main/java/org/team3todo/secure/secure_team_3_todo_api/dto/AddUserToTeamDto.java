@@ -14,3 +14,4 @@ public class AddUserToTeamDto {
     @Size(max = 255, message = "Email address cannot exceed 255 characters.")
     private String userEmail;
 }
+
