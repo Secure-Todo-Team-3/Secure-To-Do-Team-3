@@ -39,7 +39,7 @@
           </section>
 
           <footer class="task-footer">
-            <mat-chip [ngClass]="task.currentStatusName.toLowerCase()" class="status-chip">
+            <mat-chip [ngClass]="task.currentStatusName.replace(' ', '-').toLowerCase()" class="status-chip">
               {{ task.currentStatusName }}
             </mat-chip>
 
@@ -55,10 +55,7 @@
     </ul>
   </mat-card-content>
   <ng-template [ngIf]="!tasks || tasks.length === 0">
-      <div class="no-tasks-message">
-        <mat-icon>info</mat-icon>
-        <p>You team has tasks yet or you don't have access to the team's tasks</p>
-      </div>
+      <p class="no-tasks-message">Your team has tasks yet or you don't have access to the team's tasks</p>
     </ng-template>
 
   <mat-card-actions class="card-actions">

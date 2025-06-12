@@ -216,12 +216,7 @@ public class TaskService {
         if (taskUpdateRequest.getCurrentStatusId() != null) {
             TaskStatus newStatus = taskStatusRepository.findById(taskUpdateRequest.getCurrentStatusId())
                     .orElseThrow(() -> new ResourceNotFoundException("Task status not found with ID: " + taskUpdateRequest.getCurrentStatusId()));
-            TaskStatusHistory newHistory = TaskStatusHistory.builder()
-                    .task(taskToUpdate)
-                    .status(newStatus)
-                    .changedByUser(updater)
-                    .build();
-            taskStatusHistoryRepository.save(newHistory);
+            taskToUpdate.setTaskStatus(newStatus);
         }
 
         return taskRepository.save(taskToUpdate);
