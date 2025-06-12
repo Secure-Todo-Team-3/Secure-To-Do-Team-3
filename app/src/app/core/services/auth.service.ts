@@ -5,13 +5,14 @@ import { Observable, tap, throwError, catchError, concatMap, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { StorageService } from './storage.service';
 import { AuthenticatedResponse, RegisterRequest, TotpSetupResponse, TotpVerificationRequest } from '../models/AuthModel';
+import { environment } from 'src/app/shared/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/auth';
-  private userApiUrl = 'http://localhost:8080/api/user';
+  private apiUrl = environment.apiUrl + '/auth';
+  private userApiUrl = environment.apiUrl + '/user';
 
   constructor(
     private httpClient: HttpClient,
