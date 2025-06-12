@@ -86,7 +86,7 @@ public class AuthService {
         user.setTotpEnabled(true);
         userRepository.save(user);
 
-        var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid()), user);
+        var token = jwtService.generateToken(Map.of("userGuid", user.getUserGuid().toString()), user);
         return AuthenticatedResponseDto.builder().token(token).build();
     }
 
