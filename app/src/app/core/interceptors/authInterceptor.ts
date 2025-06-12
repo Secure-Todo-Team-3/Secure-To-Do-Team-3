@@ -7,7 +7,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(StorageService);
   const token = authService.getToken();
   
-  const apiUrl = 'http://localhost:8080/api/';
+  const apiUrl = environment.apiUrl+'/';
 
   if (token && req.url.startsWith(apiUrl)) {
     const clonedRequest = req.clone({
