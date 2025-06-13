@@ -20,6 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { forkJoin } from 'rxjs';
 import { environment } from 'src/app/shared/environments/environment';
+import { Team } from 'src/app/shared/models/team.model';
 
 @Component({
   selector: 'app-team-members',
@@ -51,8 +52,9 @@ export class TeamMembersComponent implements OnInit {
   searchControl = new FormControl();
   filteredUsers = this.searchControl.valueChanges.pipe(
     startWith(''),
-    map(value => this._filterUsers(value.username))
+    map(value => this._filterUsers(value.username ?? value))
   );
+  team: Team | undefined;
 
   newMemberEmail: string | undefined;
   teamId: number | undefined;
@@ -74,15 +76,20 @@ export class TeamMembersComponent implements OnInit {
     forkJoin([
       this.teamService.getTeamMembers(teamId),
       this.teamService.getAllUsers(),
-      this.teamService.getMe()
+      this.teamService.getMe(),
+      this.teamService.loadTeam(teamId)
     ]).subscribe({
-      next: ([members, users, me]) => {
+      next: ([members, users, me, team]) => {
+        this.team = team;
         this.teamMembers = members.map(member => ({
           ...member,
-          role: member.username === me.username ? {name: 'Admin'} : {name: 'Member'}
+          role: member.userGuid === this.team?.createdByUserId ? {name: 'Admin'} : {name: 'Member'}
         } as User));
 
         this.allUsers = users;
+        if (this.team) {
+          this.team.isLead = me.userGuid === this.team.createdByUserId;
+        }
 
         this.searchControl.setValue('');
       },
@@ -93,6 +100,7 @@ export class TeamMembersComponent implements OnInit {
   }
 
   private _filterUsers(value: string): User[] {
+    console.log('Filtering users with value:', value);
   const filterValue = (value || '').toLowerCase();
   return this.allUsers.filter(user =>
     !this.teamMembers.some(member => member.username === user.username) &&
