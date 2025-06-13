@@ -6,9 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
-// Import other DTOs if you plan to nest them, e.g., List<TeamSummaryDto>
-// For now, we'll keep it simple.
 
 @Data
 @Builder
@@ -16,17 +15,21 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserDto {
 
-    private UUID userGuid; // Public identifier
+    private UUID userGuid;
     private String username;
     private String email;
     private Boolean isActive;
     private Boolean isLocked;
     private OffsetDateTime createdAt;
+    private String systemRole;
+    private List<TeamRoleInfo> teamRole;
 
-    // Example: If you wanted to include IDs of teams created by this user
-    // private List<Long> createdTeamIds;
-
-    // Example: If you wanted to include simplified DTOs for team memberships
-    // private List<TeamMembershipSummaryDto> teamMemberships;
-
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TeamRoleInfo {
+        private String teamName;
+        private String roleName;
+    }
 }
