@@ -69,7 +69,7 @@ export class TeamTasksComponent {
   }
 
   goBack(): void {
-    this.router.navigate(['/teams']);
+    this.router.navigate(['/tasks']);
   }
 
   editTask(task: Task): void {
