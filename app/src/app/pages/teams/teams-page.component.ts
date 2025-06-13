@@ -12,6 +12,10 @@ import { TeamsPageService } from './teams-page.service';
 import { Team } from 'src/app/shared/models/team.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
+import { forkJoin } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AddUserToTeamDialogComponent } from './add-to-team-dialog/add-user-to-team-dialog.component';
 
 @Component({
   selector: 'app-teams-page',
@@ -38,33 +42,65 @@ export class TeamsPageComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private teamsPageService: TeamsPageService
+    private teamsPageService: TeamsPageService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    this.isLoading = true;
-    this.teamsPageService.getMyTeams().subscribe({
-      next: (teams) => {
-        this.myTeams = teams;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.myTeams = [];
-        this.isLoading = false;
-      }
-    });
+    this.loadAllTeams();
+  }
 
-    this.teamsPageService.getJoinedTeams().subscribe({
-      next: (teams) => {
-        this.joinedTeams = teams;
+  loadAllTeams(): void {
+    this.isLoading = true;
+    forkJoin({
+      myTeams: this.teamsPageService.getMyTeams(),
+      joinedTeams: this.teamsPageService.getJoinedTeams(),
+    }).subscribe({
+      next: ({ myTeams, joinedTeams }) => {
+        this.myTeams = myTeams;
+        this.joinedTeams = joinedTeams;
+        this.isLoading = false;
       },
-      error: () => {
-        this.joinedTeams = [];
-      }
+      error: (err) => {
+        console.error('Failed to load teams', err);
+        this.snackBar.open('Could not load teams.', 'Close', { duration: 3000 });
+        this.isLoading = false;
+      },
     });
   }
 
   addTeam() {
     this.router.navigate(['/create-team']);
+  }
+
+   openAddUserDialog(): void {
+    if (this.myTeams.length === 0) {
+      this.snackBar.open('You must be a lead of a team to add users.', 'Close', { duration: 3000 });
+      return;
+    }
+    const dialogRef = this.dialog.open(AddUserToTeamDialogComponent, {
+      width: '25rem',
+      data: { teams: this.myTeams, userEmail: null, selectedTeamId: null }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.userEmail && result.selectedTeamId) {
+        this.addUserToTeam(result.userEmail, result.selectedTeamId);
+      }
+    });
+  }
+
+  private addUserToTeam(userEmail: string, teamId: number): void {
+    this.teamsPageService.addUserToTeam(userEmail, teamId).subscribe({
+      next: () => {
+        this.snackBar.open(`Successfully added user to team!`, 'Close', { duration: 3000 });
+      },
+      error: (err) => {
+        console.error('Failed to add user', err);
+        const errorMessage = err.error?.message || 'Could not add user. Please check the email and try again.';
+        this.snackBar.open(errorMessage, 'Close', { duration: 4000 });
+      }
+    });
   }
 }

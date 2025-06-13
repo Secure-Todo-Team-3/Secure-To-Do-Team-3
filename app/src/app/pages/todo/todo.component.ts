@@ -16,6 +16,7 @@ import { Task } from 'src/app/shared/models/task.model';
 import { Status } from 'src/app/shared/models/status.model';
 import { Team } from 'src/app/shared/models/team.model';
 import { forkJoin } from 'rxjs';
+import { MatSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-task-dashboard',
@@ -33,6 +34,7 @@ import { forkJoin } from 'rxjs';
     MatChipsModule,
     MatTooltipModule,
     TaskCardComponent,
+    MatSpinner
   ],
   templateUrl: './todo.component.html',
   styleUrls: ['./todo.component.css'],

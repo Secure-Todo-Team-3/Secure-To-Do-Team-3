@@ -1,0 +1,24 @@
+<div>
+<h1 mat-dialog-title>Add User to Team</h1>
+    <div mat-dialog-content>
+      <!-- Dropdown to select the team -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Team</mat-label>
+        <mat-select [(ngModel)]="data.selectedTeamId" name="team">
+          <mat-option *ngFor="let team of data.teams" [value]="team.id">
+            {{ team.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Input for the user's email -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>User Email</mat-label>
+        <input matInput [(ngModel)]="data.userEmail" placeholder="e.g., user@example.com" type="email" (keydown.enter)="onAddClick()">
+      </mat-form-field>
+    </div>
+    <div mat-dialog-actions align="end">
+      <button mat-button (click)="onNoClick()">Cancel</button>
+      <button mat-flat-button color="primary" [disabled]="!data.userEmail || !data.selectedTeamId" (click)="onAddClick()">Add User</button>
+    </div>
+</div>

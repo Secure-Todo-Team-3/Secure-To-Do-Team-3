@@ -1,5 +1,9 @@
 <main class="dashboard">
-  <section class="controls-container">
+  <div *ngIf="isLoading" class="loading-overlay">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <section class="controls-container" *ngIf="!isLoading">
     <section class="search">
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Search tasks...</mat-label>
@@ -8,8 +12,9 @@
           matInput
           type="text"
           [(ngModel)]="searchTerm"
-          (ngModelChange)="searchTasks()"
+          (keydown.enter)="searchTasks()"
         />
+        <!-- This button now acts as the explicit submit for the search -->
         <button mat-icon-button matSuffix (click)="searchTasks()">
           <mat-icon>search</mat-icon>
         </button>
@@ -45,15 +50,13 @@
     </section>
   </section>
 
-  <section class="task-list">
+  <section class="task-list" *ngIf="!isLoading">
     <app-task-card *ngFor="let task of tasks" [task]="task"></app-task-card>
   </section>
 
-  <ng-template [ngIf]="!tasks || tasks.length === 0">
-    <div class="no-tasks-message">
-      <p>You don't have tasks yet.</p>
-    </div>
-  </ng-template>
+  <div *ngIf="!isLoading && (!tasks || tasks.length === 0)" class="no-tasks-message">
+    <p>No tasks match your criteria.</p>
+  </div>
 
   <button mat-fab color="primary" class="add-task-fab" (click)="addTask()">
     <mat-icon>add</mat-icon>
