@@ -1,0 +1,80 @@
+
+.teams-page { 
+  padding-block: 2rem;
+  padding-inline: 2rem;
+  background-color: var(--background-color);
+  position: relative;
+  min-height: 100vh;
+}
+
+.loading-overlay { 
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.7); 
+  z-index: 1000;
+}
+
+.mat-tab-group { 
+  background: var(--nav-background);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+}
+
+.mat-tab-body { 
+  padding-block-start: 1rem;
+}
+
+.full-width-input {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.user-table-container {
+  overflow-x: auto; 
+}
+
+table {
+  width: 100%;
+}
+
+
+th.mat-header-cell, td.mat-cell {
+  padding: 0.75rem 1rem;
+  border-bottom: 0.0625rem solid var(--border-color-light); 
+  white-space: nowrap; 
+}
+
+th.mat-header-cell {
+  font-weight: bold;
+  color: var(--text-color-secondary);
+}
+
+td.mat-cell {
+  color: var(--text-color-primary); 
+}
+
+tr.mat-row:last-child td.mat-cell {
+  border-bottom: none;
+}
+
+.mat-icon {
+  vertical-align: middle;
+}
+
+.mat-paginator {
+  background: var(--nav-background); 
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+
+mat-card-content {
+  padding: 1rem;
+}
